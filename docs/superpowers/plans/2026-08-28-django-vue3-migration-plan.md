@@ -408,8 +408,10 @@ def spa_index(request):
 ```
 改为：
 ```python
-    path('',spa.spa_index,name="home"),
+    path('',spa.spa_index,name="index"),
 ```
+
+> 注意：根路径 name 用 `"index"`，**不要用 `"home"`**——`urlpatterns` 里已有一个 `path('home',pv.home,name="home")`，重名会导致 `reverse('home')` 命中 `/`（第一个）而非 `/home`，埋下隐患。
 
 **(b) catch-all 放在 `if settings.DEBUG:` 的 static 之后**，避免吞掉 `/static/*`。在 `djangoPlant/urls.py` 文件最末尾（`static(...)` 那行之后、`handler404` 之前）加入：
 
