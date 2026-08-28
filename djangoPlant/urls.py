@@ -21,6 +21,7 @@ from django.contrib import admin  # type: ignore
 from django.urls import path, re_path  # type: ignore
 from. import originview as ov, publicview as pv, saasview as sv, userlogin as ul, miniprogram
 from. import spa
+from . import api_menu
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -98,6 +99,7 @@ path('sv/queryLoginCode',sv.queryLoginCode),
     path('sv/aftergetqmbydsan',sv.aftergetqmbydsan),
 
     path('download/dynamic/', miniprogram.download_dynamic_file, name='download_dynamic'),
+    path('api/menu', api_menu.menu_api, name='api_menu'),
 ]
 
 # uvicorn 开发模式下提供静态文件（runserver 自动加，uvicorn 需显式配置）

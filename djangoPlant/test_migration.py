@@ -1,4 +1,5 @@
 from django.test import TestCase, Client
+from django.contrib.auth.models import User
 from pathlib import Path
 import os
 
@@ -35,3 +36,38 @@ class SpaFallbackTests(TestCase):
             self.assertIn(b'<div id="app">', resp.content)
         finally:
             DIST_INDEX.unlink(missing_ok=True)
+
+
+class MenuApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('menutest', password='x')
+        self.c = Client()
+        self.c.force_login(self.user)
+        # SessionExpiryMiddleware 要求已登录用户 session 里有 isLoggedIn，
+        # 否则会 logout 并 302 到 /login（与真实 user_login 流程一致）。
+        s = self.c.session
+        s['isLoggedIn'] = True
+        s.save()
+
+    def test_requires_login(self):
+        resp = Client().get('/api/menu')
+        self.assertIn(resp.status_code, (302, 403))
+
+    def test_empty_menus_returns_empty(self):
+        resp = self.c.get('/api/menu')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()['data']
+        self.assertEqual(data['standalone'], [])
+        self.assertEqual(data['groups'], [])
+
+    def test_mergeuser_menu_is_inside_tools_group(self):
+        # 只给 mergeUser 权限
+        s = self.c.session
+        s['menus'] = ['mergeUser']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        self.assertEqual(data['standalone'], [])
+        self.assertEqual(len(data['groups']), 1)
+        self.assertEqual(data['groups'][0]['key'], 'tools')
+        self.assertEqual(data['groups'][0]['items'][0]['key'], 'mergeUser')
