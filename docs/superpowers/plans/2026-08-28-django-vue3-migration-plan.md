@@ -125,7 +125,9 @@ const DJANGO = 'http://localhost:8001'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/static/',
+  // 构建产物落在 static/vue/ 下（Django 的 static() 只服务 STATICFILES_DIRS[0]=static/，
+  // 输出到 static/ 内才能被 /static/ URL 命中），base 相应指向 /static/vue/
+  base: '/static/vue/',
   server: {
     port: 5173,
     proxy: {
@@ -139,7 +141,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: '../static/vue',
     emptyOutDir: true,
   },
 })
@@ -227,8 +229,9 @@ const src = computed(() => route.query.goto ? `/${route.query.goto}` : '/home')
 
 ```
 node_modules/
-dist/
 ```
+
+> 说明：构建产物输出到 `static/vue/`（不在 frontend/ 内），由项目根 `.gitignore` 统一忽略，见 Task 2。
 
 - [ ] **Step 11: 安装依赖**
 
@@ -259,10 +262,11 @@ git commit -m "feat(frontend): 搭建 Vue3 + Vite + Element Plus 工程脚手架
 
 **Files:**
 - Modify: `run.sh`（端口 8000→8001）
-- Modify: `djangoPlant/settings.py`（`CSRF_TRUSTED_ORIGINS`、`STATICFILES_DIRS`）
+- Modify: `djangoPlant/settings.py`（`CSRF_TRUSTED_ORIGINS`）
+- Modify: `.gitignore`（忽略 `static/vue/` 构建产物）
 
 **Interfaces:**
-- Produces: Django 跑在 8001；`frontend/dist` 加入静态查找路径；dev 前端源 5173 与 8001 进入 CSRF 信任源。
+- Produces: Django 跑在 8001；dev 前端源 5173 与 8001 进入 CSRF 信任源；构建产物 `static/vue/` 不入 git。
 
 - [ ] **Step 1: 改 run.sh 端口**
 
@@ -283,21 +287,16 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']  # 本地开发域名（根据�
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8001', 'http://localhost:5173', 'http://127.0.0.1:8001', 'http://127.0.0.1:5173']
 ```
 
-- [ ] **Step 3: 改 settings.py 的 STATICFILES_DIRS**
+- [ ] **Step 3: 改根 .gitignore，忽略构建产物**
 
-将：
-```python
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+在项目根 `.gitignore` 末尾追加：
+
 ```
-改为：
-```python
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR, 'frontend', 'dist'),  # Vue build 产物
-]
+# Vue 构建产物（npm run build 输出到 static/vue/，不入库）
+static/vue/
 ```
+
+> 说明：**不改 `STATICFILES_DIRS`**。Vite 已配置输出到 `static/vue/`，它落在 `STATICFILES_DIRS[0]`（`static/`）内部，天然被 Django 的 `static()` 与 `/static/` URL 覆盖，无需任何额外静态配置。
 
 - [ ] **Step 4: 验证 Django 能起在 8001**
 
@@ -311,8 +310,8 @@ bash run.sh
 
 ```bash
 cd /Users/imc/djangoAndVue
-git add run.sh djangoPlant/settings.py
-git commit -m "chore: 端口统一为 8001，静态目录加入 frontend/dist"
+git add run.sh djangoPlant/settings.py .gitignore
+git commit -m "chore: 端口统一为 8001，忽略 Vue 构建产物 static/vue"
 ```
 
 ---
@@ -325,7 +324,7 @@ git commit -m "chore: 端口统一为 8001，静态目录加入 frontend/dist"
 - Modify: `djangoPlant/urls.py`（本任务只加 catch-all，/api/menu 在 Task 4 加）
 
 **Interfaces:**
-- Produces: `spa_index(request)` 视图，返回 `frontend/dist/index.html` 内容（`Content-Type: text/html`）；dist 不存在时返回 404 提示。供 urls.py 的 catch-all 使用。
+- Produces: `spa_index(request)` 视图，返回 `static/vue/index.html` 内容（`Content-Type: text/html`）；产物不存在时返回 404 提示。供 urls.py 的 catch-all 与根路径 `/` 使用。
 
 - [ ] **Step 1: 写失败测试**
 
@@ -337,12 +336,12 @@ from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DIST_INDEX = BASE_DIR / 'frontend' / 'dist' / 'index.html'
+DIST_INDEX = BASE_DIR / 'static' / 'vue' / 'index.html'
 
 
 class SpaFallbackTests(TestCase):
     def test_spa_index_returns_html_when_dist_exists(self):
-        # 造一个临时 dist/index.html
+        # 造一个临时 static/vue/index.html
         DIST_INDEX.parent.mkdir(parents=True, exist_ok=True)
         DIST_INDEX.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
         try:
@@ -358,6 +357,17 @@ class SpaFallbackTests(TestCase):
             DIST_INDEX.unlink()
         resp = Client().get('/some-vue-route')
         self.assertEqual(resp.status_code, 404)
+
+    def test_root_returns_spa(self):
+        # 根路径 / 应返回 Vue index.html（登录后进入 Vue 壳）
+        DIST_INDEX.parent.mkdir(parents=True, exist_ok=True)
+        DIST_INDEX.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
+        try:
+            resp = Client().get('/')
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(b'<div id="app">', resp.content)
+        finally:
+            DIST_INDEX.unlink(missing_ok=True)
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
@@ -376,7 +386,7 @@ from pathlib import Path
 from django.http import HttpResponse, Http404
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DIST_INDEX = BASE_DIR / 'frontend' / 'dist' / 'index.html'
+DIST_INDEX = BASE_DIR / 'static' / 'vue' / 'index.html'
 
 
 def spa_index(request):
@@ -387,20 +397,31 @@ def spa_index(request):
         return HttpResponse(f.read(), content_type='text/html')
 ```
 
-- [ ] **Step 4: 在 urls.py 加 catch-all（放在 urlpatterns 最末尾、static 之前）**
+- [ ] **Step 4: 在 urls.py 加根路径 `/` 指向 spa_index + catch-all（放在 static 之后）**
 
-在 `djangoPlant/urls.py` 末尾、`if settings.DEBUG:` 之前，加入：
+改动分两处：
+
+**(a) 根路径 `/` 从旧 shell 改为 Vue 壳**。将现有：
+```python
+    path('',pv.shell,name="home"),
+```
+改为：
+```python
+    path('',spa.spa_index,name="home"),
+```
+
+**(b) catch-all 放在 `if settings.DEBUG:` 的 static 之后**，避免吞掉 `/static/*`。在 `djangoPlant/urls.py` 文件最末尾（`static(...)` 那行之后、`handler404` 之前）加入：
 
 ```python
 from . import spa
 
-# SPA 兜底：所有未命中路由交给 Vue index.html（必须放在最后）
+# SPA 兜底：所有未命中路由交给 Vue index.html（必须放在 static 之后，避免吞掉静态文件）
 urlpatterns += [
     re_path(r'^.*$', spa.spa_index, name='spa'),
 ]
 ```
 
-> 注意：`re_path` 已在文件顶部导入（`from django.urls import path, re_path`）。此 catch-all 会兜住未知路径，但 `admin/`、`login`、`logout`、`/sv/*`、`/ov/*`、`/pv/*`、`/api/*` 等明确路由仍优先匹配。
+> 注意：`re_path` 已在文件顶部导入（`from django.urls import path, re_path`）。`from . import spa` 需放在文件顶部 import 区（与 `from . import originview as ov` 并列）。catch-all 兜住未知路径，但 `admin/`、`login`、`logout`、`/sv/*`、`/ov/*`、`/pv/*`、`/api/*`、`/static/*` 等明确路由仍优先匹配。
 
 - [ ] **Step 5: 跑测试确认通过**
 
@@ -723,13 +744,13 @@ const migrated = {
   // mergeUser: () => import('../views/mergeUser/index.vue'),  // Task 8 启用
 }
 
+// 本阶段（Task 6）无壳，平铺路由，全部绝对路径；Task 7 引入 AppLayout 后会重写为嵌套结构。
 function legacy(path) {
-  // path 不带前导斜杠，作为 AppLayout 的 children 子路径使用
-  return { path: path.replace(/^\//, ''), name: path, component: LegacyIframe }
+  return { path, name: path, component: LegacyIframe }
 }
 
 const routes = [
-  // 壳内默认页：先指向旧首页（iframe）
+  // 默认页：先指向旧首页（iframe）
   { path: '/', component: LegacyIframe },
   // 试点页（暂走 iframe，Task 8 切换）
   { path: '/mergeUser', component: migrated.mergeUser || LegacyIframe },
@@ -903,7 +924,14 @@ import SidebarMenu from './SidebarMenu.vue'
 import { useMenuStore } from '../store/menu'
 
 const menuStore = useMenuStore()
-onMounted(() => { menuStore.fetchMenu() })
+onMounted(async () => {
+  try {
+    await menuStore.fetchMenu()
+  } catch (e) {
+    // 未登录（后端 302 跟随到 login.html，getMenu 解析失败）→ 跳登录页
+    window.location.href = '/login'
+  }
+})
 </script>
 
 <style scoped>
@@ -928,10 +956,22 @@ onMounted(() => { menuStore.fetchMenu() })
 
 - [ ] **Step 5: 改 router/index.js 用 AppLayout 嵌套**
 
-将 `routes` 改为嵌套结构：
+**完整重写 `router/index.js`**（替换 Task 6 的平铺路由为嵌套结构）：
 
 ```js
+import { createRouter, createWebHistory } from 'vue-router'
+import LegacyIframe from '../views/LegacyIframe.vue'
 import AppLayout from '../layout/AppLayout.vue'
+
+// 迁移开关：迁完一页，把对应路径改成 import 的 Vue 组件即可。
+const migrated = {
+  // mergeUser: () => import('../views/mergeUser/index.vue'),  // Task 8 启用
+}
+
+// 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
+function legacy(path) {
+  return { path: path.replace(/^\//, ''), name: path, component: LegacyIframe }
+}
 
 const routes = [
   {
@@ -942,13 +982,43 @@ const routes = [
       { path: 'mergeUser', component: migrated.mergeUser || LegacyIframe },
       legacy('/home'),
       legacy('/ov/mmeettopen'),
-      // ... 其余 legacy(...) 项原样搬入 children（保持相同顺序与路径）
+      legacy('/pv/other'),
+      legacy('/ov/soonConfig'),
+      legacy('/ov/setting'),
+      legacy('/ov/twCompSet'),
+      legacy('/sv/jtSaleskits'),
+      legacy('/sv/hwskset'),
+      legacy('/sv/upgradeR3'),
+      legacy('/sv/basicComp'),
+      legacy('/sv/baseUpgradeSK'),
+      legacy('/sv/updateCT'),
+      legacy('/sv/companyModule'),
+      legacy('/sv/delCP'),
+      legacy('/sv/forWeCom'),
+      legacy('/sv/delBindRelation'),
+      legacy('/sv/queryLoginCode'),
+      legacy('/sv/dzFunction'),
+      legacy('/sv/batchDeleteClue'),
+      legacy('/sv/afterSales'),
+      legacy('/sv/miniprogram'),
+      legacy('/pv/mynote'),
+      legacy('/pv/usercenter'),
+      legacy('/pv/easyIC'),
+      legacy('/pv/aitools'),
+      legacy('/pv/agent'),
     ],
   },
 ]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+export default router
 ```
 
-> 注意：`legacy()` 已内置去除前导斜杠，生成子路径（如 `legacy('/home')` → `{path:'home'}`）。菜单 URL（如 `/home`）在 vue-router 中由 `AppLayout` 的 `/` 父路由 + 子路径 `home` 匹配，`el-menu` 的 `index=it.url` 用绝对路径触发 `router.push` 到 `/home`，同样命中该子路由。
+> 注意：`legacy()` 已改为去除前导斜杠，生成子路径（如 `legacy('/home')` → `{path:'home'}`）。菜单 URL（如 `/home`）由 `AppLayout`（`path:'/'`）+ 子路径 `home` 匹配；`el-menu` 的 `index=it.url` 用绝对路径 `/home` 触发 `router.push`，命中该子路由。
 
 - [ ] **Step 6: 验证编译与菜单渲染**
 
@@ -1014,7 +1084,6 @@ git commit -m "feat(frontend): Vue 壳（header + sidebar + content）"
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import http from '../../api/http'
 
 const formRef = ref()
@@ -1104,9 +1173,9 @@ git commit -m "feat(frontend): 迁移试点页「手工合并用户」为 Vue �
 - Consumes: 前 8 个 Task 的全部产物。
 - Produces: 登录后进入 Vue 壳，全链路可用；生产 build 由 Django 托管。
 
-- [ ] **Step 1: 改 userlogin.py 默认跳转**
+- [ ] **Step 1: 改 userlogin.py 默认跳转（两处）**
 
-将 `user_login` 中的：
+**(a) POST 登录成功分支**。将 `user_login` 中的：
 ```python
 redirect_url = data.get('next', '') or request.session.pop('login_redirect', '') or '/home'
 ```
@@ -1114,6 +1183,19 @@ redirect_url = data.get('next', '') or request.session.pop('login_redirect', '')
 ```python
 redirect_url = data.get('next', '') or request.session.pop('login_redirect', '') or '/'
 ```
+
+**(b) GET 已登录分支**。将 `user_login` 中的：
+```python
+        if 'isLoggedIn' in request.session and request.session['isLoggedIn']:
+            return redirect('/home')
+```
+改为：
+```python
+        if 'isLoggedIn' in request.session and request.session['isLoggedIn']:
+            return redirect('/')
+```
+
+> 说明：`user_logout` 里的 `login_redirect = referer if referer else '/home'` 保持不动——`/home` 现在是 Vue 壳内的 legacy 路由，登录后回来仍能正常进入壳。
 
 - [ ] **Step 2: 启动后端与前端（双终端）**
 
@@ -1139,7 +1221,7 @@ cd /Users/imc/djangoAndVue/frontend && npm run dev
 cd /Users/imc/djangoAndVue/frontend
 npm run build
 ```
-预期：产物在 `frontend/dist/`，index.html 引用 `/static/assets/...`。
+预期：产物在 `static/vue/`，index.html 引用 `/static/vue/assets/...`。
 
 ```bash
 # 停掉 dev，直接访问 Django 8001
