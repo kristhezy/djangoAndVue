@@ -20,6 +20,7 @@ from django.conf.urls.static import static
 from django.contrib import admin  # type: ignore
 from django.urls import path, re_path  # type: ignore
 from. import originview as ov, publicview as pv, saasview as sv, userlogin as ul, miniprogram
+from. import spa
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,7 +28,7 @@ urlpatterns = [
     path('logout',ul.user_logout,name="logout"),
     path('denied',pv.denied,name="denied"),
     #publicview
-    path('',pv.shell,name="home"),
+    path('',spa.spa_index,name="home"),
     path('home',pv.home,name="home"),
     path('pv/other',pv.other,name='other'),
     path('pv/pagecount',pv.pagecount,name='pagecount'),
@@ -102,6 +103,11 @@ path('sv/queryLoginCode',sv.queryLoginCode),
 # uvicorn 开发模式下提供静态文件（runserver 自动加，uvicorn 需显式配置）
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
+# SPA 兜底：所有未命中路由交给 Vue index.html（必须放在 static 之后，避免吞掉静态文件）
+urlpatterns += [
+    re_path(r'^.*$', spa.spa_index, name='spa'),
+]
 
 # 自定义 404 页面（仅 DEBUG=False 时生效；开发环境用 @login_required 控制访问）
 handler404 = 'djangoPlant.publicview.page_not_found'
