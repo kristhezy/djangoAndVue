@@ -16,3 +16,6 @@ venv/
 .venv/
 __pycache__/
 *.py[cod]
+
+# Vue 构建产物（npm run build 输出到 static/vue/，不入库）
+static/vue/

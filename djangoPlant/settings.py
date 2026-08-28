@@ -101,7 +101,7 @@ SECURE_SSL_REDIRECT = False  # 开发环境无需强制 HTTPS
 CSRF_COOKIE_SECURE = False   # 开发环境无需 HTTPS 下的 CSRF Cookie
 CSRF_COOKIE_HTTPONLY = False  # 关键！前端JS需要读取CSRF Cookie，必须设为False
 CSRF_COOKIE_SAMESITE = 'Lax'  # 兼容表单提交（不要设为Strict）
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']  # 本地开发域名（根据实际修改）
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8001', 'http://localhost:5173', 'http://127.0.0.1:8001', 'http://127.0.0.1:5173']
 
 # Session配置（删除Session后登录失败的核心）
 SESSION_COOKIE_SECURE = False
