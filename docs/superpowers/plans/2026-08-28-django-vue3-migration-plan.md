@@ -123,11 +123,12 @@ import vue from '@vitejs/plugin-vue'
 
 const DJANGO = 'http://localhost:8001'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [vue()],
-  // 构建产物落在 static/vue/ 下（Django 的 static() 只服务 STATICFILES_DIRS[0]=static/，
-  // 输出到 static/ 内才能被 /static/ URL 命中），base 相应指向 /static/vue/
-  base: '/static/vue/',
+  // dev 下 base 用 '/'：Vite 自己提供 app 源码（/src/main.js 等），不经过 /static 代理。
+  // build 下 base 用 '/static/vue/'：产物落在 static/vue/，由 Django 的 /static/ URL 服务。
+  // （Django 的 static() 只服务 STATICFILES_DIRS[0]=static/，故构建产物必须落在 static/ 内）
+  base: command === 'build' ? '/static/vue/' : '/',
   server: {
     port: 5173,
     proxy: {
@@ -144,7 +145,7 @@ export default defineConfig({
     outDir: '../static/vue',
     emptyOutDir: true,
   },
-})
+}))
 ```
 
 - [ ] **Step 5: 写 frontend/index.html**
