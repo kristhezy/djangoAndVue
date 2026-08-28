@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* 首页：本页布局结构（控件走 components.css） */
+    .home-page {
+        height: 100vh;
+        overflow-y: auto;
+        padding: 24px;
+        background: #f0f2f5;
+    }
+
+    /* 面板 */
+    .panel {
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 24px;
+        margin-bottom: 16px;
+    }
+    .panel:last-child { margin-bottom: 0; }
+    .panel--centered {
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .panel__title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    /* 链接状态 */
+    .useable { color: var(--blue-600); }
+    .notavailable { color: var(--gray-400); text-decoration: line-through; cursor: not-allowed; }
+    .empty { color: var(--gray-300); }
+
+    /* 快捷入口：卡片网格 */
+    .quick-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+    .quick-card {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        background: #fff;
+    }
+    .quick-card--highlight {
+        background: var(--blue-50);
+    }
+    .quick-card__name {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 12px;
+    }
+    .quick-card--highlight .quick-card__name { color: var(--red-600); }
+    .quick-card__row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        font-size: 14px;
+    }
+    .quick-card__env {
+        width: 36px;
+        flex-shrink: 0;
+        font-size: 12px;
+        color: var(--gray-500);
+    }
+
+    /* 链接卡片网格（常用工具 / 工作相关 共用） */
+    .link-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+    .tool-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 12px;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        background: #fff;
+        color: var(--blue-600);
+        font-size: 14px;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+    }
+    .tool-link:hover {
+        border-color: var(--indigo-500);
+        background: var(--gray-50);
+    }
+    .tool-link--danger { color: var(--red-600); }
+
+    /* 资源卡（“一个资源 → 飞书/钉钉两个链接”） */
+    .resource-card {
+        padding: 16px;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        background: #fff;
+    }
+    .resource-card__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--gray-800);
+        margin-bottom: 10px;
+    }
+    .resource-card__links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .resource-card__links a {
+        font-size: 13px;
+        color: var(--blue-600);
+    }
+</style>
+
+<div class="home-page">
+
+    <!-- 快捷入口 -->
+    <section class="panel panel--centered">
+        <h2 class="panel__title">快捷入口</h2>
+        <div class="quick-grid">
+            <div class="quick-card">
+                <div class="quick-card__name">k8s平台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='http://msr.jiatuitest.com/service-envdirect/index.html' target="_blank" rel="noopener noreferrer">msr-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><span class="empty">/</span></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">kibana</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='http://dev-kibana-log.jiatuiyun.net/app/kibana#/discover' target="_blank" rel="noopener noreferrer">kibana-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><span class="empty">/</span></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">老企管后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test.aijiatui.com/bms/#/' target="_blank" rel="noopener noreferrer">bms-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://business.aijiatui.com/bms/#/' target="_blank" rel="noopener noreferrer">bms-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><a class="notavailable" href='https://business.aijiatui.com/bms-shop/#/' target="_blank" rel="noopener noreferrer">bms-shop</a></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">私域流量后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test.aijiatui.com/refactor/#/' target="_blank" rel="noopener noreferrer">refactor-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://business.aijiatui.com/refactor/#/' target="_blank" rel="noopener noreferrer">refactor-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><a class="notavailable" href='https://business.aijiatui.com/refactor-gray/#/' target="_blank" rel="noopener noreferrer">refactor-gray</a></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">招商版企管后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test.aijiatui.com/refactor-zs/#/' target="_blank" rel="noopener noreferrer">refactor-zs-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://business.aijiatui.com/refactor-zs/#/' target="_blank" rel="noopener noreferrer">refactor-zs-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><a class="notavailable" href='https://business.aijiatui.com/refactor-zs-gray/#/' target="_blank" rel="noopener noreferrer">refactor-zs-gray</a></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">家装版企管后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test.aijiatui.com/refactor-jz/#/' target="_blank" rel="noopener noreferrer">refactor-jz-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://business.aijiatui.com/refactor-jz/#/' target="_blank" rel="noopener noreferrer">refactor-jz-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><a class="notavailable" href='https://business.aijiatui.com/refactor-jz-gray/#/' target="_blank" rel="noopener noreferrer">refactor-jz-gray</a></div>
+            </div>
+            <div class="quick-card quick-card--highlight">
+                <div class="quick-card__name">电脑导入文件</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test-file.jiatui.com' target="_blank" rel="noopener noreferrer">file-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://file.jiatui.com' target="_blank" rel="noopener noreferrer">file-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><a class="notavailable" href='https://gray-file.jiatui.com' target="_blank" rel="noopener noreferrer">file-gray</a></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">代理商后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test-agent.aijiatui.com/agent/home#/login' target="_blank" rel="noopener noreferrer">agent-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://agent.aijiatui.com/agent/login' target="_blank" rel="noopener noreferrer">agent-business</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">小程序发版系统</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://test-code-publish.aijiatui.com/code-publish-h5/#/login' target="_blank" rel="noopener noreferrer">applet-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://code-publish.aijiatui.com/code-publish-h5/#/login' target="_blank" rel="noopener noreferrer">applet-online</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">运营后台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><a class="notavailable" href='https://checkout-bob.aijiatui.com/#/user/login' target="_blank" rel="noopener noreferrer">bob-test</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://bob.aijiatui.com/#/user/login' target="_blank" rel="noopener noreferrer">bob-online</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">SQL审核查询平台</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><span class="empty">/</span></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://sqlprod.jiatuiyun.net/sqlquery/' target="_blank" rel="noopener noreferrer">SqlProd</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-card__name">云端SSL VPN</div>
+                <div class="quick-card__row"><span class="quick-card__env">测试</span><span class="empty">/</span></div>
+                <div class="quick-card__row"><span class="quick-card__env">生产</span><a class="useable" href='https://wiki.jiatuiyun.net/pages/viewpage.action?pageId=30638081' target="_blank" rel="noopener noreferrer">EASY CONNECT</a></div>
+                <div class="quick-card__row"><span class="quick-card__env">灰度</span><span class="empty">/</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常用工具 -->
+    <section class="panel panel--centered">
+        <h2 class="panel__title">常用工具</h2>
+        <div class="link-grid">
+            <a class="tool-link" href='https://www.baidu.com/' target="_blank" rel="noopener noreferrer">百度baidu</a>
+            <a class="tool-link" href='https://fanyi.baidu.com/' target="_blank" rel="noopener noreferrer">百度翻译</a>
+            <a class="tool-link" href='https://tool.lu/timestamp/' target="_blank" rel="noopener noreferrer">时间戳工具</a>
+            <a class="tool-link" href='https://www.jianshu.com/p/abf793f91973?from=singlemessage' target="_blank" rel="noopener noreferrer">iOS证书信任设置</a>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docs/doccnVJbRfdIXZt0NRnC6tpcTzc' target="_blank" rel="noopener noreferrer">charles基本使用</a>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docs/doccnavbo3RLvyQ5JUM3E8tugBe' target="_blank" rel="noopener noreferrer">kibana之日志搜索</a>
+            <a class="tool-link" href='https://www.jianshu.com/p/bce9077d883c' target="_blank" rel="noopener noreferrer">Jmeter在mac上的安装方法</a>
+            <a class="tool-link" href='https://www.cnblogs.com/hle030609/p/9579805.html' target="_blank" rel="noopener noreferrer">Jmeter组件简介</a>
+            <a class="tool-link" href='https://edu.csdn.net/course/detail/19762' target="_blank" rel="noopener noreferrer">使用Jmeter进行接口测试</a>
+            <a class="tool-link" href='http://www.jsons.cn/utf8/' target="_blank" rel="noopener noreferrer">UTF-8 编码转换工具</a>
+            <a class="tool-link" href='https://www.cmd5.com/' target="_blank" rel="noopener noreferrer">MD5在线加密</a>
+            <a class="tool-link" href='https://www.cnblogs.com/molson/p/7000841.html' target="_blank" rel="noopener noreferrer">HTTP请求返回状态码详解</a>
+            <a class="tool-link" href='https://sfz.tool90.com/sfz/generate.html' target="_blank" rel="noopener noreferrer">身份证查询大全</a>
+            <a class="tool-link" href='https://ddu1222.github.io/bankcard-validator/bcBuilder.html' target="_blank" rel="noopener noreferrer">银行卡号查询</a>
+            <a class="tool-link" href='https://www.creditchina.gov.cn/' target="_blank" rel="noopener noreferrer">统一社会信用代码查询</a>
+        </div>
+    </section>
+
+    <!-- 工作相关 -->
+    <section class="panel panel--centered">
+        <h2 class="panel__title">工作相关</h2>
+        <div class="link-grid">
+            <div class="resource-card">
+                <div class="resource-card__title">测试企业信息</div>
+                <div class="resource-card__links">
+                    <a href='https://jiatui.feishu.cn/sheets/shtcnVgCQKJ2yoHk1OyjjQuCCBb?sheet=a95b37' target="_blank" rel="noopener noreferrer">『飞书链接』</a>
+                    <a href='https://alidocs.dingtalk.com/i/nodes/ZgpG2NdyVXrGP2j1TvBxnDoe8MwvDqPk' target="_blank" rel="noopener noreferrer">『钉钉链接』</a>
+                </div>
+            </div>
+            <div class="resource-card">
+                <div class="resource-card__title">测试用例</div>
+                <div class="resource-card__links">
+                    <a href='https://jiatui.feishu.cn/drive/folder/fldcnbgcCZMxzaCMRNKZJdsZaxx' target="_blank" rel="noopener noreferrer">『飞书链接』</a>
+                    <a href='https://qr.dingtalk.com/page/yunpan?route=previewDentry&spaceId=21592115021&fileId=104770321197&type=folder' target="_blank" rel="noopener noreferrer">『钉钉链接』</a>
+                </div>
+            </div>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docs/doccniDoBZ4OsOzpKzyztaxjZvt#' target="_blank" rel="noopener noreferrer">测试新员工入职指引</a>
+            <a class="tool-link tool-link--danger" href='https://alidocs.dingtalk.com/i/nodes/KGZLxjv9VG37nPYet9Xbyg4XV6EDybno' target="_blank" rel="noopener noreferrer">企微绑定流程(钉钉)</a>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docx/OChedR134oswndxFrPSc7ZVHnRd' target="_blank" rel="noopener noreferrer">企微绑定流程(旧-飞书)</a>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docs/doccnIMKwfy5TQ2uZkgvM8Sx6Ah' target="_blank" rel="noopener noreferrer">数据库表相关</a>
+            <a class="tool-link" href='https://wiki.jiatuiyun.net/pages/viewpage.action?pageId=41746439' target="_blank" rel="noopener noreferrer">OpenVPN客户端</a>
+            <a class="tool-link" href='https://jiatui.feishu.cn/docs/doccnQsky96ROBEzc2bRTeoTUxb' target="_blank" rel="noopener noreferrer">清除app登录token</a>
+        </div>
+    </section>
+</div>
+
+<script>
+    document.querySelectorAll('.notavailable').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+        });
+    });
+</script>
+
+{% endblock %}

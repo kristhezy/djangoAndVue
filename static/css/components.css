@@ -1,0 +1,236 @@
+/* ============================================================
+   基础控件库 (Shared primitives)
+   仅共享跨页面完全一致的底层控件与通用工具类。
+   页面级布局 / 结构样式请写在各自模板的 <style> 块内，遵循页面设计。
+   命名约定：BEM —— .block__element--modifier
+   ============================================================ */
+
+/* ---- 输入框 / 下拉框 ---- */
+.input,
+.select {
+    width: 180px;
+    padding: 8px 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-300);
+    outline: none;
+    text-align: center;
+    font-size: 14px;
+    background: #fff;
+    transition: border-color var(--transition-fast);
+}
+.input:focus,
+.select:focus {
+    border-color: var(--indigo-500);
+}
+.input:disabled {
+    background: var(--gray-100);
+    cursor: not-allowed;
+}
+.input--muted,
+.textarea--muted {
+    background: var(--gray-50);
+}
+.input--muted:focus,
+.textarea--muted:focus {
+    background: #fff;
+}
+.input--sm {
+    width: 100px;
+}
+.input--fluid {
+    width: 100%;
+}
+.input--wide {
+    width: 500px;
+    max-width: 100%;
+    text-align: left;
+}
+.select--fluid {
+    width: 100%;
+}
+
+/* ---- 文本域 ---- */
+.textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-300);
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    resize: none;
+    transition: border-color var(--transition-fast);
+}
+.textarea:focus {
+    border-color: var(--indigo-500);
+}
+.textarea--wide {
+    width: 500px;
+    max-width: 100%;
+}
+
+/* ---- 单选框 / 复选框药丸（label 包裹 input 的形式） ---- */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    border: 1px solid var(--gray-300);
+    font-size: 13px;
+    cursor: pointer;
+    background: #fff;
+    transition: all var(--transition-fast);
+}
+.pill--sm {
+    padding: 4px 12px;
+}
+.pill input {
+    display: none;
+}
+.pill:has(input:checked) {
+    background: var(--indigo-500);
+    color: #fff;
+    border-color: var(--indigo-500);
+}
+
+/* ---- 原生 checkbox 的强调色 ---- */
+.checkbox {
+    accent-color: var(--indigo-500);
+    cursor: pointer;
+}
+
+/* ---- 按钮 ---- */
+.btn {
+    display: inline-block;
+    padding: 5px 40px;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+.btn:active {
+    transform: scale(0.95);
+}
+.btn--primary {
+    background: var(--gray-900);
+    color: #fff;
+    font-weight: 500;
+    border: 1px solid var(--gray-900);
+}
+.btn--primary:hover {
+    background: var(--gray-700);
+}
+.btn--secondary {
+    background: #fff;
+    border: 1px solid var(--gray-300);
+    color: #333;
+}
+.btn--ghost {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+.btn--danger {
+    background: var(--red-500);
+    color: #fff;
+}
+.btn--danger-outline {
+    background: #fff;
+    border: 1px solid var(--red-400);
+    color: var(--red-400);
+    font-size: 12px;
+}
+.btn--blue {
+    background: #1d4ed8;
+    color: #fff;
+}
+.btn--blue:hover {
+    background: #2563eb;
+}
+.btn--sm {
+    padding: 6px 16px;
+    font-size: 13px;
+}
+
+/* ---- 结果展示框（工具页统一输出框，跨页完全一致） ---- */
+.result {
+    flex: 1;
+    width: 100%;
+    min-height: 40px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: var(--radius-lg);
+    overflow-y: auto;
+    font-size: 15px;
+    text-align: center;
+    word-break: break-all;
+    white-space: pre-wrap;
+    color: var(--indigo-500);
+}
+
+/* ---- 查询结果列表（querymsgbyds.js 动态生成，5 个页面共享同一 JS 组件） ---- */
+.result-empty {
+    color: var(--gray-400);
+    text-align: center;
+    padding: 16px 0;
+}
+.result-item {
+    border-bottom: 1px solid var(--gray-100);
+    padding: 12px 4px;
+}
+.result-item__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+.result-item__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+.result-item__time {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+.result-item__msg {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.625;
+}
+
+/* ---- 通用工具类 ---- */
+.required {
+    color: var(--red-500);
+}
+.hidden {
+    display: none;
+}
+.text-center {
+    text-align: center;
+}
+
+/* ---- 滚动条（垂直，参考 base.css 的 sidebar） ---- */
+.scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+.scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* ---- 滚动条（水平，参考 base.css 的 tab-bar） ---- */
+.scrollbar--x::-webkit-scrollbar {
+    height: 2px;
+}
+.scrollbar--x::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}

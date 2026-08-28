@@ -1,0 +1,816 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    /* 接口调试：本页布局结构（控件 btn/input/textarea 仍走 components.css） */
+    .page-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .page-cols--vertical { flex-direction: column; }
+
+    /* 主面板 */
+    .ide-panel {
+        position: relative;
+        flex: 1;
+        width: 100%;
+        max-width: 1440px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-100);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .ide-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--gray-200);
+        flex-shrink: 0;
+    }
+    .ide-method {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--indigo-500);
+        background: transparent;
+        border: 0;
+        outline: none;
+        cursor: pointer;
+    }
+    .ide-uri {
+        flex: 1;
+        min-width: 0;
+        padding: 6px 12px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-300);
+        font-size: 14px;
+        outline: none;
+    }
+    .ide-uri:focus { border-color: var(--indigo-500); }
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: var(--radius-lg);
+        color: var(--gray-500);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+    .icon-btn:hover { color: var(--indigo-500); background: var(--gray-100); }
+    .ide-body { display: flex; flex: 1; min-height: 0; }
+    .ide-left {
+        width: 520px;
+        flex-shrink: 0;
+        border-right: 1px solid var(--gray-200);
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+        overflow-y: auto;
+    }
+    .ide-label { display: block; font-size: 14px; font-weight: 500; color: var(--gray-600); margin-bottom: 6px; }
+    .ide-textarea {
+        width: 100%;
+        height: 170px;
+        resize: none;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-300);
+        font-size: 14px;
+        font-family: monospace;
+        outline: none;
+        background: #fff;
+    }
+    .ide-textarea:focus { border-color: var(--indigo-500); }
+    .ide-actions { display: flex; gap: 12px; margin-top: auto; }
+    .ide-result { flex: 1; min-width: 0; background: var(--gray-50); overflow-y: auto; }
+
+    /* 环境选择下拉（工具栏内） */
+    .filter-select {
+        padding: 8px 12px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-300);
+        font-size: 14px;
+        background: #fff;
+        outline: none;
+    }
+    .filter-select:focus { border-color: var(--indigo-500); }
+
+    /* 下拉面板（历史 / curl） */
+    .dropdown {
+        position: absolute;
+        right: 16px;
+        top: 56px;
+        z-index: 50;
+        width: 500px;
+        max-height: 320px;
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+    }
+    .dropdown__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+        height: 36px;
+        background: var(--gray-100);
+        border-bottom: 1px solid var(--gray-200);
+        flex-shrink: 0;
+    }
+    .dropdown__title { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+    .dropdown__close { cursor: pointer; color: var(--gray-400); }
+    .dropdown__close:hover { color: var(--gray-600); }
+    .dropdown__body { overflow-y: auto; max-height: 280px; }
+    .dropdown--center {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        width: 520px;
+        padding: 16px;
+    }
+
+    /* 接口结果卡片 */
+    .api-card {
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--gray-200);
+        background: #fff;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    .api-card__head { display: flex; align-items: flex-start; gap: 12px; }
+    .api-card__method { font-size: 24px; font-weight: 600; color: var(--indigo-500); line-height: 1; }
+    .api-card__uri { font-size: 16px; color: var(--gray-700); word-break: break-all; padding-top: 2px; }
+    .api-card__fields { margin-top: 12px; font-size: 14px; }
+    .api-field { display: flex; gap: 12px; margin: 6px 0; }
+    .api-field--top { align-items: flex-start; }
+    .api-field__label { width: 80px; flex-shrink: 0; font-weight: 600; color: var(--gray-500); }
+    .api-field__value { word-break: break-all; color: var(--gray-700); }
+    .api-field__value--mono { font-family: monospace; font-size: 12px; }
+    .api-field__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .api-copy {
+        align-self: flex-start;
+        padding: 4px 12px;
+        border-radius: var(--radius-md);
+        background: var(--gray-900);
+        color: #fff;
+        font-size: 12px;
+        border: 0;
+        cursor: pointer;
+    }
+    .api-copy:hover { background: var(--gray-700); }
+    .api-copy i { margin-right: 4px; }
+    .api-card__footer {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid var(--gray-100);
+        text-align: center;
+        font-size: 12px;
+        color: var(--gray-400);
+    }
+    .api-note { margin-top: 20px; }
+    .api-error { color: var(--red-500); margin-top: 20px; }
+
+    /* 请求历史行 */
+    .his-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--gray-100);
+    }
+    .his-row:hover { background: var(--gray-50); }
+    .his-text {
+        flex: 1;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        color: var(--gray-700);
+        padding-right: 8px;
+    }
+    .his-replay {
+        flex-shrink: 0;
+        padding: 4px 8px;
+        color: var(--indigo-500);
+        font-size: 14px;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+    }
+    .his-replay:hover { color: var(--indigo-700); }
+    .his-delete {
+        flex-shrink: 0;
+        padding: 4px 8px;
+        color: var(--gray-400);
+        font-size: 14px;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+    }
+    .his-delete:hover { color: var(--red-500); }
+</style>
+
+<div class="page-cols page-cols--vertical">
+    <!-- 主卡片 -->
+    <div class="ide-panel">
+        <!-- 工具栏 -->
+        <div class="ide-toolbar">
+            <select id="setreqtype" class="ide-method">
+                <option value="get">GET</option>
+                <option value="post" selected>POST</option>
+            </select>
+            <select id="setenv" class="filter-select">
+                <option value ="" selected> 选择环境 </option>
+                <option value="https://soon-api.aijiatui.com">soonProd</option>
+                <option value="https://soon-api-dev.aijiatui.com">soonTest</option>
+                <option value="https://api.mmeett.com">meetProd</option>
+                <option value="https://vcard-api.aijiatui.com">meetTest</option>
+                <option value="https://borigin.aijiatui.com">originProd</option>
+                <option value="https://borigin-test.aijiatui.com">originTest</option>
+                <option value="http://msr.jtscprod.com">saasProd</option>
+                <option value="http://msr.jiatuitest.com">saasTest</option>
+            </select>
+            <input id="uri" type="text" placeholder="输入接口地址" class="ide-uri" />
+            <button id="ghbtn" class="icon-btn" title="请求历史"><i class="fa-solid fa-clock-rotate-left"></i></button>
+            <button id="curlBtn" class="icon-btn" title="粘贴curl命令"><i class="fa-solid fa-terminal"></i></button>
+        </div>
+
+        <!-- 主体：左输入 / 右结果 -->
+        <div class="ide-body">
+            <!-- 左栏：输入 -->
+            <div class="ide-left">
+                <div>
+                    <label class="ide-label">请求头 Headers</label>
+                    <textarea id="headerkv" type="text" class="ide-textarea" placeholder="input request headers"></textarea>
+                </div>
+                <div>
+                    <label class="ide-label">请求参数 Params / Body</label>
+                    <textarea id="paramkv" type="text" rows="3" class="ide-textarea" placeholder="input request params"></textarea>
+                </div>
+                <div class="ide-actions">
+                    <button class="btn btn--secondary" style="flex:1" onclick="resetparam()">重&nbsp;&nbsp;置</button>
+                    <button id="getval" class="btn btn--primary" style="flex:1" onclick="getvalue()">调&nbsp;&nbsp;用</button>
+                </div>
+            </div>
+
+            <!-- 右栏：结果 -->
+            <div class="ide-result">
+                <div id="result" style="padding:16px"></div>
+            </div>
+        </div>
+
+        <!-- 历史记录面板 -->
+        <div id="hislist" class="dropdown" style="display:none;">
+            <div class="dropdown__header">
+                <h3 class="dropdown__title">Request history</h3>
+                <div id="close" class="dropdown__close"><i class="fa-solid fa-xmark"></i></div>
+            </div>
+            <div class="dropdown__body">
+                <table style="width:100%">
+                    <tbody id="shuju"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- curl 粘贴面板 -->
+        <div id="curlArea" class="dropdown dropdown--center" style="display:none;">
+            <div style="font-weight:600; color:var(--gray-700); margin-bottom:8px">粘贴curl命令，自动解析填充</div>
+            <textarea id="curlInput" class="ide-textarea" style="height:120px; resize:vertical; font-size:12px" placeholder="粘贴curl命令，例如：&#10;curl -X POST https://example.com/api -H 'Content-Type: application/json' -d '{&quot;key&quot;:&quot;value&quot;}'"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px">
+                <button class="btn btn--secondary" style="padding:6px 16px" onclick="closeCurlArea()">取消</button>
+                <button class="btn btn--primary" style="padding:6px 16px" onclick="parseCurlCommand()">解析并填充</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    // testdata();
+    // function testdata(){
+    //     console.log("测试数据");
+    //     document.getElementById("setenv").value="saasProd";
+    //     document.getElementById("uri").value="/ai-retail-store/retail/partner/backend/list";
+    //     document.getElementById("key").value="companyId";
+    //     document.getElementById("value").value="1021060956165488640,1012037449188364288";
+    // }
+
+    // 设置 AJAX 请求头
+    // function delInputFeild(cfni){
+    //     var deldiv = document.getElementById(cfni);
+    //     deldiv.style.display = "none";
+
+    // }
+    function resetparam(){
+        document.getElementById("setreqtype").value = "post";
+        document.getElementById("setenv").value = "";
+        document.getElementById("uri").value = "";
+        document.getElementById("headerkv").value = "";
+        document.getElementById("paramkv").value = "";
+        document.getElementById("hislist").style.display = 'none';
+    }
+    let resrlt = ""
+
+    // 预设环境 host 列表（与 setenv select 的 option value 一致）
+    const KNOWN_HOSTS = [
+        'https://soon-api.aijiatui.com',
+        'https://wecard-dev.aijiatui.com',
+        'https://api.mmeett.com',
+        'https://vcard-api.aijiatui.com',
+        'https://borigin.aijiatui.com',
+        'https://borigin-test.aijiatui.com',
+        'http://msr.jtscprod.com',
+        'http://msr.jiatuitest.com'
+    ];
+
+    // 从历史数据中切割 host 和 interface
+    function splitHostAndUri(host, uri) {
+        var cleanHost = (host || '').replace(/\/+$/, '');
+        // 如果 host 匹配预设环境，直接使用
+        if (KNOWN_HOSTS.includes(cleanHost)) {
+            return { env: cleanHost, uri: uri || '/' };
+        }
+        // 如果 host 存在但不匹配预设，把完整地址放进 uri
+        if (cleanHost) {
+            return { env: '', uri: cleanHost + (uri || '') };
+        }
+        // host 不存在，uri 可能是完整地址
+        return { env: '', uri: uri || '' };
+    }
+
+    // 将 Python 风格字面量（单引号字符串、None/True/False）转为合法 JSON 字符串
+    function pythonToJSON(text) {
+        var kw = { 'None': 'null', 'True': 'true', 'False': 'false' };
+        var out = '';
+        var inSingle = false, inDouble = false;
+        var i = 0;
+        while (i < text.length) {
+            var c = text[i];
+            if (inSingle) {
+                // 单引号字符串内：处理转义
+                if (c === '\\') {
+                    var n = text[i + 1];
+                    if (n === "'") { out += "'"; }          // \' -> '
+                    else if (n === '"') { out += '\\"'; }    // \" 保留
+                    else { out += c + (n || ''); }
+                    i += 2;
+                    continue;
+                }
+                if (c === "'") { out += '"'; inSingle = false; }   // 结束单引号串 -> 双引号
+                else if (c === '"') { out += '\\"'; }              // 串内双引号需转义
+                else { out += c; }
+                i++;
+                continue;
+            }
+            if (inDouble) {
+                if (c === '\\') { out += c + (text[i + 1] || ''); i += 2; continue; }
+                if (c === '"') { out += c; inDouble = false; }
+                else { out += c; }
+                i++;
+                continue;
+            }
+            // 字符串外
+            if (c === "'") { out += '"'; inSingle = true; i++; continue; }
+            if (c === '"') { out += c; inDouble = true; i++; continue; }
+            // None/True/False 关键字替换（仅字符串外，按整词匹配）
+            var matched = false;
+            for (var k in kw) {
+                if (text.startsWith(k, i) &&
+                    (i === 0 || !/[a-zA-Z0-9_]/.test(text[i - 1])) &&
+                    !/[a-zA-Z0-9_]/.test(text[i + k.length] || '')) {
+                    out += kw[k];
+                    i += k.length;
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) continue;
+            out += c;
+            i++;
+        }
+        return out;
+    }
+
+    // 将文本解析为 JSON 对象（支持 JSON、Python 字面量、key:value 逐行、URL 编码格式）
+    function parseTextToJSON(text) {
+        if (!text || !text.trim()) return {};
+        // 尝试 JSON 解析
+        try {
+            var parsed = JSON.parse(text);
+            if (typeof parsed === 'object' && parsed !== null) return parsed;
+        } catch(e) {}
+        // 尝试 Python 风格字面量（单引号、None/True/False）
+        if (text.indexOf("'") !== -1) {
+            try {
+                var pyParsed = JSON.parse(pythonToJSON(text));
+                if (typeof pyParsed === 'object' && pyParsed !== null) return pyParsed;
+            } catch(e) {}
+        }
+        // 尝试 key:value 逐行格式（header 格式）
+        var lines = text.split('\n');
+        var result = {};
+        var hasKV = false;
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line) continue;
+            // 结构化数据（[ / { / ( 开头）不走 KV 兜底，避免误切
+            if (/^[\[{\(]/.test(line)) continue;
+            var colonIdx = line.indexOf(':');
+            if (colonIdx > 0) {
+                result[line.substring(0, colonIdx).trim()] = line.substring(colonIdx + 1).trim();
+                hasKV = true;
+            }
+        }
+        if (hasKV) return result;
+        // 尝试 URL 编码格式 (key=value&key2=value2)
+        if (text.includes('=') && text.indexOf('\n') === -1) {
+            try {
+                var params = new URLSearchParams(text);
+                var urlResult = {};
+                params.forEach(function(value, key) { urlResult[key] = value; });
+                if (Object.keys(urlResult).length > 0) return urlResult;
+            } catch(e) {}
+        }
+        return text;
+    }
+
+    // curl 粘贴区域开关
+    document.addEventListener('DOMContentLoaded', function() {
+        const curlBtn = document.getElementById('curlBtn');
+        if (curlBtn) {
+            curlBtn.addEventListener('click', function() {
+                const curlArea = document.getElementById('curlArea');
+                if (curlArea.style.display === 'block') {
+                    curlArea.style.display = 'none';
+                } else {
+                    curlArea.style.display = 'block';
+                    document.getElementById('hislist').style.display = 'none';
+                }
+            });
+        }
+        // 点击curl区域外关闭
+        document.addEventListener('click', function(e) {
+            const curlArea = document.getElementById('curlArea');
+            const curlBtn = document.getElementById('curlBtn');
+            if (curlArea && curlArea.style.display === 'block') {
+                if (!curlArea.contains(e.target) && e.target !== curlBtn && !curlBtn.contains(e.target)) {
+                    curlArea.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    function closeCurlArea() {
+        document.getElementById('curlArea').style.display = 'none';
+        document.getElementById('curlInput').value = '';
+    }
+
+    function parseCurlCommand() {
+        const curlStr = document.getElementById('curlInput').value.trim();
+        if (!curlStr) {
+            showToast('请粘贴curl命令！');
+            return;
+        }
+
+        // 去除换行符和多余空格
+        let cmd = curlStr.replace(/\\\n/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // 提取 URL
+        let url = '';
+        const urlMatch = cmd.match(/(?:curl\s+)(?:-[a-zA-Z]+\s+[^\s]+\s+)*?(['"]?)(https?:\/\/[^\s'"]+)\1/);
+        if (urlMatch) {
+            url = urlMatch[2];
+        } else {
+            const simpleMatch = cmd.match(/(https?:\/\/[^\s'"]+)/);
+            if (simpleMatch) url = simpleMatch[1];
+        }
+        if (!url) {
+            showToast('未能识别URL，请检查curl命令格式！');
+            return;
+        }
+
+        // 提取方法
+        let method = 'GET';
+        const methodMatch = cmd.match(/(?:-X|--request)\s+['"]?(\w+)['"]?/i);
+        if (methodMatch) {
+            method = methodMatch[1].toUpperCase();
+        } else if (/(?:-d|--data|--data-raw|--data-binary)\s+/.test(cmd)) {
+            method = 'POST';
+        }
+
+        // 提取 headers
+        let headers = [];
+        const headerRegex = /(?:-H|--header)\s+['"]([^'"]+)['"]/g;
+        let hMatch;
+        while ((hMatch = headerRegex.exec(cmd)) !== null) {
+            headers.push(hMatch[1]);
+        }
+
+        // 提取 body
+        let body = '';
+        const bodyMatch = cmd.match(/(?:-d|--data|--data-raw|--data-binary)\s+['"]([^'"]+)['"]/);
+        if (bodyMatch) {
+            body = bodyMatch[1];
+        }
+
+        // 分割 URL 为 host + uri
+        let host = '';
+        let uri = '/';
+        try {
+            const urlObj = new URL(url);
+            host = urlObj.origin;
+            uri = urlObj.pathname + urlObj.search;
+        } catch(e) {
+            host = url;
+        }
+
+        // 填充表单
+        document.getElementById('setreqtype').value = method.toLowerCase();
+        if (KNOWN_HOSTS.includes(host)) {
+            document.getElementById('setenv').value = host;
+            document.getElementById('uri').value = uri;
+        } else {
+            document.getElementById('setenv').value = '';
+            document.getElementById('uri').value = host + uri;
+        }
+        document.getElementById('headerkv').value = headers.join('\n');
+        document.getElementById('paramkv').value = body;
+
+        closeCurlArea();
+        showToast('curl解析成功，已填充表单！');
+    }
+
+    function getvalue(){
+        // 禁用按钮
+        var getval = document.getElementById("getval");
+        getval.disabled = true;
+        var headers = document.getElementById('headerkv').value;
+        var params = document.getElementById('paramkv').value;
+        var setreqtype = document.getElementById("setreqtype").value;
+        var setenv = document.getElementById("setenv").value;
+        var uri = document.getElementById("uri").value;
+        var data = JSON.stringify({
+            "setreqtype": setreqtype,
+            "setenv": setenv,
+            "uri": uri,
+            "headers": parseTextToJSON(headers),
+            "params": parseTextToJSON(params),
+            "type": "requestinterface"
+        })
+        if(!setenv || !uri){
+            if (uri.includes("http://") || uri.includes("https://")){
+                console.log("链接中带有域名！")
+            }
+            else if (setenv && !uri){
+                showToast("输入正确的接口地址！");
+                getval.disabled = false;
+                return;
+            }
+            else{
+                showToast("输入正确的请求域名和接口地址！");
+                getval.disabled = false;
+                return;
+            }
+        }
+        const result = document.getElementById('result');
+        result.innerHTML = "<div class='api-note'><img src='../static/img/loading.gif' height='10'/></div>"; //在后台返回success之前显示loading图标
+        axios.post(`/pv/easyIC`,data,{headers: header})
+        .then(response => {
+            var res = response.data.data;
+            // 检查是否返回了错误
+            if (response.data.error || !res) {
+                result.innerHTML = `<div class="api-error">请求异常: ${response.data.error || '未获取到数据'}</div>`;
+                getval.disabled = false;
+                return;
+            }
+            resrlt = res;
+            // console.log('res suc:', res);
+            var reqheader = "/"
+            var reqparam = "/"
+            var str = ""
+            const keys = Object.keys(res);
+            for(i in res){
+                console.log('i suc:', i, typeof(i));
+                console.log("before-reqheader:",res[i].request_headers,"before-reqparam:",res[i].request_params)
+                var id = keys[i]
+                if(res[i].request_headers){
+                    reqheader = res[i].request_headers;
+                }
+                if(res[i].request_params){
+                    reqparam = res[i].request_params;
+                }
+                console.log("reqheader:",reqheader,"reqparam:",reqparam)
+                num = Number(i) + 1
+                var rbody = JSON.stringify(res[i].response_body);
+                var rheader = res[i].response_headers;
+                console.log("type:",rbody,typeof(rbody),rheader,typeof(rheader))
+                var rlt =
+                `<div class="api-card">
+                    <div class="api-card__head">
+                        <span class="api-card__method">${escapeHTML(res[i].request_type)}</span>
+                        <span class="api-card__uri">${escapeHTML(res[i].host_uri)}</span>
+                    </div>
+                    <div class="api-card__fields">
+                        <div class="api-field"><span class="api-field__label">请求头部:</span><span class="api-field__value">${escapeHTML(reqheader)}</span></div>
+                        <div class="api-field"><span class="api-field__label">请求内容:</span><span class="api-field__value">${escapeHTML(reqparam)}</span></div>
+                        <div class="api-field"><span class="api-field__label">响应头部:</span><span class="api-field__value">${escapeHTML(rheader)}</span></div>
+                        <div class="api-field api-field--top">
+                            <span class="api-field__label">响应内容:</span>
+                            <div class="api-field__body">
+                                <button class="api-copy" data-id="${id}"><i class="fa-solid fa-copy"></i>复制</button>
+                                <span class="api-field__value api-field__value--mono">${escapeHTML(rbody)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="api-card__footer">第${num}条</div>
+                </div>`
+                str = str + rlt
+                // console.log('接口批量调用suc:', str);
+            }
+            result.innerHTML = str;
+            document.getElementById("hislist").style.display = 'none';
+            getval.disabled = false;
+        })
+        .catch(err => {
+            console.log(`easyIC getvalue err: ${err}`);
+            var errMsg = err.response && err.response.data ? JSON.stringify(err.response.data) : (err.message || err);
+            result.innerHTML = `<div class="api-error">请求失败: ${errMsg}</div>`;
+            getval.disabled = false;
+        })
+    }
+    document.addEventListener('DOMContentLoaded',function() {
+        const elist = document.getElementById('result');
+        console.log(`testtest: ${elist.value}`);
+        elist.removeEventListener('click', copybody); //移除操作事件监听器
+        elist.addEventListener('click', copybody);  //添加操作事件监听器
+        const copyinp = document.getElementById("shuju");
+        copyinp.removeEventListener('click', copyinput); //移除操作事件监听器
+        copyinp.addEventListener('click', copyinput);  //添加操作事件监听器
+    });
+
+    // 获取文本框和复制按钮元素
+    function copybody(event){
+        const target = event.target;
+        const clickedButton = target.closest('button');
+        id = clickedButton.getAttribute('data-id');
+        // 创建一个临时的输入框元素
+        const tempInput = document.createElement('input');
+        // 将变量中的内容赋值给输入框的值
+        if(resrlt){
+            tempInput.value = JSON.stringify(resrlt[id].response_body);
+            // 将输入框添加到文档中
+            document.body.appendChild(tempInput);
+            // 选中输入框中的内容
+            tempInput.select();
+            // 执行复制命令
+            document.execCommand('copy');
+            // 从文档中移除临时输入框
+            document.body.removeChild(tempInput);
+            console.log('已复制文本框内容');
+            // alert('已复制响应内容！');
+            showToast("复制成功！")
+        }
+    };
+    let sjrlt = ""
+    function gethis(){
+        var type = "gethistory";
+        var str = ""
+        var data = JSON.stringify({
+            "type": type
+        })
+        const shuju = document.getElementById('shuju');
+        shuju.innerHTML = "<tr><td style='padding:16px; text-align:center'><img src='../static/img/loading.gif' height='10'/></td></tr>"; //在后台返回success之前显示loading图标
+        axios.post(`/pv/easyIC`,data,{headers: header})
+        .then(response => {
+            var res = response.data.data;
+            sjrlt = res;
+            console.log('接口批量调用succ:', sjrlt);
+            for(var i in res){
+                var id = res[i]["id"]
+                var method = res[i]["method"]
+                var host = res[i]["host"]
+                var uri = res[i]["uri"]
+                str = str + `<tr><td style="padding:0">
+                    <div class="his-row">
+                        <span class="his-text" id="copyinput" data-id="${id}" title="点击填充表单">【${escapeHTML(method)}】${escapeHTML(host)}${escapeHTML(uri)}</span>
+                        <button class="his-replay" data-id="${id}" title="一键重放请求"><i class="fa-solid fa-rotate-right"></i></button>
+                        <button class="his-delete" data-id="${id}" title="删除记录"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </td></tr>`
+            }
+            shuju.innerHTML = str;
+        })
+        .catch(err => {
+            console.log(`easyIC gethistory err: ${err}`);
+            document.getElementById('shuju').innerHTML = '<tr><td style="color:var(--red-500); padding:8px">获取历史失败，请重试</td></tr>';
+        })
+    }
+    function copyinput(event){
+        const target = event.target;
+        console.log(`target: ${target.id}, class: ${target.className}`)
+        // 处理重放按钮点击
+        if (target.closest('.his-replay')) {
+            const btn = target.closest('.his-replay');
+            const id = btn.getAttribute('data-id');
+            replayRequest(id);
+            return;
+        }
+        // 处理删除按钮点击
+        if (target.closest('.his-delete')) {
+            const btn = target.closest('.his-delete');
+            const id = btn.getAttribute('data-id');
+            deleteHistory(id, btn);
+            return;
+        }
+        // 处理历史文本点击 - 填充表单
+        if(target.classList.contains('his-text') || target.id === 'copyinput' || target.closest('.his-text')){
+            const el = target.classList.contains('his-text') ? target : (target.closest('.his-text') || target);
+            id = el.getAttribute('data-id');
+            for(var i in sjrlt){
+                if(id == sjrlt[i].id){
+                    var method = sjrlt[i].method;
+                    var host = sjrlt[i].host;
+                    var uri = sjrlt[i].uri;
+                    var header = sjrlt[i].header;
+                    var param = sjrlt[i].param;
+                }
+            }
+            var parts = splitHostAndUri(host, uri);
+            document.getElementById("setenv").value = parts.env;
+            document.getElementById("uri").value = parts.uri;
+            document.getElementById("setreqtype").value = method;
+            document.getElementById("headerkv").value = header;
+            document.getElementById("paramkv").value = param;
+            document.getElementById("hislist").style.display = 'none';
+        }
+    }
+
+    function replayRequest(id){
+        // 先从sjrlt中查找并填充表单
+        for(var i in sjrlt){
+            if(id == sjrlt[i].id){
+                var parts = splitHostAndUri(sjrlt[i].host, sjrlt[i].uri);
+                document.getElementById("setenv").value = parts.env;
+                document.getElementById("uri").value = parts.uri;
+                document.getElementById("setreqtype").value = sjrlt[i].method;
+                document.getElementById("headerkv").value = sjrlt[i].header;
+                document.getElementById("paramkv").value = sjrlt[i].param;
+            }
+        }
+        document.getElementById("hislist").style.display = 'none';
+        // 直接执行请求
+        getvalue();
+    }
+
+    function deleteHistory(id, btnElement){
+        if (!confirm('确定要删除这条历史记录吗？')) return;
+        var data = JSON.stringify({
+            "type": "deletehistory",
+            "id": id
+        });
+        axios.post(`/pv/easyIC`, data, {headers: header})
+        .then(response => {
+            if (response.data.success || response.data.data) {
+                // 从 DOM 中移除该行
+                var row = btnElement.closest('tr');
+                if (row) row.remove();
+                // 从 sjrlt 中移除对应数据
+                sjrlt = sjrlt.filter(function(item) { return item.id != id; });
+                showToast('删除成功！');
+            } else {
+                showToast('删除失败！');
+            }
+        })
+        .catch(err => {
+            console.log(`easyIC deletehistory err: ${err}`);
+            showToast('删除失败，请重试');
+        });
+    }
+    document.getElementById("close").addEventListener('click', function() {
+        console.log("close")
+        document.getElementById("hislist").style.display = 'none';
+    });
+    document.getElementById("result").addEventListener('click', function() {
+        console.log("close")
+        document.getElementById("hislist").style.display = 'none';
+    });
+    document.getElementById("ghbtn").addEventListener('click', function() {
+        console.log("hislist")
+        document.getElementById("hislist").style.display = "block";
+        gethis();
+    });
+</script>
+
+{% endblock %}

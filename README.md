@@ -1,2 +1,2 @@
-# djangoAndVue
-前后端分离，django+vue3+vite方案实现
+# hzy_django
+使用django框架搭建的web页面，实现一些接口调用的功能来支持工作

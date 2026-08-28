@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* 工作笔记：本页布局结构（控件 btn/input/textarea 仍走 components.css） */
+    .page-cols {
+        height: 100vh;
+        display: flex;
+        gap: 1px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .page-cols--vertical { flex-direction: column; }
+
+    /* 查询栏 */
+    .toolbar {
+        max-width: 1090px;
+        width: 100%;
+        margin: 0 auto 12px;
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .toolbar__group { display: flex; align-items: center; gap: 10px; }
+    .toolbar-btn {
+        padding: 6px 32px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        cursor: pointer;
+        border: 1px solid var(--gray-300);
+        color: var(--gray-700);
+        background: #fff;
+    }
+    .toolbar-btn:hover { background: var(--gray-100); }
+    .toolbar-btn--dark {
+        background: var(--gray-900);
+        color: #fff;
+        border-color: var(--gray-900);
+    }
+    .toolbar-btn--dark:hover { background: var(--gray-800); }
+
+    /* 列表 */
+    .note-list {
+        flex: 1;
+        max-width: 1090px;
+        width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: var(--radius-xl);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        overflow-y: auto;
+    }
+    .note-table { width: 100%; border-collapse: collapse; }
+    .note-bottom { width: 80%; margin: 0 auto; }
+    .note-bottom__bar {
+        text-align: center;
+        font-weight: 500;
+        background: var(--gray-900);
+        color: #fff;
+        border-radius: var(--radius-md);
+        padding: 8px 0;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+    .note-row__cell { padding: 12px 0; }
+    .note-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        background: var(--gray-100);
+        font-size: 15px;
+        font-weight: 500;
+    }
+    .note-content { margin: 0 20px 10px; font-size: 14px; color: var(--gray-700); line-height: 1.625; }
+    .note-content a { color: #1d4ed8; }
+    .note-meta { text-align: right; font-size: 12px; color: var(--gray-400); }
+    .note-actions { padding: 12px 0; text-align: right; vertical-align: bottom; white-space: nowrap; }
+    .note-sep { color: var(--gray-400); }
+    .note-edit { color: var(--blue-600); cursor: pointer; }
+    .note-edit:hover { text-decoration: underline; }
+    .note-del { color: var(--red-500); cursor: pointer; }
+    .note-del:hover { text-decoration: underline; }
+    .note-row-divider { border-bottom: 1px solid var(--gray-200); }
+    .fstd { width: 4%; }
+
+    /* 回到顶部 */
+    .back-top {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        z-index: 100;
+    }
+    .back-top__btn {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--gray-900);
+    }
+    .back-top__btn:hover { background: #000; }
+    .back-top svg { width: 24px; height: 24px; fill: #fff; }
+
+    /* 模态框 */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-dialog {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        padding: 32px 40px;
+    }
+    .modal-dialog--wide { padding: 20px; width: 90%; max-width: 900px; }
+</style>
+
+<div class="page-cols page-cols--vertical">
+
+    <!-- 查询栏 -->
+    <div class="toolbar">
+        <div class="toolbar__group">
+            <input id="queryparam" type="text" class="input" style="width:220px; height:32px; border-radius:var(--radius-md)" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" placeholder="搜索标题/内容" />
+            <div id="querynote" class="btn btn--primary">查询</div>
+            <div id="reset" class="btn btn--secondary">重置</div>
+        </div>
+        <a id="addnote" class="btn btn--blue" style="padding:6px 20px; font-weight:500">新增记录</a>
+    </div>
+
+    <!-- 列表 -->
+    <div class="note-list scrollbar" id="rcclist">
+        <table class="note-table">
+            <tbody id="shuju"></tbody>
+        </table>
+        <div class="note-bottom">
+            <div id="bottom" class="note-bottom__bar">--已经到底部了--</div>
+        </div>
+    </div>
+
+    <!-- 提示弹窗 -->
+    <div class="modal-overlay" id="tips" style="z-index:9999"></div>
+
+    <!-- 回到顶部 -->
+    <div id="btt" class="back-top hidden" onclick="scrollToTop()">
+        <div class="back-top__btn">
+            <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M614.9 402.6V692c0 14.3-11.6 25.9-25.9 25.9H433.4c-14.3 0-25.9-11.6-25.9-25.9V402.6H262c-14.3 0-25.9-11.7-25.9-26 0-6.8 2.7-13.3 7.4-18.1L492.7 106c10.1-10.2 26.5-10.3 36.7-0.3l0.3 0.3 249.2 252.5c10 10.2 9.9 26.7-0.4 36.7-4.8 4.7-11.3 7.4-18.1 7.4H614.9zM123 823.1h778.1c14.3 0 25.9 11.6 25.9 25.9v53.2c0 14.3-11.6 25.9-25.9 25.9H123c-14.3 0-25.9-11.6-25.9-25.9V849c0-14.3 11.6-25.9 25.9-25.9z"/></svg>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal-overlay" id="isdelete" style="z-index:99">
+        <div class="modal-dialog">
+            <div style="font-weight:500; font-size:16px; margin-bottom:16px">确定删除吗？</div>
+            <div id="sacbtn" style="display:flex; gap:10px; justify-content:center">
+                <button id='canceldel' class="btn btn--ghost" style="width:70px">取消</button>
+                <button id='suredel' class="btn btn--danger" style="width:70px">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑弹窗 -->
+    <div class="modal-overlay" id="editta" style="z-index:99">
+        <div class="modal-dialog modal-dialog--wide">
+            <div style="margin-bottom:16px"><h2 id="etname" style="font-size:18px; color:var(--gray-800)"></h2></div>
+            <input id="newtit" type="text" placeholder="输入标题..." class="input" style="width:300px; height:36px; text-align:left; font-size:16px; margin-bottom:8px" />
+            <textarea id="editnoteta" cols="110" rows="20" class="textarea" style="height:300px; border-radius:var(--radius-md)"></textarea>
+            <div id="editbtn" style="display:flex; gap:10px; justify-content:center; margin-top:16px">
+                <button id='canceledit' class="btn btn--secondary">取消</button>
+                <button id='sureedit' class="btn btn--primary">确定</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="{% static 'js/setStyle.js' %}"></script>
+<script type="text/javascript">
+    const addnote = document.getElementById('addnote');
+    addnote.addEventListener('click',function(){
+        const editta = document.getElementById('editta');
+        editta.style.display = 'flex';
+        const etname = document.getElementById('etname');
+        etname.textContent = "新增";
+        document.getElementById('editnoteta').value = "";
+        document.getElementById('newtit').value = "";
+        const editbtn = document.getElementById('editbtn');
+        editbtn.removeEventListener('click',editsocclick);
+        editbtn.removeEventListener('click',addnoteclick);
+        editbtn.addEventListener('click', addnoteclick);
+    })
+    window.onload = getnotecontent("");
+    let mnrlt = "";
+    function getnotecontent(param){
+        var str = "";
+        var mtype = "getnote"
+        var shuju = document.getElementById('shuju');
+        var tips = document.getElementById('tips');
+        var data = JSON.stringify({"type":mtype,"param":param})
+        document.getElementById('tips').style.display = 'flex';
+        tips.innerHTML = ("<img src='../static/img/loading.gif' height='10'/>");
+        axios.post(`/pv/mynote/${mtype}`,data,{headers: header})
+        .then(response => {
+            var res = response;
+            if(res.code === "10002"){
+                str = str+"<tr><td class='fstd' colspan=2 style='font-size:17px;color:gray;text-align:center;'>"+res.data+"</td></tr>";
+                document.getElementById("bottom").style.display = "none";
+                shuju.innerHTML = str;
+                tips.style.display = 'none';
+            }
+            else{
+                a = res.data.data;
+                mnrlt = a;
+                for (var i in a) {
+                    var id = a[i].id;
+                    var tit = a[i].tit;
+                    var nc = a[i].nc;
+                    nc = escapeHTML(nc);
+                    nc = nc.replace(/\n/g,'<br/>')
+                    nc = nc.replace(/ /g,'&nbsp;')
+                    nc = getlinks(nc)
+                    var user = a[i].user;
+                    var ct = a[i].ct;
+                    var ut = a[i].ut;
+                    if (ut == ''){ t = ' 于 '+ct+" 创建 " } else { t = ' 于 '+ct+' 创建, '+ut+" 更新 " }
+                    str = str + "<tr><td class='note-row__cell' style='width:88%;'><div style='margin-bottom:8px'><span class='note-badge'>"+escapeHTML(tit)+"</span></div><div class='note-content'>" + nc +"</div><div class='note-meta'>"+t+"</div></td><td class='note-actions'><span class='note-sep'>|</span>&nbsp;<a id='edit' data-id="+id+" class='note-edit'>编辑</a>&nbsp;&nbsp;<span class='note-sep'>|</span>&nbsp;<a id='delete' data-id="+id+" class='note-del'>删除</a>&nbsp;&nbsp;&nbsp;</td></tr><tr><td colspan=2><div class='note-row-divider'></div></td></tr>";
+                }
+                shuju.innerHTML = str;
+                document.getElementById("bottom").style.display = "";
+                tips.style.display = 'none';
+            }
+        })
+        .catch(err => console.log(`mynote-getnotecontent err: ${err}`))
+    }
+    const querynote = document.getElementById('querynote');
+    querynote.addEventListener('click',function(){
+        var param = document.getElementById("queryparam").value;
+        getnotecontent(param);
+    })
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('queryparam');
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                var param = document.getElementById("queryparam").value;
+                getnotecontent(param);
+            }
+        });
+    });
+    const reset = document.getElementById('reset');
+    if (reset) {
+        reset.addEventListener('click',function(){
+            document.getElementById("queryparam").value = "";
+            getnotecontent("");
+        })
+    }
+    let id = 0
+    document.addEventListener('DOMContentLoaded',function() {
+        const elist = document.getElementById('shuju');
+        elist.removeEventListener('click', oprclick);
+        elist.addEventListener('click', oprclick);
+    });
+    function oprclick(event){
+        const tips = document.getElementById('tips');
+        const target = event.target;
+        if(target.id === 'delete'){
+            id = target.getAttribute('data-id');
+            const isd = document.getElementById('isdelete');
+            isd.style.display = 'flex';
+            const sacbtn = document.getElementById('sacbtn');
+            sacbtn.removeEventListener('click', delsocclick);
+            sacbtn.addEventListener('click', delsocclick);
+        }
+        else if (target.id === 'edit') {
+            id = target.getAttribute('data-id');
+            const editta = document.getElementById('editta');
+            editta.style.display = 'flex';
+            const etname = document.getElementById('etname');
+            etname.textContent = "编辑";
+            let result = null;
+            for (let key in mnrlt) {
+                if (mnrlt.hasOwnProperty(key) && mnrlt[key].id === Number(id)) {
+                    result = mnrlt[key];
+                    break;
+                }
+            }
+            document.getElementById('editnoteta').value = result['nc'];
+            document.getElementById('newtit').value = result['tit'];
+            const editbtn = document.getElementById('editbtn');
+            editbtn.removeEventListener('click',addnoteclick);
+            editbtn.removeEventListener('click',editsocclick);
+            editbtn.addEventListener('click', editsocclick);
+        }
+    }
+    function addnoteclick(){
+        const target = event.target;
+        const editta = document.getElementById('editta');
+        if (target.id === 'sureedit'){
+            var tit = document.getElementById('newtit').value;
+            var nc = document.getElementById('editnoteta').value;
+            var tips = document.getElementById('tips');
+            var mtype = "istnote";
+            var data = JSON.stringify({"tit":tit,"nc":nc,"type":mtype});
+            if(tit.length == 0 || nc.length == 0){
+                alert("标题和内容都不能为空！");
+                return;
+            };
+            tips.style.display = 'flex';
+            tips.innerHTML = ("<img src='../static/img/loading.gif' height='10'/>");
+            axios.post(`/pv/mynote/${mtype}`,data,{headers: header})
+            .then(response => {
+                var res = response.data.data;
+                result = '<label style="color:blue;">&nbsp;'+res+'&nbsp;</label>';
+                tips.innerHTML = result;
+                setTimeout(() => { tips.style.display = 'none'; }, 2000);
+                getnotecontent(0);
+                editta.style.display = 'none';
+            })
+            .catch(err => console.log(`mynote-addnoteclick err: ${err}`))
+        }
+        else if (target.id === 'canceledit'){
+            editta.style.display = 'none';
+        }
+    }
+    function delsocclick(event){
+        const target = event.target;
+        const isd = document.getElementById('isdelete');
+        var mtype = "delnote"
+        var tips = document.getElementById('tips');
+        if (target.id === 'suredel'){
+            var data = JSON.stringify({"id":id,"type":mtype})
+            tips.style.display = 'flex';
+            tips.innerHTML = ("<img src='../static/img/loading.gif' height='10'/>");
+            axios.post(`/pv/mynote/${mtype}`,data,{headers: header})
+            .then(response => {
+                var res = response.data.data;
+                result = '<label style="color:blue;">&nbsp;'+res+'&nbsp;</label>';
+                tips.innerHTML = result;
+                setTimeout(() => { tips.style.display = 'none'; }, 2000);
+                getnotecontent(0);
+                isd.style.display = 'none';
+            })
+            .catch(err => console.log(`mynote-delsocclick err: ${err}`))
+        }else if (target.id === 'canceldel'){
+            isd.style.display = 'none';
+        }
+    }
+    function editsocclick(event){
+        const target = event.target;
+        const editta = document.getElementById('editta');
+        if (target.id === 'sureedit'){
+            var textarea = document.getElementById('editnoteta');
+            var newnc = textarea.value;
+            var newtit = document.getElementById('newtit').value;
+            var mtype = "editnote";
+            var tips = document.getElementById('tips');
+            newnc = newnc.replace(/ /g,' ')
+            var data = JSON.stringify({"id":Number(id),"newtit":newtit,"newnc":newnc,"type":mtype})
+            if(newtit.length == 0 || newnc.length == 0){
+                alert("编辑的标题和内容都不能为空！");
+                return;
+            };
+            tips.style.display = 'flex';
+            tips.innerHTML = ("<img src='../static/img/loading.gif' height='10'/>");
+            axios.post(`/pv/mynote/${mtype}`,data,{headers: header})
+            .then(response => {
+                var res = response.data;
+                result = '<label style="color:blue;">&nbsp;'+res+'&nbsp;</label>';
+                tips.innerHTML = result;
+                setTimeout(() => { tips.style.display = 'none'; }, 2000);
+                getnotecontent(0);
+                editta.style.display = 'none';
+            })
+            .catch(err => console.log(`mynote-editsocclick err: ${err}`))
+        }else if (target.id === 'canceledit'){
+            editta.style.display = 'none';
+        }
+    }
+    function replaceLinksWithAnchors(text) {
+        var linkRegex = /https?:\/\/?(.*?(?=(&|<|[一-龥]|（|，|【|、|。|；|：|‘|“|「|·|--))|.*)/g;
+        return text.replace(linkRegex, function(match) {
+            return `<a href="${match}" target="_blank">${match}</a>`;
+        });
+    }
+    function getlinks(text) {
+        var newtext = replaceLinksWithAnchors(text)
+        return newtext
+    }
+    var jst = document.getElementById("rcclist");
+    function scrollToTop() {
+        jst.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+    var btt = document.getElementById("btt");
+    jst.onscroll = function() {
+        if (jst.scrollTop > 35) {
+            btt.style.display = 'block';
+        } else {
+            btt.style.display = 'none';
+        }
+    };
+</script>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load menu_filters %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TS-Django</title>
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link href="{% static 'font/css/fa-subset.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ config.STATIC_VERSION }}">
+    <script type="text/javascript" src="{% static 'js/mypub.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/axios.min.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    <script>var csrftoken = getCookie('csrftoken'); var header = {'X-CSRFToken': csrftoken, 'Content-Type': 'application/json'};</script>
+</head>
+<body>
+    <div class="app-container">
+        {% include "partials/header.html" %}
+        <div class="app-body">
+            {% include "partials/sidebar.html" %}
+            <div id="toast" class="toast"></div>
+            <main class="content" style="display:flex;flex-direction:column;overflow:hidden;">
+                <!-- <div class="tab-bar" id="tabBar"></div> -->
+                <iframe name="mainFrame" id="mainFrame" style="flex:1;border:none;width:100%;"></iframe>
+                <script>
+                (function() {
+                    var params = new URLSearchParams(window.location.search);
+                    var plainUrl = (params.get('goto') || '/home'); document.getElementById('mainFrame').src = plainUrl + (plainUrl.indexOf('?') >= 0 ? '&' : '?') + '_plain=1';
+                })();
+                </script>
+            </main>
+        </div>
+    </div>
+    <script src="{% static 'js/shell.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    {% if menus|has_menu:'agent' %}
+    {% include "partials/agent_float.html" %}
+    {% endif %}
+</body>
+</html>

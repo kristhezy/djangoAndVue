@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; }
+
+    button {
+        border: 0; background-color: #111827; color: white; width: 150px; border-radius: 8px; font-size: 14px;
+        padding: 5px 0; cursor: pointer;
+    }
+    button:hover { background-color: #374151; }
+    button:disabled { background-color: #999; cursor: not-allowed; }
+
+    .output-result { min-height: 20px; font-size: 14px; margin-top: 8px; }
+
+    .btn-rlt { margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0; }
+    .btn-rlt div { margin: 8px 0; }
+
+    /* radio / checkbox → pill 胶囊（隐藏原生控件） */
+    input[type="radio"],
+    input[type="checkbox"] {
+        display: none;
+    }
+    input[type="radio"] + label,
+    input[type="checkbox"] + label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-right: 8px;
+        padding: 5px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 9999px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .15s;
+        user-select: none;
+    }
+    input[type="radio"]:not(:checked) + label:hover,
+    input[type="checkbox"]:not(:checked) + label:hover {
+        border-color: #a5b4fc;
+    }
+    input[type="radio"]:checked + label,
+    input[type="checkbox"]:checked + label {
+        background: #6366f1;
+        color: #fff;
+        border-color: #6366f1;
+    }
+
+    .tips {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        color: black;
+        padding: 15px 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        display: none;
+        width: 320px;
+        border-radius: 8px;
+    }
+
+    .rcctitle {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .one .table {
+        background: #f5f5f5;
+        height: 45px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    table { border-collapse: collapse; width: 100%; }
+
+    .rcclist {
+        margin: 0;
+        width: 100%;
+        border-radius: 5px;
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .rcclist::-webkit-scrollbar { width: 4px; }
+    .rcclist::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.3); border-radius: 2px; }
+    .rcclist::-webkit-scrollbar-track { background-color: transparent; }
+
+    .one .sj {
+        text-align: center;
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .one .sj tr { height: 65px; }
+    .one .sj td {
+        border-bottom: 1px solid #e8e8e8;
+        overflow: hidden;
+        white-space: normal;
+        word-wrap: break-word;
+        vertical-align: middle;
+        padding: 0 8px;
+        /* font-size: 14px; */
+    }
+
+    #page-footer { display: flex; justify-content: flex-end; align-items: center; gap: 15px; padding: 8px 0; width:100%;  flex-wrap: nowrap;}
+
+    .tj {
+        text-align: center;
+        /* margin-top: 8px;
+        float: right;
+        margin-right: 20px; */
+        /* font-size: 14px; */
+        color: #666;flex-shrink: 0; 
+    }
+
+    .xx {
+        /* margin-left: 5px; */
+        text-align: center;
+        /* margin-top: 8px;
+        float: right; */
+        margin-right: 0px;
+        border: 0px solid #e8e8e8;
+        border-radius: 4px;
+        padding: 5px;
+        white-space: nowrap;
+        flex-shrink: 0; 
+        width: auto;
+        display: inline-block;
+    }
+
+    .xx ul {
+        margin: 0 auto;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: nowrap;      /* 强制不换行！这是解决分页器换行的核心 */
+        width: auto;            /* 让 ul 宽度自适应 li 的总宽度 */
+        justify-content: center;/* 如果 li 总宽小于 ul，则居中 */
+    }
+
+    .xx ul li {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #d1d5db;
+        min-width: 30px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: 4px;
+        /* font-size: 14px; */
+        /* background: #fff; */
+        flex-shrink: 0;         
+        white-space: nowrap;    /* 防止 li 内部的文字换行 */
+    }
+    li:hover { cursor: pointer; background-color: #f5f5f5; }
+
+    .xx ul li.active {
+        background-color: #6366f1;
+        color: #fff;
+        border-color: #6366f1;
+    }
+
+    .xx .fpage, .xx .epage {background-color: #fafafa; }
+
+    #phone, #getci, #qkey, #chaxun { font-size: 14px; }
+
+    .lntd { width: 10%; }
+    .cntd { width: 22%; }
+    .aitd { width: 18%; }
+    .octd { width: 32%; }
+    .untd { width: 8%; }
+    .cttd { width: 10%; }
+
+    .cx {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 450px;
+        margin: 8px 0;
+    }
+
+    .input-clear-wrapper {
+        position: relative;
+        flex: 1;
+        height: 32px;
+    }
+
+    .input-clear {
+        width: 100%;
+        height: 100%;
+        padding: 0 30px 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .input-clear:focus { border-color: #6366f1; }
+    .input-clear::placeholder { color: #bfbfbf; }
+
+    .clear-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #909399;
+        display: none;
+        padding: 0;
+    }
+
+    .clear-btn:hover { color: #606266; }
+    .input-clear-wrapper.has-content .clear-btn { display: block; }
+
+    .clear-btn::before, .clear-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1px;
+        height: 10px;
+        background-color: currentColor;
+    }
+    .clear-btn::before { transform: translate(-50%, -50%) rotate(45deg); }
+    .clear-btn::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+    .search-btn {
+        height: 32px;
+        width: 70px;
+        background-color: #111827;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .lnlist:hover { background-color: #f5f5f5; cursor: pointer; }
+
+    /* 布局优化 */
+    .right.part { height: 98%; overflow: hidden; }
+    .rcontent { height: 100vh; display: flex; gap: 12px; padding: 10px; }
+    .rcleft { width: 507px !important; min-width: 400px; padding: 15px 0; overflow-y: auto; }
+    .rcright { flex: 1; min-width: 0; padding: 15px 0; overflow-y: auto; }
+
+    .card { height:100%; background: #fff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); overflow: hidden; }
+    .card-header { padding: 10px 16px; background: #f0f2f5; font-size: 14px; font-weight: 600; color: #333; }
+    .card-body { padding: 12px 16px; }
+
+    .getcibyphone { display: flex; gap: 10px; align-items: center; justify-content: center; }
+    #phone { flex: 1; padding: 5px 12px; border: 1px solid #d1d5db; border-radius: 4px; text-align: left; }
+    #phone:focus { border-color: #6366f1; outline: none; }
+
+    #cinfo {
+        margin: 15px 0;
+        min-height: 92px;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        /* font-size: 14px; */
+        line-height: 1.6;
+    }
+
+    #wcid {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        text-align: left;
+    }
+    #wcid:focus { border-color: #6366f1; outline: none; }
+
+    #wechatId { margin-bottom: 8px; }
+
+    .big.title { font-size: 18px; font-weight: 600; padding: 12px 15px; border-bottom: 1px solid #e8e8e8; }
+
+    input[type="text"] { font-family: inherit; }
+
+    .tips b { font-size: 16px; }
+    .tips a { float: right; font-weight: 500; text-decoration: none; color: #666; }
+    .tips a:hover { color: #333; }
+</style>
+<div class='right part'>
+    <div class='rcontent'>
+        <div class="rcleft">
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>小程序发版管理</span>
+                    <button type="button" class="btn btn--secondary" data-draft-reset style="padding:4px 16px;font-size:13px">重置</button>
+                </div>
+                <div class="card-body">
+                    <div class="getcibyphone">
+                        <input id="phone" type="text" placeholder="输入登录手机号或企业ID">
+                        <button id="getci" class="btn btn--primary">查询</button>
+                    </div>
+                    <div id="cinfo"></div>
+                    <div class="btn-rlt">
+                        <div>
+                            <input type="checkbox" name="tsq" id="priv" value="priv"><label for="priv">隐私权限配置</label>
+                            <input type="checkbox" name="tsq" id="ulcm" value="ulcm"><label for="ulcm">上传代码模板</label>
+                            <input type="checkbox" name="tsq" id="addm" value="addm"><label for="addm">添加域名</label>
+                        </div>
+                        <div><button id="tsqbtn" class="btn btn--primary">提交</button></div>
+                        <div id="tsqrlt" class="output-result"></div>
+                    </div>
+                    <div class="btn-rlt">
+                        <div>
+                            <input type="radio" name="fts" id="au" value="audit" checked/><label for="au">提交审核</label>
+                            <input type="radio" name="fts" id="ad" value="ads"/><label for="ad">查看审核结果</label>
+                            <input type="radio" name="fts" id="rl" value="rls"/><label for="rl">发布小程序</label>
+                            <input type="radio" name="fts" id="uca" value="ucaudit"/><label for="uca">撤回审核</label>
+                        </div>
+                        <div><button id="tsbtn" class="btn btn--primary">提交</button></div>
+                        <div id="tsrlt" class="output-result"></div>
+                    </div>
+                    <div class="btn-rlt" style="border-bottom: none;">
+                        <div>
+                            <input type="radio" name="tyb" id="bt" value="bindtester" checked/><label for="bt">绑定体验者</label>
+                            <input type="radio" name="tyb" id="ubt" value="unbindtester"/><label for="ubt">解绑体验者</label>
+                            <input type="radio" name="tyb" id="gqc" value="getqrcode"/><label for="gqc">生成体验码</label>
+                        </div>
+                        <div id="wechatId">
+                            <input id="wcid" type="text" placeholder="输入微信号">
+                        </div>
+                        <div><button id="tybbtn" class="btn btn--primary">提交</button></div>
+                        <div id="tybrlt" class="output-result"></div>
+                    </div>
+
+                    <div class="tips">
+                        <b><i class="fa-solid solid"></i></i>&nbsp;提示</b>
+                        <a href="#">ㄨ</a><br/>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <div style="margin: 10px 0;">请先配置业务域名的 <button id="dlcfbtn" style="background-color: white;color: #6366f1;border: 1px solid #6366f1;width: auto;padding: 4px 12px;">校验文件</button>，并点击按钮去上传。</div>
+                            <div style="margin: 12px 0;">
+                                <button id="wdbtn">去上传</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="rcright">
+            <div class="card">
+                <div class="card-body">
+                    <div class="cx">
+                        <div class="input-clear-wrapper" id="inputWrapper">
+                            <input type="text" id="qkey" class="input-clear" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" placeholder="输入企业账号/ID/名称/appID查询"/>
+                            <button class="clear-btn" id="clearBtn" aria-label="清除输入内容"></button>
+                        </div>
+                        <div><button type="button" class="btn btn--primary" id="chaxun"><span>查询</span></button></div>
+                    </div>
+                    <div class="rcctitle" style="background-color: #f5f5f5; border-radius: 4px 4px 0 0;">
+                        <table class="one" cellspacing="0">
+                            <thead>
+                                <tr class="table title">
+                                    <th class="lntd">账号</th>
+                                    <th class="cntd">企业名称</th>
+                                    <th class="aitd">appID</th>
+                                    <th class="octd">操作信息</th>
+                                    <th class="untd">操作人</th>
+                                    <th class="cttd">操作时间</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="rcclist">
+                        <table class="one" cellspacing="0">
+                            <tbody class="sj" id="shuju"></tbody>
+                        </table>
+                    </div>
+                    <div id="page-footer">
+                        <div class="tj" id="tongji"></div>
+                        <div class="xx" id="xinxi"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var csrftoken = getCookie('csrftoken');
+    var header = {'X-CSRFToken': csrftoken};
+    var isSubmitting = false;
+    var phone = "", cid = "", cn = "", appid = "";
+    const env = "prod";
+
+    document.getElementById('getci').addEventListener('click', function() {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        this.disabled = true;
+        loginName = document.getElementById('phone').value;
+        var cinfo = document.getElementById('cinfo');
+        cinfo.innerHTML = "<span style='color:#999;'>查询中...</span>";
+        axios.post('/sv/querycompid/saas', JSON.stringify({"ln": loginName, env, cid, cn}), {headers: header})
+        .then(response => {
+            var res = response.data;
+            if (res.code == 0) {
+                cid = res.data.cid;
+                cn = res.data.cn;
+                phone = res.data.phone;
+                axios.post('/sv/getappid', JSON.stringify({cid, env}), {headers: header})
+                .then(resp => {
+                    appid = resp.data.data.appid;
+                    cinfo.innerHTML = "<div>企业名称: " + escapeHTML(cn) + "</div><div>企业ID: " + escapeHTML(cid) + "</div><div>appID: " + escapeHTML(appid) + "</div>";
+                });
+            } else {
+                cinfo.innerHTML = "<div style='color:#ff4d4f;'>" + res.data + "</div>";
+            }
+            isSubmitting = false;
+            this.disabled = false;
+        })
+        .catch(() => {
+            cinfo.innerHTML = "<div style='color:#ff4d4f;'>查询失败</div>";
+            isSubmitting = false;
+            this.disabled = false;
+        });
+    });
+
+    document.getElementById('tsqbtn').addEventListener('click', function() {
+        if (isSubmitting) return;
+        var tsq = Array.from(document.querySelectorAll("input[name='tsq']:checked")).map(cb => cb.value).join(",");
+        if (!tsq) {
+            alert('请勾选需要提交的内容！');
+            return;
+        }
+        isSubmitting = true;
+        this.disabled = true;
+        var tsqrlt = document.getElementById('tsqrlt');
+        tsqrlt.innerHTML = "<span style='color:#999;'>处理中...</span>";
+        axios.post('miniprogramRelease/baconfig', JSON.stringify({tsq, phone, cid, cn, appid, env, type: "baconfig"}), {headers: header})
+        .then(response => {
+            tsqrlt.innerHTML = response.data.data.rlt;
+            if (response.data.data.errtips) document.querySelector('.tips').style.display = 'block';
+            isSubmitting = false;
+            Load(1);
+        })
+        .catch(() => { tsqrlt.innerHTML = "<span style='color:#ff4d4f;'>操作失败</span>"; })
+        .finally(() => { isSubmitting = false; this.disabled = false; });
+    });
+
+    document.getElementById('tsbtn').addEventListener('click', function() {
+        if (isSubmitting) return;
+        if (!cid) {
+            alert("企业信息不能为空！");
+            return;
+        }
+        isSubmitting = true;
+        this.disabled = true;
+        var ts = document.querySelector("input[name='fts']:checked").value;
+        var tsrlt = document.getElementById('tsrlt');
+        tsrlt.innerHTML = "<span style='color:#999;'>处理中...</span>";
+        axios.post('miniprogramRelease/auditAndRelease', JSON.stringify({ts, phone, cid, cn, appid, env, type: "auditAndRelease"}), {headers: header})
+        .then(response => {
+            tsrlt.innerHTML = response.data.data.rlt;
+            if (response.data.data.errtips) document.querySelector('.tips').style.display = 'block';
+            isSubmitting = false;
+            Load(1);
+        })
+        .catch(() => { tsrlt.innerHTML = "<span style='color:#ff4d4f;'>操作失败</span>"; })
+        .finally(() => { isSubmitting = false; this.disabled = false; });
+    });
+
+    document.getElementById('tybbtn').addEventListener('click', function() {
+        if (isSubmitting) return;
+        if (!cid) {
+            alert("企业信息不能为空！");
+            return;
+        }
+        isSubmitting = true;
+        this.disabled = true;
+        var tyb = document.querySelector("input[name='tyb']:checked").value;
+        var wcid = document.getElementById('wcid').value;
+        var tybrlt = document.getElementById('tybrlt');
+        tybrlt.innerHTML = "<span style='color:#999;'>处理中...</span>";
+        axios.post('miniprogramRelease/testerAndQrcode', JSON.stringify({tyb, phone, cid, cn, appid, env, type: "testerAndQrcode", wcid}), {headers: header})
+        .then(response => {
+            if (tyb == "getqrcode") {
+                tybrlt.innerHTML = "<img src='/static/img/latest_img.jpg?t=" + Date.now() + "' height='180'>";
+            } else {
+                tybrlt.innerHTML = response.data.data.rlt;
+            }
+        })
+        .catch(() => { tybrlt.innerHTML = "<span style='color:#ff4d4f;'>操作失败</span>"; })
+        .finally(() => { isSubmitting = false; this.disabled = false; });
+    });
+
+    document.querySelectorAll("input[name='tyb']").forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('wechatId').style.display = this.value === 'getqrcode' ? 'none' : 'block';
+        });
+    });
+
+    document.getElementById('wdbtn').addEventListener('click', function() {
+        window.open("https://dsa-app.aijiatui.com/upload.html", "_blank");
+    });
+
+    document.getElementById('dlcfbtn').addEventListener('click', function() {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        axios.post('miniprogramRelease/getwdcfile', JSON.stringify({phone, cid, cn, appid, env, type: "getwdcfile"}), {headers: header})
+        .then(response => {
+            if (response.data.code == 0) {
+                window.open("{% url 'download_dynamic' %}?type=txt&name=" + response.data.data.rlt.file_name + "&content=" + response.data.data.rlt.file_content, "_blank");
+            } else {
+                alert(response.data.data);
+            }
+        })
+        .catch(() => { alert("下载失败"); })
+        .finally(() => { isSubmitting = false; });
+    });
+
+    document.querySelector('.tips a').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector('.tips').style.display = 'none';
+    });
+
+    var page = 1, num = 10;
+
+    function Load(p) {
+        if (isSubmitting) return;
+        if (p) page = p;
+        var qkey = document.getElementById('qkey').value;
+        var shuju = document.getElementById('shuju');
+        shuju.innerHTML = "<tr><td colspan='6' style='padding:40px;color:#999;'>加载中...</td></tr>";
+        isSubmitting = true;
+        axios.post('queryMiniprogramRecord/querympoc', JSON.stringify({page, num, qkey, type: "querympoc"}), {headers: header})
+        .then(response => {
+            var data = response.data.data.oprationalInfo;
+            if (!Array.isArray(data) || data.length === 0) {
+                shuju.innerHTML = "<tr><td colspan='6' style='padding:40px;color:#999;'>暂无数据</td></tr>";
+            } else {
+                var list = data;
+                shuju.innerHTML = list.map(item => "<tr class='lnlist' data-id='" + item.id + "'><td class='lntd'>" + escapeHTML(item.phone) + "</td><td class='cntd'>" + escapeHTML(item.companyName) + "</td><td class='aitd'>" + escapeHTML(item.appId) + "</td><td class='octd'>" + escapeHTML(item.oContent) + "</td><td class='untd'>" + escapeHTML(item.uname) + "</td><td class='cttd'>" + escapeHTML(item.createTime) + "</td></tr>").join('');
+                shuju.querySelectorAll('tr').forEach(function(tr) {
+                    tr.addEventListener('click', function() {
+                        var id = this.dataset.id;
+                        var item = list.find(d => String(d.id) === id);
+                        if (item) {
+                            phone = item.phone;
+                            cid = item.companyId;
+                            cn = item.companyName;
+                            appid = item.appId;
+                            document.getElementById('phone').value = phone;
+                            document.getElementById('cinfo').innerHTML = "<div>企业名称: " + escapeHTML(cn) + "</div><div>企业ID: " + escapeHTML(cid) + "</div><div>appID: " + escapeHTML(appid) + "</div>";
+                        }
+                    });
+                });
+            }
+            loadPagination(qkey);
+        })
+        .catch(() => { shuju.innerHTML = "<tr><td colspan='6' style='padding:40px;color:#ff4d4f;'>加载失败</td></tr>"; })
+        .finally(() => { isSubmitting = false; });
+    }
+
+    function loadPagination(qkey) {
+        axios.post('queryMiniprogramRecord/querytp', JSON.stringify({qkey, type: "querytp"}), {headers: header})
+        .then(response => {
+            var total = parseInt(response.data.data.total) || 0;
+            var totalPages = Math.ceil(total / num) || 1;
+            document.getElementById('tongji').textContent = "共 " + total + " 条，第 " + page + "/" + totalPages + " 页";
+            var pages = [];
+            if (totalPages <= 7) {
+                for (var i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (page <= 4) {
+                    pages = [1, 2, 3, 4, 5, '...', totalPages];
+                } else if (page >= totalPages - 3) {
+                    pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                } else {
+                    pages = [1, '...', page - 1, page, page + 1, '...', totalPages];
+                }
+            }
+            var html = "<ul><li class='fpage'>首页</li><li id='prev'>«</li>";
+            pages.forEach(function(p) {
+                html += p === '...' ? "<li style='border:none;'>...</li>" : "<li class='" + (p === page ? 'active' : '') + "' data-page='" + p + "'>" + p + "</li>";
+            });
+            html += "<li id='next'>»</li><li class='epage'>末页</li><input type='text' id='spn' style='width:40px;height:28px;border:1px solid #d1d5db;border-radius:4px;text-align:center;margin-left:5px;' placeholder='页码'></ul>";
+            document.getElementById('xinxi').innerHTML = html;
+
+            document.querySelector('.fpage').onclick = function() { if (page > 1) Load(1); };
+            document.querySelector('.epage').onclick = function() { if (page < totalPages) Load(totalPages); };
+            document.getElementById('prev').onclick = function() { if (page > 1) Load(page - 1); };
+            document.getElementById('next').onclick = function() { if (page < totalPages) Load(page + 1); };
+            document.querySelectorAll('#xinxi li[data-page]').forEach(function(li) {
+                li.onclick = function() { Load(parseInt(this.dataset.page)); };
+            });
+            document.getElementById('spn').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    var p = parseInt(this.value);
+                    if (p >= 1 && p <= totalPages) Load(p);
+                }
+            };
+        });
+    }
+
+    document.getElementById('chaxun').addEventListener('click', function() { Load(1); });
+    document.getElementById('qkey').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') Load(1);
+    });
+
+    var inputWrapper = document.getElementById('inputWrapper');
+    var qkeyInput = document.getElementById('qkey');
+    var clearBtn = document.getElementById('clearBtn');
+
+    function checkInput() {
+        inputWrapper.classList.toggle('has-content', qkeyInput.value.trim() !== '');
+    }
+    clearBtn.addEventListener('click', function() {
+        qkeyInput.value = '';
+        checkInput();
+        qkeyInput.focus();
+    });
+    qkeyInput.addEventListener('input', checkInput);
+    checkInput();
+
+    Load(1);
+</script>
+
+{% endblock %}

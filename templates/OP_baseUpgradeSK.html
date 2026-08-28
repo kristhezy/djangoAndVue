@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .right.part { width: 100%; height: 100vh; display: flex; justify-content: center;
+                  padding: 12px; background: #f0f2f5; }
+
+    .card { width: 720px; max-width: 100%; border-radius: 14px; background: #fff;
+            box-shadow: 0 2px 12px rgba(0,0,0,.08); display: flex; flex-direction: column;
+            overflow: hidden; }
+
+    .card-hd { padding: 12px 20px; border-bottom: 1px solid #f0f0f0;
+               font-size: 16px; font-weight: 600; color: #333; flex-shrink: 0; }
+    .card-body { flex: 1; overflow-y: auto; padding: 24px; font-size: 14px; }
+    .card-body::-webkit-scrollbar { width: 5px; }
+    .card-body::-webkit-scrollbar-thumb { background: #d9d9d9; border-radius: 5px; }
+
+    .form-block { margin-bottom: 18px; }
+    .form-label { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    textarea.form-input {
+        flex: 1; min-width: 140px; height: 80px; resize: none; border-radius: 8px;
+        border: 1px solid #d9d9d9; padding: 8px 10px; font-size: 14px; outline: none;
+        transition: border-color .2s; font-family: inherit; background: #fafafa;
+    }
+    textarea.form-input:focus { border-color: #4f6ef7; background: #fff; }
+    textarea.form-input::placeholder { color: #bbb; }
+
+    .mk-grid { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+    .mk-item { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .mk-item input { cursor: pointer; accent-color: #6366f1; }
+    .mk-item input:checked + span { color: #4f6ef7; font-weight: 500; }
+    .mk-grid label{
+        padding: 5px 20px;
+        width: 200px;
+    }
+
+    .option-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .opt-pill { padding: 5px 16px; border-radius: 9999px; border: 1px solid #d1d5db;
+                background: #fff; font-size: 14px; cursor: pointer; transition: all .15s;
+                user-select: none; white-space: nowrap; }
+    .opt-pill input { display: none; }
+    .opt-pill:has(input:checked) { background: #6366f1; color: #fff; border-color: #6366f1; }
+    .opt-pill:hover:not(:has(input:checked)) { border-color: #aaa; }
+
+    .btn-submit:hover { background: #333; }
+
+    .result-content { font-size: 14px; line-height: 1.8; color: #444; word-break: break-word; }
+    .result-content .ok  { color: #52c41a; }
+    .result-content .err { color: #ff4d4f; }
+    .result-content .warn { color: #faad14; }
+
+    label { user-select: none; }
+</style>
+
+<div class='right part'>
+    <div class="card">
+        <div class="card-hd">工具版升级 SK</div>
+        <div class="card-body">
+            <div class="form-block">
+                <div class="form-label">企业数据</div>
+                <div class="input-row">
+                    <textarea id="companyIds" class="form-input" placeholder="企业 ID" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);"></textarea>
+                    <textarea id="sseats" class="form-input" placeholder="销售席位" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" style="max-width:160px;"></textarea>
+                    <textarea id="pseats" class="form-input" placeholder="推荐官席位" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" style="max-width:160px;"></textarea>
+                </div>
+            </div>
+
+            <div class="form-block">
+                <div class="form-label">企业模块</div>
+                <div class="mk-grid">
+                    <label class="mk-item"><input id="mk107" type="checkbox" value="M107" name="mk"/><span>M107 (推广表单)</span></label>
+                    <label class="mk-item"><input id="mk138" type="checkbox" value="M138" name="mk"/><span>M138 (任务中心)</span></label>
+                    <label class="mk-item"><input id="mk139" type="checkbox" value="M139" name="mk"/><span>M139 (产品库)</span></label>
+                </div>
+                <div class="mk-grid">
+                    <label class="mk-item"><input id="mk141" type="checkbox" value="M141" name="mk"/><span>M141 (折扣卡)</span></label>
+                    <label class="mk-item"><input id="mk142" type="checkbox" value="M142" name="mk"/><span>M142 (小程序装修)</span></label>
+                    <label class="mk-item"><input id="mk143" type="checkbox" value="M143" name="mk"/><span>M143 (AI名片)</span></label>
+                </div>
+            </div>
+
+            <div class="form-block">
+                <div class="form-label">环境</div>
+                <div class="option-row">
+                    <label class="opt-pill"><input id="p" name="env" type="radio" value="prod" checked/>生产</label>
+                    <label class="opt-pill"><input id="t" name="env" type="radio" value="test"/>测试</label>
+                </div>
+            </div>
+
+            <button id="busk" class="btn btn--primary btn-submit">提交</button>
+
+            <div style="height:24px;"></div>
+            <div class="result-content" id="rlt"></div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/baseUpgradeSK.js' %}"></script>
+{% endblock %}

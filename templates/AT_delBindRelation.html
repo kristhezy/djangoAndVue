@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* 解除绑定：本页布局结构（控件 btn/input/select/pill/result 仍走 components.css） */
+    .delbind-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .delbind-card {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+    .delbind-title {
+        width: 100%;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid var(--gray-100);
+        text-align: center;
+    }
+    .delbind-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+    }
+    .delbind-label {
+        text-align: right;
+        min-width: 60px;
+        font-size: 14px;
+    }
+    .delbind-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+    }
+    .delbind-notice {
+        font-size: 12px;
+        color: #92400e;
+        border-radius: var(--radius-lg);
+        margin: 0 20px;
+        text-align: left;
+        line-height: 1.625;
+        background: #fffbeb;
+        padding: 12px;
+    }
+    .delbind-notice ol { padding-left: 20px; }
+</style>
+
+<div class="delbind-cols">
+
+    <!-- 卡片1: 清除公众号/小程序绑定数据 -->
+    <div class="delbind-card">
+        <h1 class="delbind-title">清除公众号/小程序绑定数据</h1>
+        <div class="delbind-row">
+            <label class="delbind-label"><span class="required">* </span>企业ID:</label>
+            <input id='companyId1' type='text' required onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" class="input"/>
+        </div>
+        <div class="delbind-row">
+            <label class="delbind-label"><span class="required">* </span>应用ID:</label>
+            <select id="appId1" class="select">
+                <option value="wx_oa" selected>公众号</option>
+                <option value="card">小程序</option>
+                <option value="cpe_backlog">自建应用</option>
+                <option value="cpe_investment_applet">招商/推广版小程序</option>
+                <option value="cpe_partner_applet">合伙人小程序</option>
+            </select>
+        </div>
+        <div class="delbind-row">
+            <label class="delbind-label"><span class="required">* </span>Status:</label>
+            <select id="status" class="select">
+                <option selected>0</option>
+                <option>1</option>
+                <option>2</option>
+            </select>
+        </div>
+        <div class="delbind-actions">
+            <label class="pill"><input id='p' name="env1" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t' name="env1" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delbind-actions">
+            <button id="btn1" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv1' class="result"></div>
+    </div>
+
+    <!-- 卡片2: 清除过期企业信息数据 -->
+    <div class="delbind-card">
+        <h1 class="delbind-title">清除过期企业信息数据</h1>
+        <div class="delbind-row">
+            <label class="delbind-label"><span class="required">* </span>企业ID:</label>
+            <input id='companyId2' type='text' required onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" class="input"/>
+        </div>
+        <div class="delbind-actions">
+            <label class="pill"><input id='p1' name="env2" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t1' name="env2" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delbind-actions">
+            <button id="btn2" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div class="delbind-notice">
+            <ol>
+                <b>清除过期企业，功能包含以下3点：</b>
+                <li>企业设置为注销状态</li>
+                <li>关闭员工雷达，清除员工和推荐官app登录token</li>
+                <li>解除企业第三方绑定关系(公众号、小程序、企微)</li>
+            </ol>
+        </div>
+        <div id='rltdiv2' class="result"></div>
+    </div>
+
+    <!-- 卡片3: 清除app登录token -->
+    <div class="delbind-card">
+        <h1 class="delbind-title">清除app登录token</h1>
+        <div class="delbind-row">
+            <label class="delbind-label"><span class="required">* </span>企业ID:</label>
+            <input id='companyId3' type='text' required class="input"/>
+        </div>
+        <div class="delbind-actions">
+            <label class="pill"><input id='p2' name="env3" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t2' name="env3" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delbind-actions">
+            <button id="btn3" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv3' class="result"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('btn1').addEventListener('click',function () {
+        const cid1 = document.getElementById('companyId1').value;
+        const aid1 = document.getElementById('appId1').value;
+        const status = document.getElementById('status').value;
+        const env = document.querySelector("input[name='env1']:checked").value;
+        const data = JSON.stringify({
+            "companyId": cid1,
+            "appId": aid1,
+            "status": status,
+            "env": env,
+            "type": 3
+        })
+        console.log('aid1:', aid1)
+        if (!cid1) {
+            alert('“企业ID”不能为空！')
+            return
+        }
+        const rltdiv1 = document.getElementById('rltdiv1');
+        rltdiv1.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/sv/forWeCom`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            console.log('清除公众号/小程序绑定数据 succ:', res.code,res.data);
+            rltdiv1.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`清除公众号/小程序绑定数据 err: ${err}`)})
+    });
+    document.getElementById('btn2').addEventListener('click',function () {
+        const cids = document.getElementById('companyId2').value;
+        const env = document.querySelector("input[name='env2']:checked").value;
+        const data = JSON.stringify({
+            "companyIds": cids,
+            "env": env
+        })
+        if (!cids) {
+            alert('“企业ID”不能为空！');
+            return;
+        }
+        const rltdiv2 = document.getElementById('rltdiv2');
+        rltdiv2.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/sv/delBindRelation`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            console.log('清除过期企业信息数据 succ:', res.data,res.cdoe);
+            rltdiv2.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`清除过期企业信息数据 err: ${err}`)})
+    });
+    document.getElementById('btn3').addEventListener('click',function () {
+        const cid = document.getElementById('companyId3').value;
+        const env = document.querySelector("input[name='env3']:checked").value;
+        if (!cid) { alert('"企业ID"不能为空！'); return; }
+        const rltdiv3 = document.getElementById('rltdiv3');
+        rltdiv3.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/sv/cleanAppToken`, JSON.stringify({ companyId: cid, env: env }), {headers: header})
+        .then(response => {
+            rltdiv3.innerHTML = response.data.data || response.data.msg || '操作完成';
+            console.log('清除app登录token succ:', response.data);
+        })
+        .catch(err => { console.log(`清除app登录token err: ${err}`); rltdiv3.innerHTML = '请求失败'; });
+    });
+</script>
+
+{% endblock %}

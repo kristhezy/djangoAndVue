@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TS-Django</title>
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link href="{% static 'font/css/fa-subset.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ config.STATIC_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ config.STATIC_VERSION }}">
+    {% block extra_css %}{% endblock %}
+    <script type="text/javascript" src="{% static 'js/mypub.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    <script type="text/javascript" src="{% static 'js/axios.min.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    <script>var csrftoken = getCookie('csrftoken'); var header = {'X-CSRFToken': csrftoken, 'Content-Type': 'application/json'};</script>
+    <script>
+    requestAnimationFrame(function() {
+      if (window.self === window.top && location.pathname !== '/login' && location.pathname !== '/' && location.search.indexOf('_plain=1') === -1)
+        location.replace('/?goto=' + encodeURIComponent(location.pathname + location.search));
+    });
+    </script>
+</head>
+<body>
+{% if not is_plain %}<div class="app-container">
+        {% include "partials/header.html" %}
+        <div class="app-body">
+            {% include "partials/sidebar.html" %}
+{% endif %}
+            <div id="toast" class="toast"></div>
+{% if is_plain %}<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;">{% endif %}
+            <main class="content">
+<!-- {% if not is_plain %}
+                <div class="tab-bar" id="tabBar"></div>
+{% endif %} -->
+                {% block content %}{% endblock %}
+            </main>
+{% if is_plain %}</div>{% endif %}
+{% if not is_plain %}
+        </div>
+    </div>
+{% endif %}
+    <script defer src="{% static 'js/base.js' %}?v={{ config.STATIC_VERSION }}"></script>
+    <script defer src="{% static 'js/draft.js' %}?v={{ config.STATIC_VERSION }}"></script>
+</body>
+</html>

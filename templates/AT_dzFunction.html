@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* 定制功能：本页布局结构（控件 btn/input/pill/result 仍走 components.css） */
+    .dzfn-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .dzfn-card {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+    .dzfn-title {
+        width: 100%;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid var(--gray-100);
+        text-align: center;
+    }
+    .dzfn-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+    }
+    .dzfn-label {
+        text-align: right;
+        min-width: 80px;
+        font-size: 14px;
+    }
+    .dzfn-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+    }
+</style>
+
+<div class="dzfn-cols">
+
+    <!-- 卡片1: 红蚂蚁企业修改客户阶段 -->
+    <div class="dzfn-card">
+        <h1 class="dzfn-title">红蚂蚁企业修改客户阶段</h1>
+        <div class="dzfn-row">
+            <label class="dzfn-label"><span class="required">* </span>客户 ID:</label>
+            <input id='cfid' type='text' required placeholder="输入CustomerFormID" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" class="input"/>
+        </div>
+        <div class="dzfn-row">
+            <label class="dzfn-label"><span class="required">* </span>跟进状态:</label>
+            <input id='fs' type='text' required placeholder="输入生命周期顺序，从0起" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" class="input"/>
+        </div>
+        <div class="dzfn-actions">
+            <label class="pill"><input id='p' name="env" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t' name="env" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="dzfn-actions">
+            <button id="btn1" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv' class="result" style="min-height:60px; border-top:1px solid var(--gray-100)"></div>
+    </div>
+
+    <!-- 卡片2: 华为云license激活 -->
+    <div class="dzfn-card">
+        <h1 class="dzfn-title">华为云license激活</h1>
+        <div class="dzfn-row">
+            <label class="dzfn-label"><span class="required">* </span>企业 ID:</label>
+            <input id='compId2' type='text' required onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" placeholder="输入加推的企业ID" class="input"/>
+        </div>
+        <div class="dzfn-row">
+            <label class="dzfn-label"><span class="required">* </span>授权码:</label>
+            <input id='lisence' type='text' required onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" placeholder="输入华为云lisence授权码" class="input"/>
+        </div>
+        <div class="dzfn-row">
+            <label class="dzfn-label"><span class="required">* </span>备　注:</label>
+            <input id='remark' type='text' required onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" placeholder="输入lisence的备注信息" class="input"/>
+        </div>
+        <div class="dzfn-actions">
+            <label class="pill"><input id='p2' name="env2" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t2' name="env2" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="dzfn-actions">
+            <button id="btn2" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv2' class="result" style="min-height:60px; border-top:1px solid var(--gray-100)"></div>
+    </div>
+
+    <!-- 卡片3: 预留 -->
+    <div class="dzfn-card">
+        <h1 class="dzfn-title">预留功能区域</h1>
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; width:100%">
+            <p style="color:var(--gray-400); text-align:center; padding:48px 20px">此区域预留用于未来功能扩展</p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.getElementById('btn1').addEventListener('click',function(){
+        var oan = "红蚂蚁企业修改客户阶段"
+        var cfid = document.getElementById('cfid').value;
+        var fs = document.getElementById('fs').value;
+        var env = document.querySelector("input[name='env']:checked").value;
+        var data = JSON.stringify({
+            "cfid": cfid,
+            "fs": fs,
+            "env":env,
+            "type": "hmyupdcs"
+        })
+        if (cfid.length == 0 || fs.length == 0){
+            alert('必填项不能为空！');
+            return;
+        }
+        const rlt1 = document.getElementById('rltdiv');
+        rlt1.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/sv/dzFunction`,data,{headers: header})
+        .then(response => {
+            var res = response.data;
+            console.log(`${oan} succ: ${res}`);
+            rlt1.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`${oan} err: ${err}`)})
+    });
+    document.getElementById('btn2').addEventListener('click',function(){
+        var oan = "华为云license激活"
+        var compid = document.getElementById('compId2').value;
+        var lisence = document.getElementById('lisence').value;
+        var remark = document.getElementById('remark').value;
+        var env = document.querySelector("input[name='env2']:checked").value;
+        var data = JSON.stringify({
+            "compid": compid,
+            "lisence": lisence,
+            "remark":remark,
+            "env":env,
+            "type": "hwylicensejh"
+        })
+        if (lisence.length == 0){
+            alert('"lisence"不能为空！');
+            return;
+        }
+        const rlt2 = document.getElementById('rltdiv2');
+        rlt2.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/sv/dzFunction`,data,{headers: header})
+        .then(response => {
+            var res = response.data;
+            console.log(`${oan} succ: ${res}`);
+            rlt2.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`${oan} err: ${err}`)})
+    });
+</script>
+
+{% endblock %}

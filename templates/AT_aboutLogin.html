@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* 登录相关工具：本页布局结构（控件 btn/input/pill/result 仍走 components.css） */
+    .alogin-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .alogin-card {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+    .alogin-title {
+        width: 100%;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid var(--gray-100);
+        text-align: center;
+    }
+    .alogin-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+    }
+    .alogin-label {
+        text-align: right;
+        min-width: 80px;
+        font-size: 14px;
+    }
+    .alogin-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+    }
+    .alogin-note {
+        font-size: 12px;
+        color: var(--red-500);
+        text-align: center;
+        margin: 6px 0;
+    }
+    /* 缩略图网格（小程序码） */
+    .alogin-thumb-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+    .alogin-thumb {
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: transform var(--transition-fast);
+    }
+    .alogin-thumb:hover { transform: scale(1.05); }
+    /* 图片全屏模态 */
+    .alogin-img-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+    }
+    .alogin-img-close {
+        position: absolute;
+        top: 20px;
+        right: 32px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 1001;
+    }
+    .alogin-img-close:hover { color: var(--gray-300); }
+    .alogin-img {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 80%;
+        max-height: 80%;
+        border-radius: var(--radius-lg);
+    }
+</style>
+
+<div class="alogin-cols">
+
+    <!-- 卡片1: 查询验证码 -->
+    <div class="alogin-card">
+        <h1 class="alogin-title">查询验证码</h1>
+        <div class="alogin-row">
+            <label class="alogin-label"><span class="required">* </span>手机号码:</label>
+            <input id='tel' type='text' required name='phone' maxlength="11" onkeyup="value=value.replace(/[^\d]/g,'')" class="input" style="width:150px"/>
+        </div>
+        <div class="alogin-actions">
+            <label class="pill"><input id='t' name="env" type="radio" value="test" checked/> 测试环境</label>
+        </div>
+        <div class="alogin-actions">
+            <button id="qlcode" class="btn btn--primary btn--lg">查询</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div class="alogin-note">注：查询10分钟以内的短信验证码。</div>
+        <div id='rltdiv' class="result" style="min-height:60px; border-top:1px solid var(--gray-100)"></div>
+    </div>
+
+    <!-- 卡片2: 设置销售/推荐官固定验证码 -->
+    <div class="alogin-card">
+        <h1 class="alogin-title">设置销售/推荐官固定验证码</h1>
+        <div id="cidiv" class="alogin-row">
+            <label class="alogin-label"><span class="required">* </span>企业 ID:</label>
+            <input id='cid' type='text' required name='cid' onkeyup="value=value.replace(/[^\d]/g,'')" class="input" style="width:150px"/>
+        </div>
+        <div class="alogin-row">
+            <label class="alogin-label"><span class="required">* </span>手 机 号:</label>
+            <input id='ctel' type='text' required name='ctel' maxlength="11" onkeyup="value=value.replace(/[^\d]/g,'')" class="input" style="width:150px"/>
+        </div>
+        <div class="alogin-row">
+            <label class="alogin-label"><span class="required">* </span>验 证 码:</label>
+            <input id='code' type='text' required name='code' onkeyup="value=value.replace(/[^\d]/g,'')" class="input" style="width:150px"/>
+        </div>
+        <div class="alogin-actions">
+            <label class="pill"><input id='s' name="role" type="radio" value="sale" checked/> 销售</label>
+            <label class="pill"><input id='pn' name="role" type="radio" value="partner"/> 推荐官</label>
+        </div>
+        <div class="alogin-actions">
+            <label class="pill"><input id='p1' name="env1" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t1' name="env1" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="alogin-actions">
+            <button id="splc" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv1' class="result" style="min-height:60px; border-top:1px solid var(--gray-100)"></div>
+    </div>
+
+    <!-- 卡片3: 小程序码 -->
+    <div class="alogin-card">
+        <h1 class="alogin-title">小程序码</h1>
+        <div class="alogin-thumb-grid">
+            <img src="../static/img/jdkf.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/jdcs.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/mdcszy.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/hxbd.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/dzhx.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/wfw666.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/jtmp.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/jtty.png" onclick="showModal(this)" class="alogin-thumb"/>
+            <img src="../static/img/cjzsbys.png" onclick="showModal(this)" class="alogin-thumb"/>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="myModal" class="alogin-img-modal hidden">
+        <span class="alogin-img-close" onclick="closeModal()">&times;</span>
+        <img id="myModalContent" src="" class="alogin-img"/>
+    </div>
+</div>
+
+<script>
+    document.getElementById('qlcode').addEventListener('click',function() {
+        const tel = document.getElementById('tel').value;
+        const env = document.querySelector("input[name='env']:checked").value;
+        const rltdiv = document.getElementById('rltdiv');
+        const data = JSON.stringify({
+            "tel": tel,
+            "env": env
+        })
+        if(!tel){
+            rltdiv.innerHTML = "'手机号码'不能为空! ";
+            return;
+        }
+        rltdiv.innerHTML = "<img src='../static/img/loading.gif'/>";
+        axios.post(`/sv/queryLoginCode`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            rltdiv.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`查询验证码err: ${err}`)})
+    });
+
+    document.addEventListener('DOMContentLoaded',function() {
+        handleRadioChange();
+        const radioList = document.querySelectorAll('input[type="radio"]');
+        radioList.forEach(radio => {
+            radio.addEventListener('change', handleRadioChange);
+        });
+    });
+
+    function handleRadioChange(e) {
+        const radio = e?.target || document.querySelector('input[type="radio"]:checked');
+        if (!radio) return;
+        const radioId = radio.id;
+        const otd = document.getElementById('cidiv');
+        if (radioId == 'pn') {
+            otd.style.display = "none";
+        }
+        if (radioId == 's') {
+            otd.style.display = "";
+        }
+    };
+
+    document.getElementById('splc').addEventListener('click',function() {
+        const cid = document.getElementById('cid').value;
+        const ctel = document.getElementById('ctel').value;
+        const code = document.getElementById('code').value;
+        const role = document.querySelector("input[name='role']:checked").value;
+        const env = document.querySelector("input[name='env1']:checked").value;
+        const rltdiv1 = document.getElementById('rltdiv1');
+        let data = '';
+        if (role == "sale"){
+            data = JSON.stringify({
+                "cid": cid, "tel": ctel, "code": code, "role": role, "env": env
+            })
+            if (!cid.trim()){
+                rltdiv1.innerHTML = '企业ID不能为空！';
+                return;
+            }
+            else if(cid.length < 18 || numberCheck(cid)){
+                rltdiv1.innerHTML = '企业ID为18位以上的纯数字！';
+                return;
+            }
+        }
+        else if(role == "partner"){
+            data = JSON.stringify({
+                "tel": ctel, "code": code, "role": role, "env": env
+            })
+        }
+        if (!ctel.trim()){
+            rltdiv1.innerHTML = '手机号不能为空！';
+            return;
+        }
+        else if (ctel.length != 11 || numberCheck(ctel)) {
+            rltdiv1.innerHTML = '手机号只能为11位纯数字！';
+            return;
+        }
+        if (!code.trim()){
+            rltdiv1.innerHTML = '验证码不能为空！';
+            return;
+        }
+        else if (code.length != 4 || numberCheck(code)) {
+            rltdiv1.innerHTML = '验证码只能是4为纯数字！';
+            return;
+        }
+        rltdiv1.innerHTML = "<img src='../static/img/loading.gif'/>";
+        axios.post(`/sv/splc`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            rltdiv1.innerHTML = res.data;
+        })
+    });
+
+    const modal = document.getElementById('myModal');
+    const img = document.getElementById('myModalContent');
+    img.onclick = function(){
+        modal.style.display = "none";
+    }
+    function showModal(clickedImage) {
+        modal.style.display = "block";
+        img.src = clickedImage.src;
+    }
+    function closeModal() {
+        modal.style.display = "none";
+    }
+</script>
+{% endblock content%}

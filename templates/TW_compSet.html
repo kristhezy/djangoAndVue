@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+{% block title %}通威版企业配置{% endblock %}
+{% block li23 %}
+<li class="first-menu single" style="background-color: rgb(202, 227, 250);border-right: rgb(0, 132, 255) solid 3px;">
+    <a href="{{config.SITE_TWCOMPSET}}" class="originSetting" id="originSetting" style="color: rgb(0, 132, 255);font-weight: 600;font-size: 16px;">
+        <i class="fa-solid solid"></i></i> {{config.SITE_TWCOMPSET_NAME}}</a></li>{%endblock%}
+{% block content %}
+<style>
+    .right.part {
+        display: flex;
+        gap: 16px;
+        padding: 10px 16px;
+        height: 94.5%;
+    }
+    
+    .card {
+        flex: 1;
+        background: #fff;
+        border: 1px solid #f3f4f6;
+        border-radius: 16px;
+        padding: 10px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    }
+    
+    .card-title {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .card-title h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    /* 表单区域：只包 label+input，两列对齐(max-content自适应) + 居中 */
+    .form-grid {
+        display: grid;
+        grid-template-columns: max-content 180px;
+        column-gap: 8px;
+        row-gap: 8px;
+        align-items: center;
+    }
+
+    .form-group {
+        display: contents;
+    }
+
+    .form-group label {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .form-group label .required {
+        color: red;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 180px;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.3s;
+        text-align: center;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #6366f1;
+    }
+    
+    .env-group {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 15px 0;
+    }
+    
+    .env-group label {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 16px;
+        border-radius: 9999px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        font-size: 13px;
+        transition: all .15s;
+        user-select: none;
+    }
+    .env-group label:has(input:checked) {
+        background: #6366f1;
+        color: #fff;
+        border-color: #6366f1;
+    }
+    .env-group input[type="radio"] {
+        display: none;
+    }
+    
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .btn-reset {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        color: #666;
+    }
+    
+    .btn-submit {
+        background: #111827;
+        border: none;
+        color: white;
+        font-weight: bold;
+    }
+
+    .btn-submit:hover {
+        background: #374151;
+    }
+    
+    .result {
+        flex: 1;
+        margin-top: 10px;
+        padding: 10px;
+        border: 0px solid #f0f0f0;
+        border-radius: 8px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        font-size: 15px;
+        text-align: center;
+        width: 100%;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: pre-wrap;
+    }
+
+    .note {
+        color: red;
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class='right part'>
+    <!-- 卡片1: 通威版企业开户 -->
+    <div class="card">
+        <div class="card-title">
+            <h1>通威版企业开户</h1>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label><span class="required">* </span>企业名称:</label>
+                <input id="compName" type="text" placeholder="输入企业全称"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required" style="visibility:hidden;">* </span>企业简称:</label>
+                <input id="compShortName" type="text" placeholder="输入企业简称"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>管理员名称:</label>
+                <input id="adminName" type="text" placeholder="输入管理员名称"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>登录手机号:</label>
+                <input id="loginPhone" type="text" placeholder="输入手机号"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>企业账号数:</label>
+                <input id="maxTotalAccount" type="text" placeholder="输入账号数"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>企业有效期:</label>
+                <input id="expireTime1" type="date"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>名片模板:</label>
+                <select id="templateNo">
+                    <option value="" selected>默认</option>
+                    <option value="9">中电四公司</option>
+                </select>
+            </div>
+        </div>
+        <div class="env-group">
+            <label><input id='t' name="env" type="radio" value="test"/> 测试环境</label>
+            <label><input id='p' name="env" type="radio" value="prod" checked/> 生产环境</label>
+        </div>
+        <div class="btn-group">
+            <button id='oaReset' class="btn btn-reset"> 重置 </button>
+            <button id='oaSubmit' class="btn btn-submit"> 提交 </button>
+        </div>
+        <div id="oaResult" class="result"></div>
+    </div>
+
+    <!-- 卡片2: 通威版企业绑定小程序 -->
+    <div class="card">
+        <div class="card-title">
+            <h1>通威版企业绑定小程序</h1>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label><span class="required">* </span>企业ID:</label>
+                <input id="compId" type="text"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>APP ID:</label>
+                <input id="appId" type="text"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required">* </span>Secret:</label>
+                <input id="appSecret" type="text"/>
+            </div>
+        </div>
+        <div class="env-group">
+            <label><input id='t2' name="env2" type="radio" value="test"/> 测试环境</label>
+            <label><input id='p2' name="env2" type="radio" value="prod" checked/> 生产环境</label>
+        </div>
+        <div class="btn-group">
+            <button id='wxaiReset' class="btn btn-reset"> 重置 </button>
+            <button id='wxaiSubmit' class="btn btn-submit"> 提交 </button>
+        </div>
+        <div id="wxaiResult" class="result"></div>
+    </div>
+
+    <!-- 卡片3: 通威版企业信息配置记录 -->
+    <div class="card">
+        <div class="card-title">
+            <h1>通威版企业信息配置记录</h1>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label><span class="required">* </span>企业ID:</label>
+                <input id="compId3" type="text"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required" style="visibility:hidden;">* </span>销售席位:</label>
+                <input id="maxTotAcc3" type="text"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required" style="visibility:hidden;">* </span>有效日期:</label>
+                <input id="expireTime" type="date"/>
+            </div>
+            <div class="form-group">
+                <label><span class="required" style="visibility:hidden;">* </span>企业状态:</label>
+                <select id="compStatus">
+                    <option value="" selected>请选择</option>
+                    <option value="1">正常</option>
+                    <option value="0">禁用</option>
+                    <option value="2">注销</option>
+                </select>
+            </div>
+        </div>
+        <div class="env-group">
+            <label><input id='t3' name="env3" type="radio" value="test"/> 测试环境</label>
+            <label><input id='p3' name="env3" type="radio" value="prod" checked/> 生产环境</label>
+        </div>
+        <div class="btn-group">
+            <button id='uciReset' class="btn btn-reset"> 重置 </button>
+            <button id='uciSubmit' class="btn btn-submit"> 提交 </button>
+        </div>
+        <div id="uciResult" class="result"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    // var color1 = "green"
+    // var color2 = "white"
+    // 设置 AJAX 请求头
+
+    //开户配置提交
+    var oaSubmit = document.getElementById('oaSubmit');
+    oaSubmit.addEventListener('click',function(){
+        var oan = "通威版企业开户"
+        var cname = document.getElementById('compName').value;
+        var csname = document.getElementById('compShortName').value;
+        var aname = document.getElementById('adminName').value;
+        var lp = document.getElementById('loginPhone').value;
+        const mta = document.getElementById('maxTotalAccount').value;
+        const etime = document.getElementById('expireTime1').value;
+        var templateNo = document.getElementById('templateNo').value;
+        // var pwd = $('#password').value;
+        var env = document.querySelector("input[name='env']:checked").value;
+        console.log("env:",env)
+        var version = 6;
+        var data = JSON.stringify({
+            cname,csname,aname,lp,mta,etime,templateNo,env,version,"type": "twopenaccount"
+        })
+        if (cname.length == 0 || aname.length == 0 || lp.length == 0){
+            alert('必填项不能为空！');
+            return;
+        }
+        console.log('开户配置提交入参:',data)
+        // ajax提交数据
+        var oaResult = document.getElementById('oaResult');
+        oaResult.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/ov/twCompSet`,data,{headers: header})
+        .then(response => {
+            var res = response.data.data;
+            oaResult.innerHTML = res;
+            console.log(`${oan} succ: ${res}`);
+        })
+        .catch(err => {
+            console.log(`${oan} err: ${err}`)
+        })
+    });
+    // 通威版开户--重置
+    var oaReset = document.getElementById('oaReset');
+    oaReset.addEventListener('click',function(){
+        document.getElementById("compName").value = "";
+        document.getElementById("compShortName").value = "";
+        document.getElementById("adminName").value = "";
+        document.getElementById("loginPhone").value = "";
+    })
+    
+    //通威版企业绑定小程序--重置
+    var wxaiReset = document.getElementById('wxaiReset');
+    wxaiReset.addEventListener('click',function(){
+        document.getElementById("compId").value = "";
+        document.getElementById("appId").value = "";
+        document.getElementById("appSecret").value = "";
+    })
+    //通威企业绑定小程序
+    var wxaiSubmit = document.getElementById('wxaiSubmit');
+    wxaiSubmit.addEventListener('click',function(){
+        var wxain = "通威版企业绑定小程序"
+        var cid = document.getElementById('compId').value;
+        var appid = document.getElementById('appId').value;
+        var secret = document.getElementById('appSecret').value;
+        var env = document.querySelector("input[name='env2']:checked").value;
+        var data = JSON.stringify({
+            "cid": cid,
+            "appid": appid,
+            "secret": secret,
+            "env": env,
+            "type": "twbindapplet"
+        })
+        // 输入为空校验
+        // console.log('mk的长度为：',mk.length)
+        if (cid.length == 0 || appid.length == 0 || secret.length == 0){
+            alert('必填项不能为空！');
+            return;
+        }
+        console.log('777777:',data)
+        var wxaiResult = document.getElementById('wxaiResult');
+        wxaiResult.innerHTML = "<img src='../static/img/loading.gif' height='10'/>"; 
+        axios.post(`/ov/twCompSet`,data,{headers: header})
+        .then(response => {
+            var res = response.data.data;
+            wxaiResult.innerHTML = res;
+            console.log(`${wxain} succ: ${res}`);
+        })
+        .catch(err => {
+            console.log(`${wxain} err: ${err}`)
+        })
+    })
+    //通威企业配置记录
+    var uciSubmit = document.getElementById('uciSubmit');
+    uciSubmit.addEventListener('click',function(){
+        var oan = "通威企业信息配置"
+        var cid = document.getElementById('compId3').value;
+        var mta = document.getElementById('maxTotAcc3').value;
+        var etime = document.getElementById('expireTime').value;
+        var cs = document.getElementById('compStatus').value;
+        var env = document.querySelector("input[name='env3']:checked").value;
+        console.log("env:",env)
+        var version = 6;
+        var data = JSON.stringify({
+            cid, mta, etime, cs, env, version, "type": "twsetrecord"
+        })
+        // 输入为空校验
+        // console.log('mk的长度为：',mk.length)
+        if (cid.length == 0){
+            alert('企业ID不能为空！');
+            return;
+        }
+        if (mta.length == 0 && etime.length == 0 && cs.length == 0){
+            alert('配置项至少填写一项！');
+            return;
+        }
+        console.log('开户配置提交入参:',data)
+        var uciResult = document.getElementById('uciResult');
+        uciResult.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post(`/ov/twCompSet`,data,{headers: header})
+        .then(response => {
+            var res = response.data.data;
+            uciResult.innerHTML = res;
+            console.log(`${oan} succ: ${res}`);
+        })
+        .catch(err => {
+            console.log(`${oan} err: ${err}`)
+        })
+    });
+    // 通威企业配置记录--重置
+    var uciReset = document.getElementById('uciReset');
+    uciReset.addEventListener('click',function(){
+        document.getElementById("compId3").value = "";
+        document.getElementById("maxTotAcc3").value = "";
+        document.getElementById("expireTime").value = "";
+        // $("input:radio[name=langType]")[0].checked = true;
+        document.getElementById("compStatus").value = "";
+    })
+</script>
+
+{% endblock %}

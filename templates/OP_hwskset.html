@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* 华为云 SK 配置：本页布局结构（控件 btn/input/select/textarea/pill/result 仍走 components.css） */
+    .hwsk-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .hwsk-panel {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .hwsk-panel__header {
+        flex-shrink: 0;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+    .hwsk-panel__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 16px 20px;
+    }
+    .hwsk-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 6px;
+    }
+    .hwsk-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .hwsk-check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+</style>
+
+<div class="hwsk-cols">
+
+    <!-- 左栏：配置 -->
+    <div class="hwsk-panel" style="flex:1.2">
+        <div class="hwsk-panel__header">华为云 SK 配置</div>
+        <div class="hwsk-panel__body">
+
+            <label class="hwsk-label">手机号码（可根据登录手机号查询企业ID）</label>
+            <div class="hwsk-row">
+                <input type="text" id="loginName" class="input input--fluid input--muted" placeholder="输入登录手机号查询企业ID" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" />
+            </div>
+
+            <div class="hwsk-row">
+                <div style="flex:1; min-width:0">
+                    <label class="hwsk-label">企业名称</label>
+                    <input type="text" id="cname" class="input input--fluid input--muted" placeholder="输入企业名称" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" />
+                </div>
+                <div style="flex:1; min-width:0">
+                    <label class="hwsk-label">企业 ID</label>
+                    <input type="text" id="companyId" class="input input--fluid input--muted" placeholder="请输入企业ID" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" />
+                    <div id="qcierr" style="color:var(--red-500); font-size:12px; min-height:20px"></div>
+                </div>
+            </div>
+
+            <div class="hwsk-row">
+                <div style="flex:1; min-width:0">
+                    <label class="hwsk-label">付款方式</label>
+                    <select id="payment" class="select select--fluid input--muted">
+                        <option value="3" selected>预充值</option>
+                        <option value="1">线下</option>
+                    </select>
+                </div>
+                <div style="flex:1; min-width:0">
+                    <label class="hwsk-label">销售席位</label>
+                    <input type="text" id="totalSeat" class="input input--fluid input--muted" placeholder="输入销售席位" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" />
+                </div>
+            </div>
+
+            <label class="hwsk-label">企业模块</label>
+            <div class="hwsk-row">
+                <label class="hwsk-check"><input id="mk107" type="checkbox" value="M107" name="mk"/>M107 (推广表单)</label>
+                <label class="hwsk-check"><input id="mk138" type="checkbox" value="M138" name="mk"/>M138 (任务中心)</label>
+                <label class="hwsk-check"><input id="mk139" type="checkbox" value="M139" name="mk"/>M139 (产品库)</label>
+                <label class="hwsk-check"><input id="mk142" type="checkbox" value="M142" name="mk"/>M142 (toB版)</label>
+                <label class="hwsk-check"><input id="mk143" type="checkbox" value="M143" name="mk"/>M143 (AI名片)</label>
+            </div>
+
+            <label class="hwsk-label">环境</label>
+            <div class="hwsk-row">
+                <label class="pill"><input id="p0" name="env" type="radio" value="prod" checked/>生产</label>
+                <label class="pill"><input id="t0" name="env" type="radio" value="test"/>测试</label>
+            </div>
+
+            <button id="hwsksetbtn" class="btn btn--primary">提交</button>
+            <button type="button" class="btn btn--secondary" data-draft-reset style="margin-left:12px">重置</button>
+
+            <div style="height:20px"></div>
+            <div id="result" style="font-size:14px; line-height:1.625; color:var(--gray-600); word-break:break-word"></div>
+        </div>
+    </div>
+
+    <!-- 右栏：结果 -->
+    <div class="hwsk-panel">
+        <div class="hwsk-panel__header">执行结果</div>
+        <div class="hwsk-panel__body">
+            <div id="jst"></div>
+        </div>
+    </div>
+
+</div>
+
+<script src="{% static 'js/querymsgbyds.js' %}"></script>
+<script>
+    window.onload = querymsgbyds([15],10);
+    function getCidByLname(){
+        let companyId = document.getElementById('companyId');
+        let cname = document.getElementById('cname');
+        let ln = document.getElementById('loginName').value;
+        let env = document.querySelector("input[name='env']:checked").value;
+        axios.post(`/sv/querycompid/saas`,JSON.stringify({ln,env}),{headers:header})
+        .then(response => {
+            let res = response.data;
+            if(res.code == "10002"){
+                document.getElementById('qcierr').innerHTML = res.data;
+            } else {
+                document.getElementById('qcierr').innerHTML = "";
+                companyId.value=res.data.cid;
+                cname.value = res.data.cn;
+            }
+        })
+        .catch(err => { console.log('getCidByLname err:', err); })
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('loginName');
+        input.addEventListener('blur', function() {
+            if(input.value === "") return;
+            getCidByLname();
+        });
+        input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                if(input.value === "") { alert("输入手机号码查询!"); return; }
+                getCidByLname();
+            }
+        });
+    });
+    let hwsksetbtn = document.getElementById('hwsksetbtn');
+    hwsksetbtn.addEventListener('click',function() {
+        let cid = document.getElementById('companyId').value;
+        let cname = document.getElementById('cname').value;
+        let payment = document.getElementById('payment').value;
+        let tseat = document.getElementById('totalSeat').value;
+        let ptseat = "";
+        let env = document.querySelector("input[name='env']:checked").value;
+        const mk = Array.from(document.querySelectorAll("input[type='checkbox'][name='mk']:checked")).map(cb => cb.value).join(",");
+        let data = JSON.stringify({cid,cname,payment,tseat,ptseat,mk,env});
+        if (cid.length == 0) { alert('输入企业id！'); return; }
+        if (cname.length==0 && payment.length==0 && tseat.length==0 && ptseat.length==0 && mk.length==0) {
+            alert('修改类型不能全部为空！'); return;
+        }
+        const result = document.getElementById('result');
+        result.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post('/sv/hwskset',data,{headers:header})
+        .then(response => {
+            var res = response.data;
+            result.innerHTML = res.data.hwskCompanyConfig;
+            querymsgbyds([15],7);
+        })
+        .catch(err => console.log('hwskset err:', err));
+    });
+</script>
+{% endblock %}

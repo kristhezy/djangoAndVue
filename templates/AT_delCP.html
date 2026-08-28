@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    /* 删除线索/合伙人：本页布局结构（控件 btn/input/select/pill/result 仍走 components.css） */
+    .delcp-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .delcp-card {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+    }
+    .delcp-title {
+        width: 100%;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid var(--gray-100);
+        text-align: center;
+    }
+    .delcp-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+    }
+    .delcp-label {
+        text-align: right;
+        min-width: 80px;
+        font-size: 14px;
+    }
+    .delcp-empty { color: var(--gray-300); }
+    .delcp-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+    }
+    .delcp-note {
+        font-size: 12px;
+        color: var(--red-500);
+        text-align: center;
+        margin: 6px 0;
+    }
+</style>
+
+<div class="delcp-cols">
+
+    <!-- 卡片1: 删除线索/合伙人 -->
+    <div class="delcp-card">
+        <h1 class="delcp-title">删除线索/合伙人</h1>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>企业 ID:</label>
+            <input id='companyName' type='text' placeholder="请输入企业ID" class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>企业名称:</label>
+            <select id="companyId" onchange="changeInput(this)" class="select">
+                <option value="" selected>输入企业ID</option>
+                <optgroup label="🔽【prod】">
+                    <option value="1021060956165488640">招商版小程序测试企业1</option>
+                    <option value="839508475783573504">加推（测试）</option>
+                    <option value="1040268843043500032">超级推广部</option>
+                    <option value="1012037449188364288">深圳灰度测试企业5</option>
+                    <option value="532972735412850688">铁岭县供销合作社联合社</option>
+                    <option value="1069929980139683840">深圳市加推科技有限公司</option>
+                    <option value="1189258248478707712">红蚂蚁测试企业1</option>
+                    <option value="1189258337557340160">点石测试企业1</option>
+                    <option value="1192136192859492352">红蚂蚁装饰股份有限公司</option>
+                    <option value="693225071459762176">石家庄七度文化传播有限公司</option>
+                    <option value="844635664262787073">石家庄七度文化传播有限公司转介绍</option>
+                </optgroup>
+                <optgroup label="🔽【test】">
+                    <option value="1017368198385172480">招商版测试企业7</option>
+                    <option value="755550234976985088">百度（中国）有限公司</option>
+                    <option value="1035144123776442368">招商版小程序测试企业8</option>
+                    <option value="846400679986987008">云盘版转介绍3</option>
+                    <option value="870366245806292992">北京积木世纪教育科技</option>
+                    <option value="874593368431542272">深圳市兴光电子有限公司</option>
+                    <option value="1181172541784809472">红蚂蚁家装</option>
+                    <option value='1185152155297222656'>点石家装</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>用户 ID:</label>
+            <input id='userId' type='text' name='userId' onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label id="lst" class="delcp-label"><span id='wnpid' class="delcp-empty">合伙人ID:</span></label>
+            <input id='ppidcontent' type='text' name='phone' onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);" disabled class="input"/>
+        </div>
+        <div class="delcp-actions">
+            <label class="pill"><input name="del" type="radio" id="delc" value="delclue" checked/><span>删除线索</span></label>
+            <label class="pill"><input name="del" type="radio" id="delp" value="delpartner"/><span id="d2">删除合伙人</span></label>
+        </div>
+        <div class="delcp-actions">
+            <label class="pill"><input id='p' name="env" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t' name="env" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delcp-actions">
+            <button id="cleanclue" class="btn btn--primary btn--lg" type="button">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div class="delcp-note">
+            <label>※ 删除合伙人时:【先删除合伙人，再删除线索数据】</label>
+        </div>
+        <div id='rltdiv0' class="result"></div>
+    </div>
+
+    <!-- 卡片2: 根据手机号查询用户ID -->
+    <div class="delcp-card">
+        <h1 class="delcp-title">根据手机号查询用户ID</h1>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>企业 ID:</label>
+            <input id='cid' type='text' name='cid' class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>手机号:</label>
+            <input id='tel' type='text' name='tel' maxlength="11" class="input"/>
+        </div>
+        <div class="delcp-actions">
+            <label class="pill"><input id='p1' name="env1" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t1' name="env1" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delcp-actions">
+            <button id="quibycp" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv1' class="result"></div>
+    </div>
+
+    <!-- 卡片3: 销售添加线索 -->
+    <div class="delcp-card">
+        <h1 class="delcp-title">销售添加线索</h1>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>企业 ID:</label>
+            <input id='companyId1' type='text' name='companyId1' class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>员工 ID:</label>
+            <input id='cardId' type='text' name='cardId' class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>用户姓名:</label>
+            <input id='userName' type='text' name='userName' class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label"><span class="required">* </span>用户手机:</label>
+            <input id='userTel' type='text' name='userTel' maxlength="11" class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label">合伙人ID:</label>
+            <input id='pId' type='text' name='pId' class="input"/>
+        </div>
+        <div class="delcp-row">
+            <label class="delcp-label">是否批量:</label>
+            <div class="delcp-row">
+                <input name="batch" type="checkbox" id="batch" class="checkbox"/>
+                <input id='batchNum' type='text' disabled class="input input--sm"/>
+            </div>
+        </div>
+        <div class="delcp-actions">
+            <label class="pill"><input id='p2' name="env2" type="radio" value="prod" checked/> 生产环境</label>
+            <label class="pill"><input id='t2' name="env2" type="radio" value="test"/> 测试环境</label>
+        </div>
+        <div class="delcp-actions">
+            <button id="addclue" type="button" class="btn btn--primary btn--lg">提交</button>
+            <button type="button" class="btn btn--secondary btn--lg" data-draft-reset style="margin-left:12px">重置</button>
+        </div>
+        <div id='rltdiv2' class="result"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded',function() {
+        handleRadioChange();
+        const radioList = document.querySelectorAll('input[type="radio"]');
+        radioList.forEach(radio => {
+            radio.addEventListener('change', handleRadioChange);
+        });
+    });
+
+    function handleRadioChange(e) {
+        const otd = document.getElementById('ppidcontent');
+        const iptradio = document.querySelectorAll('input[type="radio"]:checked');
+        iptradio.forEach(radio => {
+            const radioId = radio.id;
+            if (radioId == 'delc') {
+                otd.setAttribute('disabled', '');
+                otd.value = '';
+                document.getElementById("wnpid").style.color='gray';
+                document.getElementById("lst").style.color = "gray";
+            }
+            if (radioId == 'delp') {
+                otd.removeAttribute('disabled');
+                document.getElementById("wnpid").style.color='black';
+                document.getElementById('lst').style.color = 'black'
+            }
+        });
+    };
+    document.getElementById('cleanclue').addEventListener('click',function() {
+        const cid = document.getElementById('companyId').value;
+        const cname = document.getElementById('companyName').value;
+        const compid = '';
+        if(cname){ compid = cname; }
+        else{ compid = cid }
+        const uid = document.getElementById('userId').value;
+        const ppc = document.getElementById('ppidcontent').value;
+        const delcheck = document.querySelector("input[name='del']:checked").value;
+        const env = document.querySelector("input[name='env']:checked").value;
+        const data = JSON.stringify({
+            "companyId": compid,
+            "userId": uid,
+            "ppc": ppc,
+            "delcheck": delcheck,
+            "env": env,
+            "check": "del"
+        })
+        if(!cname){
+            if(cid == ""){
+                alert("请先选择企业！");
+                return;
+            }
+        }
+        if(!uid){
+            alert("‘用户ID’不能为空! ");
+            return;
+        }
+        if(delcheck == 'delpartner' & !ppc){
+            alert("‘合伙人ID’不能为空! ");
+            return;
+        }
+        const rltdiv = document.getElementById('rltdiv0');
+        rltdiv.innerHTML = "<img src='../static/img/loading.gif'/>";
+        axios.post(`/sv/delclueinfo`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            console.log('清理访客/线索/合伙人数据succ:', res.data,res.code);
+            rltdiv.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`清理访客/线索/合伙人数据err: ${err}`)})
+    });
+    function changeInput(select) {
+        const valSelect = select.value;
+        const env = document.getElementsByName('env');
+        const env1 = document.getElementsByName('env1');
+        let pcomp = ['1021060956165488640','839508475783573504','1040268843043500032','1012037449188364288','532972735412850688','1069929980139683840','1189258248478707712','1189258337557340160','1192136192859492352','693225071459762176','844635664262787073']
+        let tcomp = ['1017368198385172480','755550234976985088','1035144123776442368','846400679986987008','870366245806292992','874593368431542272','1181172541784809472','1185152155297222656','other']
+        const companyIdSelect = document.getElementById('companyId');
+        const valText = companyIdSelect.options[companyIdSelect.selectedIndex].text;
+        if(valText == '输入企业ID'){
+            document.getElementById("companyName").removeAttribute('readonly');
+            document.getElementById("companyName").style.border = '1px solid black';
+            document.getElementById("companyName").value = "";
+            document.getElementById("companyName").placeholder = "请输入企业ID";
+            document.getElementById("delp").removeAttribute('disabled');
+            document.getElementById("d2").style.color='black';
+            env[1].checked = true;
+            env1[1].checked = true;
+            for (var i=0;i<2;i++){
+                env[i].removeAttribute('disabled');
+                env[i].style.backgroundColor="white";
+            }
+        }
+        for (var i=0;i<pcomp.length;i++){
+            if (pcomp[i] == valSelect){
+                env[0].checked = true;
+                env1[0].checked = true;
+                if(valSelect != 'other'){
+                    document.getElementById("companyName").value = pcomp[i];
+                    document.getElementById("companyName").style.border = '0';
+                    document.getElementById("cid").value=pcomp[i];
+                }
+                document.getElementById("delp").removeAttribute('disabled');
+                document.getElementById("d2").style.color='black';
+                for (var j=0;j<2;j++){
+                    env[j].setAttribute('disabled', '');
+                    env[j].style.backgroundColor="gainsboro";
+                }
+            }
+        }
+        for (var i=0;i<tcomp.length;i++){
+            if (tcomp[i] == valSelect){
+                env[1].checked = true;
+                env1[1].checked = true;
+                if(valSelect != 'other'){
+                    document.getElementById("companyName").value = tcomp[i];
+                    document.getElementById("companyName").style.border = '0';
+                    document.getElementById("cid").value = tcomp[i];
+                }
+                document.getElementById("delp").removeAttribute('disabled');
+                document.getElementById("d2").style.color='black';
+                for (var j=0;j<2;j++){
+                    env[j].setAttribute('disabled', '');
+                    env[j].style.backgroundColor="gainsboro";
+                }
+            }
+        }
+    }
+    document.getElementById('quibycp').addEventListener('click',function() {
+        const cid1 = document.getElementById('cid').value;
+        const tel = document.getElementById('tel').value;
+        const env = document.querySelector("input[name='env1']:checked").value;
+        const data = JSON.stringify({
+            "cid": cid1,
+            "tel": tel,
+            "env": env
+        })
+        if (cid1.length < 18 || isNaN(cid1)) {
+            alert('企业ID只能是大于等于18位的纯数字！');
+            return;
+        }
+        if (tel.length != 11 || isNaN(tel)) {
+            alert('手机号只能为11位纯数字！');
+            return;
+        }
+        const rltdiv1 = document.getElementById('rltdiv1');
+        rltdiv1.innerHTML = "<img src='../static/img/loading.gif'/>";
+        axios.post(`/sv/queryuibycp`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            console.log('根据手机号查看userId succ:', res);
+            if(res.data.partnerId){
+                rlt = 'userId: '+res.data.userId + ', partnerId: ' + res.data.partnerId;
+            }else{
+                rlt = 'userId: '+res.data.userId;
+            }
+            rltdiv1.innerHTML = rlt;
+            if(!isNaN(Number(res.userId))){
+                console.log('userId非纯数字！');
+            }else{
+                document.getElementById('userId').value = res.data.userId;
+                document.getElementById('ppidcontent').value = res.data.partnerId;
+            }
+        })
+        .catch(err => {console.log(`根据手机号查看userId err: ${err}`)})
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const batchCheckbox = document.getElementById('batch');
+        const bn = document.getElementById('batchNum');
+        batchCheckbox.addEventListener('click', function() {
+            if (batchCheckbox.checked) {
+                bn.removeAttribute('disabled');
+                bn.placeholder = '输入2~1000的整数';
+            } else {
+                bn.setAttribute('disabled', '');
+                bn.placeholder = '';
+            }
+        });
+    });
+    document.getElementById('addclue').addEventListener('click',function() {
+        const cid = document.getElementById('companyId1').value;
+        const cardid = document.getElementById('cardId').value;
+        const uname = document.getElementById('userName').value;
+        const utel = document.getElementById('userTel').value;
+        const pId = document.getElementById('pId').value;
+        const env = document.querySelector("input[name='env2']:checked").value;
+        const batch = document.getElementById('batch');
+        let data = ""
+        if (batch.checked == true) {
+            const bn = document.getElementById("batchNum").value;
+            data = JSON.stringify({
+                "cid": cid, "cardid": cardid, "uname": uname, "utel": utel,
+                "bn": bn, "pId": pId, "env": env
+            })
+            if (!bn || isNaN(bn) || bn <= 1 || bn > 1000) {
+                alert('批量数为[2~1000]之间的整数！')
+                return
+            }
+        }
+        else {
+            data = JSON.stringify({
+                "cid": cid, "cardid": cardid, "uname": uname, "utel": utel,
+                "bn": 1, "pId": pId, "env": env
+            })
+        }
+        if (!cid || !cardid || !uname || !utel) {
+            alert('必填项不能为空！')
+            return
+        }
+        if (cid.length < 18 || cid.length > 19 || isNaN(cid)) {
+            alert('企业ID只能是18或19位的纯数字！')
+            return
+        }
+        if (utel.length != 11 || isNaN(utel)) {
+            alert('手机号只能是11位的纯数字！')
+            return
+        }
+        const rltdiv2 = document.getElementById('rltdiv2');
+        rltdiv2.innerHTML = "<img src='static/img/load.gif' height='330'/>";
+        axios.post(`/sv/saci`,data,{headers: header})
+        .then(response => {
+            const res = response.data;
+            console.log('销售添加线索succ:', res.data,res.code);
+            rltdiv2.innerHTML = res.data;
+        })
+        .catch(err => {console.log(`销售添加线索err: ${err}`)})
+    });
+</script>
+{% endblock content%}

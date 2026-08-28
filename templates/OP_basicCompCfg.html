@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<style>
+    /* 销售工具版配置：本页布局结构（控件 btn/input/textarea/pill/result 仍走 components.css） */
+    .bccfg-cols {
+        height: 100vh;
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #f0f2f5;
+        overflow: hidden;
+    }
+    .bccfg-panel {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--gray-100);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-md);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .bccfg-panel__header {
+        flex-shrink: 0;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+    .bccfg-panel__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 16px 20px;
+    }
+    .bccfg-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 6px;
+    }
+    .bccfg-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .bccfg-check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .bccfg-check--disabled {
+        opacity: 0.4;
+        pointer-events: none;
+        text-decoration: line-through;
+    }
+</style>
+
+<div class="bccfg-cols">
+
+    <!-- 左栏：配置 -->
+    <div class="bccfg-panel" style="flex:1.2">
+        <div class="bccfg-panel__header">销售工具版配置</div>
+        <div class="bccfg-panel__body">
+
+            <label class="bccfg-label">企业 IDs</label>
+            <div class="bccfg-row">
+                <textarea id="companyId" class="textarea textarea--muted" style="height:70px" placeholder="示例: 727972691243679744,593467466257072128" onkeydown="return banInputSapce(event);" onKeyup="return inputSapceTrim(event,this);"></textarea>
+            </div>
+
+            <label class="bccfg-label">企业模块</label>
+            <div class="bccfg-row">
+                <label class="bccfg-check"><input id="mk100" type="checkbox" value="M100" name="mk" checked/>M100 (官网)</label>
+                <label class="bccfg-check"><input id="mk103" type="checkbox" value="M103" name="mk" checked/>M103 (推力系统)</label>
+                <label class="bccfg-check"><input id="mk104" type="checkbox" value="M104" name="mk" checked/>M104 (小程序)</label>
+                <label class="bccfg-check"><input id="mk114" type="checkbox" value="M114" name="mk" checked/>M114 (普通版商城)</label>
+            </div>
+            <div class="bccfg-row">
+                <label class="bccfg-check bccfg-check--disabled"><input id="mk115" type="checkbox" value="M115" name="mk" disabled/>M115 (直播)</label>
+                <label class="bccfg-check"><input id="mk119" type="checkbox" value="M119" name="mk" checked/>M119 (活动分发)</label>
+                <label class="bccfg-check"><input id="mk120" type="checkbox" value="M120" name="mk" checked/>M120 (优惠券)</label>
+                <label class="bccfg-check"><input id="mk124" type="checkbox" value="M124" name="mk"/>M124 (企微助手)</label>
+            </div>
+
+            <label class="bccfg-label">环境</label>
+            <div class="bccfg-row">
+                <label class="pill"><input id="p" name="env" type="radio" value="prod" checked/>生产</label>
+                <label class="pill"><input id="t" name="env" type="radio" value="test"/>测试</label>
+            </div>
+
+            <button id="umk" class="btn btn--primary">提交</button>
+            <button type="button" class="btn btn--secondary" data-draft-reset style="margin-left:12px">重置</button>
+
+            <div style="height:20px"></div>
+            <div id="rltdiv" style="font-size:14px; line-height:1.625; color:var(--gray-600); word-break:break-word"></div>
+        </div>
+    </div>
+
+    <!-- 右栏：结果 -->
+    <div class="bccfg-panel">
+        <div class="bccfg-panel__header">执行结果</div>
+        <div class="bccfg-panel__body">
+            <div id="jst"></div>
+        </div>
+    </div>
+
+</div>
+
+<script src="{% static 'js/querymsgbyds.js' %}"></script>
+<script>
+    window.onload = querymsgbyds([2],10);
+    let umk = document.getElementById('umk');
+    umk.addEventListener('click',function () {
+        let companyId = document.getElementById('companyId').value;
+        const mk = Array.from(document.querySelectorAll("input[type='checkbox'][name='mk']:checked")).map(cb => cb.value).join(",");
+        let env = document.querySelector("input[name='env']:checked").value;
+        let data = JSON.stringify({companyId,mk,env});
+        if (companyId.length == 0 || mk.length == 0) {
+            if (companyId.length == 0) { alert('企业id不能为空！'); return; }
+            if (mk.length == 0) { alert('模块最少选择一个！'); return; }
+        }
+        document.getElementById('umk').setAttribute('disabled','');
+        const rltdiv = document.getElementById('rltdiv');
+        rltdiv.innerHTML = "<img src='../static/img/loading.gif' height='10'/>";
+        axios.post('/sv/basicComp',data,{headers:header})
+        .then(response => {
+            let res = response.data;
+            rltdiv.innerHTML = res.data.basicCompanyConfig;
+            document.getElementById('umk').removeAttribute('disabled');
+            querymsgbyds([2],6);
+        })
+        .catch(err => { console.log('basicComp err:', err); })
+    });
+</script>
+{% endblock %}
