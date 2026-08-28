@@ -144,8 +144,8 @@ djangoAndVue/
 - 新增 `@login_required` 的 `GET /api/menu`，返回当前用户可见菜单树。
 - **数据来源合并三处**（见 1.1）：
   - 权限：`request.session['menus']`（用户可见的菜单 key 列表）。
-  - 结构/分组/顺序/图标/显示名：从 `sidebar.html` + `SITE_CONFIG` 抽成结构化数据（**迁移中少数需动旧文件的地方，但只是「读出来」，不改变旧渲染逻辑**）。
-  - key→url：`menu_registry.MENU_MAP`。
+  - 结构/分组/顺序/图标/显示名/key→url：统一从 `SITE_CONFIG`（`text_config.py`）抽成结构化数据（与旧 `sidebar.html` 渲染用同一来源，保证 Vue 侧边栏与旧版 url 一致）。**迁移中少数需动旧文件的地方，但只是「读出来」，不改变旧渲染逻辑**。
+  - `menu_registry.MENU_MAP` 保持不动——它仍是 `MenuPermissionMiddleware` 做 path→key 反查的权限映射，与菜单渲染 url 是两回事。
 - 返回结构（示意）：
 
 ```json
