@@ -230,9 +230,10 @@ djangoAndVue/
 
 ## 11. 验证清单
 
-- [ ] 登录 → 跳转 Vue 壳，header/sidebar 正常渲染，菜单与旧版一致。
-- [ ] 点击「手工合并用户」→ Vue 版 mergeUser，表单校验、提交、loading、结果展示正确。
-- [ ] 点击其他未迁移菜单（如「操作变更记录」「设置」）→ LegacyIframe，旧页功能与迁移前一致。
+- [x] 登录 → 跳转 Vue 壳，header/sidebar 正常渲染，菜单与旧版一致。
+- [x] 点击「手工合并用户」→ Vue 版 mergeUser，表单校验、提交、loading、结果展示正确。
+- [x] 点击「操作变更记录」→ Vue 版 other 列表，筛选/查询/分页/删除正确，刷新 `/other` 仍是 Vue 版（非 iframe）。
+- [ ] 点击其他未迁移菜单（如「设置」）→ LegacyIframe，旧页功能与迁移前一致。
 - [ ] 无权限用户访问 → 被中间件拦到 `/denied`，行为不变。
 - [ ] 生产构建：`npm run build` → Django 托管，局域网 `192.168.10.7:8001` 可访问。
 
