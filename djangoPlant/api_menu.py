@@ -69,7 +69,7 @@ GROUPS = [
 ]
 
 
-# 已迁移到 Vue 组件的菜单：url 改写为独立前端路径（避免与真实旧路由 /sv/* 冲突，
+# 已迁移到 Vue 组件的菜单：url 改写为独立前端路径（避免与真实旧路由 /sv/*、/pv/* 冲突，
 # 使刷新/直达也能由 vue-router 渲染 Vue 版；POST 仍复用旧视图的 POST 分支，旧视图不动）
 MIGRATED = {
     'mergeUser': '/mergeUser',
