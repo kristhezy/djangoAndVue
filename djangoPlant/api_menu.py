@@ -73,6 +73,7 @@ GROUPS = [
 # 使刷新/直达也能由 vue-router 渲染 Vue 版；POST 仍复用旧视图的 POST 分支，旧视图不动）
 MIGRATED = {
     'mergeUser': '/mergeUser',
+    'other': '/other',
 }
 
 
