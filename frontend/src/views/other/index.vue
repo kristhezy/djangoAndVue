@@ -79,7 +79,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import http from '../api/http'
+import http from '../../api/http'
 
 const num = 10
 const loading = ref(false)
