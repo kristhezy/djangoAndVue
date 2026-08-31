@@ -4,7 +4,7 @@ import AppLayout from '../layout/AppLayout.vue'
 
 // 迁移开关：迁完一页，把对应路径改成 import 的 Vue 组件即可。
 const migrated = {
-  // mergeUser: () => import('../views/mergeUser/index.vue'),  // Task 8 启用
+  mergeUser: () => import('../views/mergeUser/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
