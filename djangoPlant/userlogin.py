@@ -30,7 +30,7 @@ def user_login(request):
             request.session['menus'] = iaq().query_menu_keys_byuuid(uuid)
 
             # 登录成功后跳转：优先使用前端传来的 next，其次是 session 中保存的，最后默认 /home
-            redirect_url = data.get('next', '') or request.session.pop('login_redirect', '') or '/home'
+            redirect_url = data.get('next', '') or request.session.pop('login_redirect', '') or '/'
             return JsonResponse({
                 'success': True,
                 'redirect_url': redirect_url
@@ -42,7 +42,7 @@ def user_login(request):
             })
     else:
         if 'isLoggedIn' in request.session and request.session['isLoggedIn']:
-            return redirect('/home')
+            return redirect('/')
         return render(request, 'login.html')
 
 @login_required
