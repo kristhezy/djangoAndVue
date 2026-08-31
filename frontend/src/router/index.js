@@ -18,7 +18,7 @@ const routes = [
     component: AppLayout,
     children: [
       { path: '', component: LegacyIframe },
-      { path: 'sv/mergeUser', component: migrated.mergeUser || LegacyIframe },
+      { path: 'mergeUser', component: migrated.mergeUser || LegacyIframe },
       legacy('/home'),
       legacy('/ov/mmeettopen'),
       legacy('/pv/other'),

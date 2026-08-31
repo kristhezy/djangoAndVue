@@ -16,6 +16,7 @@ export default defineConfig(({ command }) => ({
       '/sv': DJANGO,
       '/ov': DJANGO,
       '/pv': DJANGO,
+      '/home': DJANGO,
       '/static': DJANGO,
       '/login': DJANGO,
       '/logout': DJANGO,

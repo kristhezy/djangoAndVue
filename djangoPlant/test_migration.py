@@ -1,41 +1,41 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from pathlib import Path
-import os
+from unittest import mock
+import tempfile
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-DIST_INDEX = BASE_DIR / 'static' / 'vue' / 'index.html'
+from djangoPlant import spa
 
 
 class SpaFallbackTests(TestCase):
+    """SPA 兜底视图测试：用 mock 把 spa.DIST_INDEX 指向临时文件，绝不触碰真实
+    static/vue/ 构建产物（否则跑测试会删掉生产构建的 index.html，导致 / 404）。"""
+
     def test_spa_index_returns_html_when_dist_exists(self):
-        # 造一个临时 static/vue/index.html
-        DIST_INDEX.parent.mkdir(parents=True, exist_ok=True)
-        DIST_INDEX.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
-        try:
-            resp = Client().get('/some-vue-route')
-            self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp['Content-Type'], 'text/html')
-            self.assertIn(b'<div id="app">', resp.content)
-        finally:
-            DIST_INDEX.unlink(missing_ok=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            idx = Path(tmp) / 'index.html'
+            idx.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
+            with mock.patch.object(spa, 'DIST_INDEX', idx):
+                resp = Client().get('/some-vue-route')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'text/html')
+        self.assertIn(b'<div id="app">', resp.content)
 
     def test_spa_index_404_when_dist_missing(self):
-        if DIST_INDEX.exists():
-            DIST_INDEX.unlink()
-        resp = Client().get('/some-vue-route')
+        missing = Path(tempfile.gettempdir()) / 'definitely-not-exists' / 'index.html'
+        with mock.patch.object(spa, 'DIST_INDEX', missing):
+            resp = Client().get('/some-vue-route')
         self.assertEqual(resp.status_code, 404)
 
     def test_root_returns_spa(self):
         # 根路径 / 应返回 Vue index.html（登录后进入 Vue 壳）
-        DIST_INDEX.parent.mkdir(parents=True, exist_ok=True)
-        DIST_INDEX.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
-        try:
-            resp = Client().get('/')
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn(b'<div id="app">', resp.content)
-        finally:
-            DIST_INDEX.unlink(missing_ok=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            idx = Path(tmp) / 'index.html'
+            idx.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
+            with mock.patch.object(spa, 'DIST_INDEX', idx):
+                resp = Client().get('/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b'<div id="app">', resp.content)
 
 
 class MenuApiTests(TestCase):
@@ -71,3 +71,13 @@ class MenuApiTests(TestCase):
         self.assertEqual(len(data['groups']), 1)
         self.assertEqual(data['groups'][0]['key'], 'tools')
         self.assertEqual(data['groups'][0]['items'][0]['key'], 'mergeUser')
+
+    def test_migrated_menu_url_rewritten_to_frontend_path(self):
+        # 已迁移页的菜单 url 改写为独立前端路径，避免与真实旧路由冲突（刷新仍走 Vue 版）
+        s = self.c.session
+        s['menus'] = ['mergeUser']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        item = data['groups'][0]['items'][0]
+        self.assertEqual(item['url'], '/mergeUser')

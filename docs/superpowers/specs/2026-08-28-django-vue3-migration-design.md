@@ -150,7 +150,7 @@ djangoAndVue/
 
 ```json
 {
-  "code": "success",
+  "code": "0",
   "data": {
     "user": { "uname": "...", "rn": "..." },
     "groups": [
