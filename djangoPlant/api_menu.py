@@ -75,6 +75,7 @@ MIGRATED = {
     'mergeUser': '/mergeUser',
     'other': '/other',
     'mynote': '/mynote',
+    'delCP': '/delCP',
 }
 
 

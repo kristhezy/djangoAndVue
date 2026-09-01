@@ -7,6 +7,7 @@ const migrated = {
   mergeUser: () => import('../views/mergeUser/index.vue'),
   other: () => import('../views/other/index.vue'),
   mynote: () => import('../views/mynote/index.vue'),
+  delCP: () => import('../views/delCP/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -34,7 +35,7 @@ const routes = [
       legacy('/sv/baseUpgradeSK'),
       legacy('/sv/updateCT'),
       legacy('/sv/companyModule'),
-      legacy('/sv/delCP'),
+      { path: 'delCP', component: migrated.delCP || LegacyIframe },
       legacy('/sv/forWeCom'),
       legacy('/sv/delBindRelation'),
       legacy('/sv/queryLoginCode'),
