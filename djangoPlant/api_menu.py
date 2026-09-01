@@ -84,6 +84,7 @@ MIGRATED = {
     'jtSaleskits': '/jtSaleskits',
     'hwskset': '/hwskset',
     'upgradeR3': '/upgradeR3',
+    'basicComp': '/basicComp',
 }
 
 

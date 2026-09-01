@@ -73,36 +73,22 @@
       </el-card>
 
       <!-- 右栏：执行结果 -->
-      <el-card class="hwsk-panel" shadow="never">
-        <template #header>
-          <div class="hwsk-title">执行结果</div>
-        </template>
-        <div v-loading="logLoading" class="hwsk-log">
-          <div v-if="!records.length" class="hwsk-empty">暂无数据</div>
-          <div v-for="(r, i) in records" :key="i" class="hwsk-item">
-            <div class="hwsk-item__head">
-              <span class="hwsk-item__title">{{ r.env }} ┆ {{ r.companyName }}（{{ r.companyId }}）</span>
-              <span class="hwsk-item__time">{{ r.t }}</span>
-            </div>
-            <div class="hwsk-item__msg">{{ r.message }}</div>
-          </div>
-        </div>
-      </el-card>
+      <OperationLog ref="log" :ds="[15]" :init-num="10" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
+import OperationLog from '../../components/OperationLog.vue'
 
 const form = reactive({ loginName: '', cname: '', cid: '', payment: '3', tseat: '', mk: [], env: 'prod' })
 const result1 = ref('')
 const qcierr = ref('')
 const loading = ref(false)
-const records = ref([])
-const logLoading = ref(false)
+const log = ref(null)
 
 // 后端返回含 <br/> 与 <b>，转成换行并去掉 b 标签，文本插值 + pre-wrap 展示（防 XSS）
 function formatResult(str) {
@@ -138,33 +124,6 @@ function onLoginNameEnter() {
   getCidByLname()
 }
 
-// 查询操作信息列表
-async function qbdan(num) {
-  const resp = await http.post('/sv/qmbydsan', { dss: [15], num })
-  const res = resp.data?.data?.qmbydsan
-  if (!Array.isArray(res)) {
-    records.value = []
-    return
-  }
-  records.value = res
-}
-
-// 查询并异步刷新缓存
-async function querymsgbyds(num) {
-  logLoading.value = true
-  try {
-    await qbdan(num)
-    const resp = await http.post('/sv/aftergetqmbydsan', { dss: [15], num })
-    if (resp.data?.data === '更新数据成功！') {
-      await qbdan(num)
-    }
-  } catch (e) {
-    console.log(`查询操作信息err: ${e.message}`)
-  } finally {
-    logLoading.value = false
-  }
-}
-
 async function submit() {
   const { cid, cname, payment, tseat, mk, env } = form
   if (!cid) {
@@ -184,7 +143,7 @@ async function submit() {
       env,
     })
     result1.value = resp.data?.data?.hwskCompanyConfig || ''
-    querymsgbyds(7)
+    log.value?.refresh(7)
   } catch (e) {
     result1.value = ''
     ElMessage.error('操作失败：' + (e?.response?.data?.msg || e.message))
@@ -204,10 +163,6 @@ function reset() {
   result1.value = ''
   qcierr.value = ''
 }
-
-onMounted(() => {
-  querymsgbyds(10)
-})
 </script>
 
 <style scoped>
@@ -265,29 +220,5 @@ onMounted(() => {
   word-break: break-all;
   border-top: 1px solid #e4e7ed;
   padding-top: 8px;
-}
-.hwsk-log { min-height: 200px; }
-.hwsk-empty {
-  color: #c0c4cc;
-  text-align: center;
-  padding: 48px 20px;
-}
-.hwsk-item {
-  padding: 10px 12px;
-  border-bottom: 1px solid #ebeef5;
-}
-.hwsk-item__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-.hwsk-item__title { font-weight: 600; font-size: 14px; color: #303133; }
-.hwsk-item__time { font-size: 12px; color: #909399; white-space: nowrap; }
-.hwsk-item__msg {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #606266;
-  word-break: break-all;
 }
 </style>

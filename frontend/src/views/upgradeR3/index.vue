@@ -49,68 +49,27 @@
       </el-card>
 
       <!-- 右栏：执行结果 -->
-      <el-card class="ur3-panel" shadow="never">
-        <template #header>
-          <div class="ur3-title">执行结果</div>
-        </template>
-        <div v-loading="logLoading" class="ur3-log">
-          <div v-if="!records.length" class="ur3-empty">暂无数据</div>
-          <div v-for="(r, i) in records" :key="i" class="ur3-item">
-            <div class="ur3-item__head">
-              <span class="ur3-item__title">{{ r.env }} ┆ {{ r.companyName }}（{{ r.companyId }}）</span>
-              <span class="ur3-item__time">{{ r.t }}</span>
-            </div>
-            <div class="ur3-item__msg">{{ r.message }}</div>
-          </div>
-        </div>
-      </el-card>
+      <OperationLog ref="log" :ds="[1]" :init-num="10" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
+import OperationLog from '../../components/OperationLog.vue'
 
 const form = reactive({ companyIds: '', seats: '', env: 'prod' })
 const result1 = ref('')
 const sql = ref('')
 const submitted = ref(false)
 const loading = ref(false)
-const records = ref([])
-const logLoading = ref(false)
+const log = ref(null)
 
 // 后端 ur3sql 含 <br/> 与 \n，转成纯换行（防 XSS，不用 v-html）
 function formatResult(str) {
   return (str || '').replace(/<br\s*\/?>/gi, '\n')
-}
-
-// 查询操作信息列表
-async function qbdan(num) {
-  const resp = await http.post('/sv/qmbydsan', { dss: [1], num })
-  const res = resp.data?.data?.qmbydsan
-  if (!Array.isArray(res)) {
-    records.value = []
-    return
-  }
-  records.value = res
-}
-
-// 查询并异步刷新缓存
-async function querymsgbyds(num) {
-  logLoading.value = true
-  try {
-    await qbdan(num)
-    const resp = await http.post('/sv/aftergetqmbydsan', { dss: [1], num })
-    if (resp.data?.data === '更新数据成功！') {
-      await qbdan(num)
-    }
-  } catch (e) {
-    console.log(`查询操作信息err: ${e.message}`)
-  } finally {
-    logLoading.value = false
-  }
 }
 
 async function submit() {
@@ -129,7 +88,7 @@ async function submit() {
     result1.value = resp.data?.data?.upgradeR3 || ''
     sql.value = resp.data?.data?.ur3sql || ''
     submitted.value = true
-    querymsgbyds(4)
+    log.value?.refresh(4)
   } catch (e) {
     result1.value = ''
     ElMessage.error('操作失败：' + (e?.response?.data?.msg || e.message))
@@ -166,10 +125,6 @@ function reset() {
   sql.value = ''
   submitted.value = false
 }
-
-onMounted(() => {
-  querymsgbyds(10)
-})
 </script>
 
 <style scoped>
@@ -231,28 +186,4 @@ onMounted(() => {
   user-select: none;
 }
 .ur3-copy { margin-top: 10px; }
-.ur3-log { min-height: 200px; }
-.ur3-empty {
-  color: #c0c4cc;
-  text-align: center;
-  padding: 48px 20px;
-}
-.ur3-item {
-  padding: 10px 12px;
-  border-bottom: 1px solid #ebeef5;
-}
-.ur3-item__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-.ur3-item__title { font-weight: 600; font-size: 14px; color: #303133; }
-.ur3-item__time { font-size: 12px; color: #909399; white-space: nowrap; }
-.ur3-item__msg {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #606266;
-  word-break: break-all;
-}
 </style>
