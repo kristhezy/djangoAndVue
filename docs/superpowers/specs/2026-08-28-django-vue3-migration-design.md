@@ -239,6 +239,7 @@ djangoAndVue/
 - [x] 点击「企业微信相关」→ Vue 版 forWeCom 双卡片（生成企微应用链接 / 获取密文企微ID），应用ID下拉 8 项、校验正确，刷新 `/forWeCom` 仍是 Vue 版（非 iframe，0 iframe）。
 - [x] 点击「解除绑定关系」→ Vue 版 delBindRelation 三卡片（清绑定 / 清过期企业 / 清token），应用ID下拉 5 项、校验正确，刷新 `/delBindRelation` 仍是 Vue 版（非 iframe，0 iframe）。
 - [x] 点击「登录验证相关」→ Vue 版 aboutLogin 三卡片（查验证码 / 设固定验证码 / 小程序码9图），role 切换企业ID显隐、校验正确，刷新 `/aboutLogin` 仍是 Vue 版（非 iframe，0 iframe）。
+- [x] 点击「定制企业功能」→ Vue 版 dzFunction 三卡片（红蚂蚁改阶段 / 华为license / 预留区），校验正确，刷新 `/dzFunction` 仍是 Vue 版（非 iframe，0 iframe）。
 - [ ] 点击其他未迁移菜单（如「设置」）→ LegacyIframe，旧页功能与迁移前一致。
 - [ ] 无权限用户访问 → 被中间件拦到 `/denied`，行为不变。
 - [ ] 生产构建：`npm run build` → Django 托管，局域网 `192.168.10.7:8001` 可访问。
