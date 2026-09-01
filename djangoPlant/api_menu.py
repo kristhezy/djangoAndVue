@@ -82,6 +82,7 @@ MIGRATED = {
     'aboutLogin': '/aboutLogin',
     'dzFunction': '/dzFunction',
     'jtSaleskits': '/jtSaleskits',
+    'hwskset': '/hwskset',
 }
 
 

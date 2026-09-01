@@ -171,3 +171,13 @@ class MenuApiTests(TestCase):
         # jtSaleskits 在 compconfig 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'jtSaleskits')
         self.assertEqual(item['url'], '/jtSaleskits')
+
+    def test_hwskset_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['hwskset']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # hwskset 在 compconfig 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'hwskset')
+        self.assertEqual(item['url'], '/hwskset')
