@@ -6,7 +6,7 @@
         <template #header>
           <div class="wecom-title">生成企微应用链接</div>
         </template>
-        <el-form label-width="100px">
+        <el-form label-width="auto">
           <el-form-item label="企业 ID" required>
             <el-input v-model="form1.companyId" placeholder="请输入企业ID" />
           </el-form-item>
@@ -34,7 +34,7 @@
         <template #header>
           <div class="wecom-title">获取密文企微ID</div>
         </template>
-        <el-form label-width="100px">
+        <el-form label-width="auto">
           <el-form-item label="企微ID(明文)" required>
             <el-input v-model="form2.corpId" placeholder="请输入企微ID" />
           </el-form-item>
