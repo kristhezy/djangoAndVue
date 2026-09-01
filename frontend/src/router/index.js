@@ -10,6 +10,7 @@ const migrated = {
   delCP: () => import('../views/delCP/index.vue'),
   batchDeleteClue: () => import('../views/batchDeleteClue/index.vue'),
   forWeCom: () => import('../views/forWeCom/index.vue'),
+  delBindRelation: () => import('../views/delBindRelation/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -39,7 +40,7 @@ const routes = [
       legacy('/sv/companyModule'),
       { path: 'delCP', component: migrated.delCP || LegacyIframe },
       { path: 'forWeCom', component: migrated.forWeCom || LegacyIframe },
-      legacy('/sv/delBindRelation'),
+      { path: 'delBindRelation', component: migrated.delBindRelation || LegacyIframe },
       legacy('/sv/queryLoginCode'),
       legacy('/sv/dzFunction'),
       { path: 'batchDeleteClue', component: migrated.batchDeleteClue || LegacyIframe },

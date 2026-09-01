@@ -78,6 +78,7 @@ MIGRATED = {
     'delCP': '/delCP',
     'batchDeleteClue': '/batchDeleteClue',
     'forWeCom': '/forWeCom',
+    'delBindRelation': '/delBindRelation',
 }
 
 
