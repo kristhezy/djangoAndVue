@@ -6,6 +6,7 @@ import AppLayout from '../layout/AppLayout.vue'
 const migrated = {
   mergeUser: () => import('../views/mergeUser/index.vue'),
   other: () => import('../views/other/index.vue'),
+  mynote: () => import('../views/mynote/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -41,7 +42,7 @@ const routes = [
       legacy('/sv/batchDeleteClue'),
       legacy('/sv/afterSales'),
       legacy('/sv/miniprogram'),
-      legacy('/pv/mynote'),
+      { path: 'mynote', component: migrated.mynote || LegacyIframe },
       legacy('/pv/usercenter'),
       legacy('/pv/easyIC'),
       legacy('/pv/aitools'),

@@ -91,3 +91,13 @@ class MenuApiTests(TestCase):
         # other 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'other')
         self.assertEqual(item['url'], '/other')
+
+    def test_mynote_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['mynote']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # mynote 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'mynote')
+        self.assertEqual(item['url'], '/mynote')

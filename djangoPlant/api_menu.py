@@ -74,6 +74,7 @@ GROUPS = [
 MIGRATED = {
     'mergeUser': '/mergeUser',
     'other': '/other',
+    'mynote': '/mynote',
 }
 
 
