@@ -76,6 +76,7 @@ MIGRATED = {
     'other': '/other',
     'mynote': '/mynote',
     'delCP': '/delCP',
+    'batchDeleteClue': '/batchDeleteClue',
 }
 
 

@@ -8,6 +8,7 @@ const migrated = {
   other: () => import('../views/other/index.vue'),
   mynote: () => import('../views/mynote/index.vue'),
   delCP: () => import('../views/delCP/index.vue'),
+  batchDeleteClue: () => import('../views/batchDeleteClue/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -40,7 +41,7 @@ const routes = [
       legacy('/sv/delBindRelation'),
       legacy('/sv/queryLoginCode'),
       legacy('/sv/dzFunction'),
-      legacy('/sv/batchDeleteClue'),
+      { path: 'batchDeleteClue', component: migrated.batchDeleteClue || LegacyIframe },
       legacy('/sv/afterSales'),
       legacy('/sv/miniprogram'),
       { path: 'mynote', component: migrated.mynote || LegacyIframe },

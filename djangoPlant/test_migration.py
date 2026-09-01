@@ -111,3 +111,13 @@ class MenuApiTests(TestCase):
         # delCP 在 tools 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'delCP')
         self.assertEqual(item['url'], '/delCP')
+
+    def test_batchdeleteclue_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['batchDeleteClue']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # batchDeleteClue 在 tools 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'batchDeleteClue')
+        self.assertEqual(item['url'], '/batchDeleteClue')
