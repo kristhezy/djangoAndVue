@@ -234,6 +234,7 @@ djangoAndVue/
 - [x] 点击「手工合并用户」→ Vue 版 mergeUser，表单校验、提交、loading、结果展示正确。
 - [x] 点击「操作变更记录」→ Vue 版 other 列表，筛选/查询/分页/删除正确，刷新 `/other` 仍是 Vue 版（非 iframe）。
 - [x] 点击「我的记录」→ Vue 版 mynote 卡片列表，查询/新增/编辑/删除正确，正文 URL 识别为链接，刷新 `/mynote` 仍是 Vue 版（非 iframe）。
+- [x] 点击「删除线索[合]」→ Vue 版 delCP 三卡片，企业下拉（prod/test 两组）、选企业联动（回填企业ID + 锁环境）、删除类型切换（合伙人ID禁用/启用）、卡片2校验 + 只读查询回填均正确，刷新 `/delCP` 仍是 Vue 版（非 iframe，0 iframe）。
 - [ ] 点击其他未迁移菜单（如「设置」）→ LegacyIframe，旧页功能与迁移前一致。
 - [ ] 无权限用户访问 → 被中间件拦到 `/denied`，行为不变。
 - [ ] 生产构建：`npm run build` → Django 托管，局域网 `192.168.10.7:8001` 可访问。
