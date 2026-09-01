@@ -141,3 +141,13 @@ class MenuApiTests(TestCase):
         # delBindRelation 在 tools 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'delBindRelation')
         self.assertEqual(item['url'], '/delBindRelation')
+
+    def test_aboutlogin_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['aboutLogin']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # aboutLogin 在 tools 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'aboutLogin')
+        self.assertEqual(item['url'], '/aboutLogin')

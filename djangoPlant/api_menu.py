@@ -79,6 +79,7 @@ MIGRATED = {
     'batchDeleteClue': '/batchDeleteClue',
     'forWeCom': '/forWeCom',
     'delBindRelation': '/delBindRelation',
+    'aboutLogin': '/aboutLogin',
 }
 
 
