@@ -121,3 +121,13 @@ class MenuApiTests(TestCase):
         # batchDeleteClue 在 tools 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'batchDeleteClue')
         self.assertEqual(item['url'], '/batchDeleteClue')
+
+    def test_forwecom_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['forWeCom']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # forWeCom 在 tools 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'forWeCom')
+        self.assertEqual(item['url'], '/forWeCom')
