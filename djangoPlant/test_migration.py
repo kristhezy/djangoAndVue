@@ -161,3 +161,13 @@ class MenuApiTests(TestCase):
         # dzFunction 在 tools 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'dzFunction')
         self.assertEqual(item['url'], '/dzFunction')
+
+    def test_jtsaleskits_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['jtSaleskits']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # jtSaleskits 在 compconfig 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'jtSaleskits')
+        self.assertEqual(item['url'], '/jtSaleskits')

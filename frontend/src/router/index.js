@@ -13,6 +13,7 @@ const migrated = {
   delBindRelation: () => import('../views/delBindRelation/index.vue'),
   aboutLogin: () => import('../views/aboutLogin/index.vue'),
   dzFunction: () => import('../views/dzFunction/index.vue'),
+  jtSaleskits: () => import('../views/jtSaleskits/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -33,7 +34,7 @@ const routes = [
       legacy('/ov/soonConfig'),
       legacy('/ov/setting'),
       legacy('/ov/twCompSet'),
-      legacy('/sv/jtSaleskits'),
+      { path: 'jtSaleskits', component: migrated.jtSaleskits || LegacyIframe },
       legacy('/sv/hwskset'),
       legacy('/sv/upgradeR3'),
       legacy('/sv/basicComp'),

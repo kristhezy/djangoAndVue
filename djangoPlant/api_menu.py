@@ -81,6 +81,7 @@ MIGRATED = {
     'delBindRelation': '/delBindRelation',
     'aboutLogin': '/aboutLogin',
     'dzFunction': '/dzFunction',
+    'jtSaleskits': '/jtSaleskits',
 }
 
 
