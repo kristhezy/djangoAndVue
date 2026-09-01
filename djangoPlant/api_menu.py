@@ -80,6 +80,7 @@ MIGRATED = {
     'forWeCom': '/forWeCom',
     'delBindRelation': '/delBindRelation',
     'aboutLogin': '/aboutLogin',
+    'dzFunction': '/dzFunction',
 }
 
 

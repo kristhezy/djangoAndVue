@@ -151,3 +151,13 @@ class MenuApiTests(TestCase):
         # aboutLogin 在 tools 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'aboutLogin')
         self.assertEqual(item['url'], '/aboutLogin')
+
+    def test_dzfunction_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['dzFunction']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # dzFunction 在 tools 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'dzFunction')
+        self.assertEqual(item['url'], '/dzFunction')
