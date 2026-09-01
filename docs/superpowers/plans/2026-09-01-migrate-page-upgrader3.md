@@ -56,31 +56,31 @@
 
 **Files:** Create `frontend/src/views/upgradeR3/index.vue`
 
-- [ ] Step 1 写组件（左栏配置表单 + SQL 展示/复制 + 右栏执行结果列表 + formatResult）
-- [ ] Step 2 语法自检（Task 3 build 验证）
-- [ ] Step 3 Commit
+- [x] Step 1 写组件（左栏配置表单 + SQL 展示/复制 + 右栏执行结果列表 + formatResult）
+- [x] Step 2 语法自检（Task 3 build 验证）
+- [x] Step 3 Commit
 
 ## Task 2: 菜单 url 改写 + 路由接入 + 后端测试
 
-- [ ] Step 1 `MIGRATED` 增加 `'upgradeR3': '/upgradeR3'`
-- [ ] Step 2 router `migrated` 增加 + 替换 `legacy('/sv/upgradeR3')`
-- [ ] Step 3 test_migration.py 新增断言（compconfig 分组，`data['groups'][0]['items']`）
-- [ ] Step 4 跑测试
-- [ ] Step 5 Commit
+- [x] Step 1 `MIGRATED` 增加 `'upgradeR3': '/upgradeR3'`
+- [x] Step 2 router `migrated` 增加 + 替换 `legacy('/sv/upgradeR3')`
+- [x] Step 3 test_migration.py 新增断言（compconfig 分组，`data['groups'][0]['items']`）
+- [x] Step 4 跑测试（18 通过）
+- [x] Step 5 Commit
 
 ## Task 3: 端到端验证 + 生产构建 + 文档更新
 
-- [ ] Step 1 `npm run build`（通过）
-- [ ] Step 2 只读 e2e：0 iframe；双栏标题齐全（转介绍 3.0 配置 / 执行结果）；空提交校验「企业id不能为空！」；console 0 错误。
-- [ ] Step 3 更新 spec 验证清单
-- [ ] Step 4 更新进度并汇报
+- [x] Step 1 `npm run build`（通过）
+- [x] Step 2 只读 e2e：0 iframe；双栏标题齐全；空提交校验「企业id不能为空！」；console 0 错误。
+- [x] Step 3 更新 spec 验证清单
+- [x] Step 4 更新进度并汇报
 
-> 只读验证：未真实提交。临时 e2e 账号删除。
+> 只读验证：未真实提交。临时 e2e 账号 e2e_ur3 已删除。
 
 ---
 
 ## 进度记录
 
-- [ ] Task 1 前端组件
-- [ ] Task 2 菜单+路由+测试
-- [ ] Task 3 构建+e2e+文档
+- [x] Task 1 前端组件
+- [x] Task 2 菜单+路由+测试
+- [x] Task 3 构建+e2e+文档
