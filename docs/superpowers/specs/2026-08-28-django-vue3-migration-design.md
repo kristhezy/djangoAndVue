@@ -243,6 +243,8 @@ djangoAndVue/
 - [x] 点击「加推Saleskits」→ Vue 版 jtSaleskits 双栏（配置 / 执行结果），5 个企业模块勾选、版本切换（招商版显示模块 / 家装版隐藏模块+显示家装类型+禁用测试环境）、空提交校验、右侧只读操作记录列表，刷新 `/jtSaleskits` 仍是 Vue 版（非 iframe，0 iframe）。
 - [x] 点击「华为云SK配置」→ Vue 版 hwskset 双栏（配置 / 执行结果），手机号查询企业ID回填、付款方式下拉、5 个企业模块勾选、空提交校验，刷新 `/hwskset` 仍是 Vue 版（非 iframe，0 iframe）。
 - [x] 点击「转介绍3.0配置」→ Vue 版 upgradeR3 双栏（配置 / 执行结果），企业ID+席位 textarea、空提交校验、提交后显示结果+菜单SQL+复制跳转按钮，刷新 `/upgradeR3` 仍是 Vue 版（非 iframe，0 iframe）。
+- [x] 点击「销售工具版配置」→ Vue 版 basicComp 双栏（配置 / 执行结果），企业IDs textarea、8 模块勾选（M115 禁用、6 默认勾选）、空提交校验，刷新 `/basicComp` 仍是 Vue 版（非 iframe，0 iframe）。
+- [x] 执行结果 message 的 HTML 加粗/换行标签已通过公共 `OperationLog` 组件安全净化渲染（先转义再还原 `<b>`/`<br/>`，防 XSS）。
 - [ ] 点击其他未迁移菜单（如「设置」）→ LegacyIframe，旧页功能与迁移前一致。
 - [ ] 无权限用户访问 → 被中间件拦到 `/denied`，行为不变。
 - [ ] 生产构建：`npm run build` → Django 托管，局域网 `192.168.10.7:8001` 可访问。
