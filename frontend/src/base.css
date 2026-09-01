@@ -1,0 +1,14 @@
+/* 全局基础样式：清除浏览器默认 margin，避免 100vh 布局超出视口产生滚动条 */
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}

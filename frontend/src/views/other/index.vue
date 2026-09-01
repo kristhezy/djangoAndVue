@@ -41,14 +41,20 @@
 
     <!-- 表格区 -->
     <el-card class="table-card" shadow="never">
-      <el-table :data="list" v-loading="loading" stripe height="100%">
+      <el-table :data="list" v-loading="loading" stripe height="100%" :style="{ '--row-height': rowHeight + 'px' }">
         <el-table-column prop="id" label="序号" width="70" />
-        <el-table-column label="环境" width="150">
+        <el-table-column label="环境" width="120">
           <template #default="{ row }">{{ envLabel(row) }}</template>
         </el-table-column>
-        <el-table-column prop="companyId" label="企业ID" width="120" show-overflow-tooltip />
-        <el-table-column prop="companyName" label="企业名称" show-overflow-tooltip />
-        <el-table-column prop="message" label="操作信息" show-overflow-tooltip />
+        <el-table-column prop="companyId" label="企业ID" width="200" show-overflow-tooltip />
+        <el-table-column prop="companyName" label="企业名称" width="230" show-overflow-tooltip />
+        <el-table-column prop="message" label="操作信息" class-name="wrap-cell">
+          <template #default="{ row }">
+            <el-tooltip :content="row.message" placement="top-start" :show-after="200">
+              <div class="msg-wrap">{{ row.message }}</div>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column prop="uname" label="操作人" width="100" show-overflow-tooltip />
         <el-table-column prop="createTime" label="操作时间" width="170" show-overflow-tooltip />
         <el-table-column label="操作" width="90" fixed="right">
@@ -64,20 +70,15 @@
 
       <!-- 分页 -->
       <div class="pager">
-        <el-pagination
-          v-model:current-page="page"
-          :page-size="num"
-          :total="total"
-          layout="total, prev, pager, next, jumper"
-          @current-change="load"
-        />
+        <el-pagination v-model:current-page="page" :page-size="num" :total="total"
+          layout="total, prev, pager, next, jumper" @current-change="load" />
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
 
@@ -87,8 +88,25 @@ const list = ref([])
 const operators = ref([])
 const total = ref(0)
 const page = ref(1)
+const rowHeight = ref(48)
 
 const query = reactive({ env: '', vers: '', compid: '', compname: '', minfo: '', uname: '' })
+
+let resizeObserver = null
+
+// 行高动态填满：body 可视区高度 ÷ 行数。满页时完全填满不留白；
+// 不足满页时限制最大行高（避免单行过高）。窗口缩放/数据变化时重算。
+function setRowHeight() {
+  const wrapper = document.querySelector('.table-card .el-table__body-wrapper')
+  if (!wrapper) return
+  const rows = wrapper.querySelectorAll('tbody tr')
+  const count = rows.length
+  if (!count) return
+  const available = wrapper.clientHeight
+  if (available <= 0) return
+  const h = Math.floor(available / count)
+  rowHeight.value = count >= num ? h : Math.min(72, h)
+}
 
 function envLabel(row) {
   const env = row.env || ''
@@ -139,6 +157,7 @@ async function load() {
     ElMessage.error('查询失败：' + (e?.response?.data?.msg || e.message))
   } finally {
     loading.value = false
+    nextTick(() => setRowHeight())
   }
 }
 
@@ -194,15 +213,90 @@ onMounted(() => {
   loadOperators()
   load()
   loadTotal()
+  nextTick(() => {
+    const wrapper = document.querySelector('.table-card .el-table__body-wrapper')
+    if (wrapper) {
+      resizeObserver = new ResizeObserver(() => setRowHeight())
+      resizeObserver.observe(wrapper)
+      setRowHeight()
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  if (resizeObserver) resizeObserver.disconnect()
 })
 </script>
 
 <style scoped>
-.other-page { height: 100%; display: flex; flex-direction: column; gap: 16px; padding: 16px; box-sizing: border-box; background: #f0f2f5; overflow: hidden; }
-.filter-card { flex-shrink: 0; }
-.filter-title { font-weight: 600; font-size: 16px; }
-.table-card { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.table-card :deep(.el-card__body) { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0; }
-.table-card :deep(.el-table) { flex: 1; }
-.pager { display: flex; justify-content: flex-end; padding: 12px 16px; }
+.other-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #f0f2f5;
+  overflow: hidden;
+}
+
+.filter-card {
+  flex-shrink: 0;
+}
+
+.filter-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.table-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-card :deep(.el-card__body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.table-card :deep(.el-table) {
+  flex: 1;
+}
+
+.table-card :deep(.el-table th.el-table__cell) {
+  font-size: 16px;
+  font-weight: 700;
+  background-color: #f0f0f0;
+  color: #303133;
+}
+
+.table-card :deep(.el-table td.el-table__cell) {
+  padding: 0;
+  height: var(--row-height, 48px);
+}
+
+.table-card :deep(.el-table .cell) {
+  line-height: 1.4;
+}
+
+.pager {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+}
+
+.msg-wrap {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
 </style>
