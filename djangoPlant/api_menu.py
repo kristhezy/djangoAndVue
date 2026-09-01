@@ -83,6 +83,7 @@ MIGRATED = {
     'dzFunction': '/dzFunction',
     'jtSaleskits': '/jtSaleskits',
     'hwskset': '/hwskset',
+    'upgradeR3': '/upgradeR3',
 }
 
 

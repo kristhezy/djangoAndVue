@@ -181,3 +181,13 @@ class MenuApiTests(TestCase):
         # hwskset 在 compconfig 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'hwskset')
         self.assertEqual(item['url'], '/hwskset')
+
+    def test_upgrader3_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['upgradeR3']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # upgradeR3 在 compconfig 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'upgradeR3')
+        self.assertEqual(item['url'], '/upgradeR3')
