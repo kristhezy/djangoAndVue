@@ -70,18 +70,16 @@
             </el-form-item>
           </div>
 
-          <div class="uci-row">
-            <el-form-item label="员工IDs">
+          <el-form-item label="员工雷达">
+            <div class="uci-dual">
               <el-input v-model="form.cardids" type="textarea" :rows="2" placeholder="员工IDs" />
-            </el-form-item>
-            <el-form-item label="雷达状态">
-              <el-select v-model="form.rs" clearable placeholder="请选择雷达状态" style="width: 100%">
+              <el-select v-model="form.rs" clearable placeholder="请选择雷达状态" class="uci-dual__sel">
                 <el-option label="关闭" value="0" />
                 <el-option label="AI雷达" value="1" />
                 <el-option label="AI和BOSS雷达" value="3" />
               </el-select>
-            </el-form-item>
-          </div>
+            </div>
+          </el-form-item>
 
           <el-form-item label="环境">
             <el-radio-group v-model="form.env">
@@ -219,6 +217,20 @@ function reset() {
 .uci-row .el-form-item {
   flex: 1;
   min-width: 0;
+}
+.uci-dual {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+.uci-dual .el-textarea {
+  flex: 1;
+  min-width: 0;
+}
+.uci-dual__sel {
+  width: 160px;
+  flex-shrink: 0;
 }
 .uci-actions {
   display: flex;
