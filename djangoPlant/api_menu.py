@@ -94,6 +94,7 @@ MIGRATED = {
     'usercenter': '/usercenter',
     'easyIC': '/easyIC',
     'aitools': '/aitools',
+    'agent': '/agent',
 }
 
 

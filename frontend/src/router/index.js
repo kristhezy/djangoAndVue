@@ -26,6 +26,7 @@ const migrated = {
   usercenter: () => import('../views/usercenter/index.vue'),
   easyIC: () => import('../views/easyIC/index.vue'),
   aitools: () => import('../views/aitools/index.vue'),
+  agent: () => import('../views/agent/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -65,7 +66,7 @@ const routes = [
       { path: 'usercenter', component: migrated.usercenter || LegacyIframe },
       { path: 'easyIC', component: migrated.easyIC || LegacyIframe },
       { path: 'aitools', component: migrated.aitools || LegacyIframe },
-      legacy('/pv/agent'),
+      { path: 'agent', component: migrated.agent || LegacyIframe },
     ],
   },
 ]
