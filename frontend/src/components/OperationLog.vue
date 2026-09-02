@@ -1,7 +1,7 @@
 <template>
   <el-card class="oplog-panel" shadow="never">
     <template #header>
-      <div class="oplog-title">执行结果</div>
+      <div class="oplog-title">{{ title }}</div>
     </template>
     <div v-loading="loading" class="oplog-log">
       <div v-if="!records.length" class="oplog-empty">暂无数据</div>
@@ -24,6 +24,7 @@ import http from '../api/http'
 const props = defineProps({
   ds: { type: Array, required: true },
   initNum: { type: Number, default: 10 },
+  title: { type: String, default: '执行结果' },
 })
 
 const loading = ref(false)

@@ -20,6 +20,7 @@ const migrated = {
   basicComp: () => import('../views/basicComp/index.vue'),
   baseUpgradeSK: () => import('../views/baseUpgradeSK/index.vue'),
   companyModule: () => import('../views/companyModule/index.vue'),
+  updateCI: () => import('../views/updateCI/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -45,7 +46,7 @@ const routes = [
       { path: 'upgradeR3', component: migrated.upgradeR3 || LegacyIframe },
       { path: 'basicComp', component: migrated.basicComp || LegacyIframe },
       { path: 'baseUpgradeSK', component: migrated.baseUpgradeSK || LegacyIframe },
-      legacy('/sv/updateCT'),
+      { path: 'updateCI', component: migrated.updateCI || LegacyIframe },
       { path: 'companyModule', component: migrated.companyModule || LegacyIframe },
       { path: 'delCP', component: migrated.delCP || LegacyIframe },
       { path: 'forWeCom', component: migrated.forWeCom || LegacyIframe },

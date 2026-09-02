@@ -242,3 +242,13 @@ class MenuApiTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp['Content-Type'], 'text/html')
         self.assertIn(b'<div id="app">', resp.content)
+
+    def test_updateci_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['updateCI']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # updateCI 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'updateCI')
+        self.assertEqual(item['url'], '/updateCI')
