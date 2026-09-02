@@ -6,12 +6,12 @@
         <template #header>
           <div class="uci-title">企业信息修改</div>
         </template>
-        <el-form label-width="auto" label-position="top">
+        <el-form label-width="auto" label-position="left">
           <el-form-item label="企业ID" required>
             <el-input
               v-model="form.cid"
               type="textarea"
-              :rows="3"
+              :rows="2"
               placeholder="请输入企业ID，多个换行分隔"
             />
           </el-form-item>
@@ -82,16 +82,15 @@
           </el-form-item>
 
           <el-form-item label="环境">
-            <el-radio-group v-model="form.env">
-              <el-radio value="prod">生产环境</el-radio>
-              <el-radio value="test">测试环境</el-radio>
-            </el-radio-group>
+            <div class="uci-submitbar">
+              <el-radio-group v-model="form.env">
+                <el-radio value="prod">生产环境</el-radio>
+                <el-radio value="test">测试环境</el-radio>
+              </el-radio-group>
+              <el-button type="primary" :loading="loading" @click="submit">提交</el-button>
+              <el-button @click="reset">重置</el-button>
+            </div>
           </el-form-item>
-
-          <div class="uci-actions">
-            <el-button type="primary" :loading="loading" @click="submit">提交</el-button>
-            <el-button @click="reset">重置</el-button>
-          </div>
 
           <div v-if="result1" class="uci-result" v-html="sanitize(result1)"></div>
         </el-form>
@@ -210,6 +209,10 @@ function reset() {
   font-weight: 600;
   font-size: 16px;
 }
+/* 收紧字段间距：el-form 默认 22px 过大，操作跨度长 */
+.uci-panel--main :deep(.el-form-item) {
+  margin-bottom: 10px;
+}
 .uci-row {
   display: flex;
   gap: 16px;
@@ -232,11 +235,12 @@ function reset() {
   width: 160px;
   flex-shrink: 0;
 }
-.uci-actions {
+/* 操作栏：环境 + 提交 + 重置 同一行，选完环境抬手即提交 */
+.uci-submitbar {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin: 12px 0;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 .uci-result {
   margin-top: 12px;
