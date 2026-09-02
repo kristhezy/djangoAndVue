@@ -246,6 +246,7 @@ djangoAndVue/
 - [x] 点击「销售工具版配置」→ Vue 版 basicComp 双栏（配置 / 执行结果），企业IDs textarea、8 模块勾选（M115 禁用、6 默认勾选）、空提交校验，刷新 `/basicComp` 仍是 Vue 版（非 iframe，0 iframe）。
 - [x] 执行结果 message 的 HTML 加粗/换行标签已通过公共 `OperationLog` 组件安全净化渲染（先转义再还原 `<b>`/`<br/>`，防 XSS）。
 - [x] 点击「工具版升级SK」→ Vue 版 baseUpgradeSK 单卡片（企业数据 3 textarea + 6 模块勾选 + 环境 + 结果），空提交校验，刷新 `/baseUpgradeSK` 仍是 Vue 版（非 iframe，0 iframe）。
+- [x] 点击「企业模块配置」→ Vue 版 companyModule（企业IDs + 6 组 40 模块勾选，M107 互斥、增加/删除模块切换），空提交校验，刷新 `/companyModule` 仍是 Vue 版（非 iframe，0 iframe）。
 - [ ] 点击其他未迁移菜单（如「设置」）→ LegacyIframe，旧页功能与迁移前一致。
 - [ ] 无权限用户访问 → 被中间件拦到 `/denied`，行为不变。
 - [ ] 生产构建：`npm run build` → Django 托管，局域网 `192.168.10.7:8001` 可访问。
