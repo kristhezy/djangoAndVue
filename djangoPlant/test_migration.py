@@ -211,3 +211,13 @@ class MenuApiTests(TestCase):
         # baseUpgradeSK 在 compconfig 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'baseUpgradeSK')
         self.assertEqual(item['url'], '/baseUpgradeSK')
+
+    def test_companymodule_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['companyModule']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # companyModule 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'companyModule')
+        self.assertEqual(item['url'], '/companyModule')
