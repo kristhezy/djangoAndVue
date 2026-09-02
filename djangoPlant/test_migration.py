@@ -221,3 +221,24 @@ class MenuApiTests(TestCase):
         # companyModule 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'companyModule')
         self.assertEqual(item['url'], '/companyModule')
+
+    def test_home_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['home']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # home 是 standalone 菜单（sidebar 首位）
+        item = next(x for x in data['standalone'] if x['key'] == 'home')
+        self.assertEqual(item['url'], '/home')
+
+    def test_home_returns_spa(self):
+        # 迁移后 /home 刷新应返回 Vue 壳（走 SPA 兜底），而不是旧模板 home.html
+        with tempfile.TemporaryDirectory() as tmp:
+            idx = Path(tmp) / 'index.html'
+            idx.write_text('<!DOCTYPE html><div id="app"></div>', encoding='utf-8')
+            with mock.patch.object(spa, 'DIST_INDEX', idx):
+                resp = Client().get('/home')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'text/html')
+        self.assertIn(b'<div id="app">', resp.content)

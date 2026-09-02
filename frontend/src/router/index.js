@@ -4,6 +4,7 @@ import AppLayout from '../layout/AppLayout.vue'
 
 // 迁移开关：迁完一页，把对应路径改成 import 的 Vue 组件即可。
 const migrated = {
+  home: () => import('../views/home/index.vue'),
   mergeUser: () => import('../views/mergeUser/index.vue'),
   other: () => import('../views/other/index.vue'),
   mynote: () => import('../views/mynote/index.vue'),
@@ -31,9 +32,9 @@ const routes = [
     path: '/',
     component: AppLayout,
     children: [
-      { path: '', component: LegacyIframe },
+      { path: '', redirect: '/home' },
+      { path: 'home', component: migrated.home || LegacyIframe },
       { path: 'mergeUser', component: migrated.mergeUser || LegacyIframe },
-      legacy('/home'),
       legacy('/ov/mmeettopen'),
       { path: 'other', component: migrated.other || LegacyIframe },
       legacy('/ov/soonConfig'),

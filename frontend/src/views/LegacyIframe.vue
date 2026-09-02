@@ -8,7 +8,6 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const iframeSrc = computed(() => {
-  const p = route.path === '/' ? '/home' : route.path
-  return `${p}?_plain=1`
+  return `${route.path}?_plain=1`
 })
 </script>

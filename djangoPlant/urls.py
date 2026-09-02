@@ -30,7 +30,7 @@ urlpatterns = [
     path('denied',pv.denied,name="denied"),
     #publicview
     path('',spa.spa_index,name="index"),
-    path('home',pv.home,name="home"),
+    path('home',spa.spa_index,name="home"),
     path('pv/other',pv.other,name='other'),
     path('pv/pagecount',pv.pagecount,name='pagecount'),
     path('pv/other/<str:part>',pv.other_part,name='otherpart'),
