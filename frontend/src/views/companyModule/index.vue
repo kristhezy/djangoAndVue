@@ -1,11 +1,6 @@
 <template>
   <div class="cm-page">
-    <!-- 表单卡片：占满剩余高度 -->
-    <el-card class="cm-panel cm-panel--form" shadow="never">
-      <template #header>
-        <div class="cm-title">企业模块配置</div>
-      </template>
-
+    <el-card class="cm-panel" shadow="never">
       <!-- 企业 IDs -->
       <div class="cm-block">
         <div class="cm-label">企 业 IDs:</div>
@@ -15,28 +10,22 @@
         />
       </div>
 
-      <!-- 企业模块 -->
-      <div class="cm-block cm-block--grow">
-        <div class="cm-label">企业模块:</div>
-        <div class="cm-cols">
-          <div v-for="(col, ci) in groupCols" :key="ci" class="cm-col">
-            <div v-for="g in col" :key="g.title" class="cm-group">
-              <div class="cm-group__title" :class="{ 'cm-group__title--muted': g.muted }">{{ g.title }}</div>
-              <div class="cm-grid">
-                <el-checkbox
-                  v-for="it in g.items"
-                  :key="it.k"
-                  v-model="it.checked"
-                  :class="{ 'cm-check--bold': it.bold }"
-                  @change="onCheckChange(it)"
-                >{{ it.label }}</el-checkbox>
-              </div>
-            </div>
-          </div>
+      <!-- 企业模块：单列，6 组从上到下依次排布（保持原模板语义分组顺序） -->
+      <div class="cm-label">企业模块:</div>
+      <div v-for="g in groups" :key="g.title" class="cm-group">
+        <div class="cm-group__title" :class="{ 'cm-group__title--muted': g.muted }">{{ g.title }}</div>
+        <div class="cm-grid">
+          <el-checkbox
+            v-for="it in g.items"
+            :key="it.k"
+            v-model="it.checked"
+            :class="{ 'cm-check--bold': it.bold }"
+            @change="onCheckChange(it)"
+          >{{ it.label }}</el-checkbox>
         </div>
       </div>
 
-      <!-- 环境 + 操作 + 提交 -->
+      <!-- 环境 + 操作 -->
       <div class="cm-opt">
         <el-radio-group v-model="form.env">
           <el-radio value="prod">生产环境</el-radio>
@@ -47,14 +36,16 @@
           <el-radio value="addm">增加模块</el-radio>
           <el-radio value="delm">删除模块</el-radio>
         </el-radio-group>
+      </div>
+
+      <!-- 提交 + 重置 -->
+      <div class="cm-actions">
         <el-button type="primary" :loading="loading" @click="submit">提交</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
-    </el-card>
 
-    <!-- 结果：底部收窄 -->
-    <el-card class="cm-panel cm-panel--result" shadow="never">
-      <div class="cm-result">{{ result1 }}</div>
+      <!-- 结果：内联展示，有内容才出现 -->
+      <div v-if="result1" class="cm-result">{{ result1 }}</div>
     </el-card>
   </div>
 </template>
@@ -145,9 +136,6 @@ const groups = reactive([
 
 const allItems = groups.flatMap(g => g.items)
 
-// 6 组均衡拆成左右两栏（前 3 组 20 项 = 后 3 组 20 项），垂直占用减半
-const groupCols = [groups.slice(0, 3), groups.slice(3)]
-
 // M107 互斥：勾选其一，取消另一个
 function onCheckChange(item) {
   if (!item.mutex || !item.checked) return
@@ -196,97 +184,77 @@ function reset() {
 <style scoped>
 .cm-page {
   height: 100%;
-  overflow: hidden;
-  padding: 12px;
+  overflow-y: auto;
+  padding: 16px;
   background: #f0f2f5;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 .cm-panel {
-  margin: 0;
+  max-width: 1200px;
+  margin: 0 auto;
 }
-.cm-panel--form {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-.cm-panel--form :deep(.el-card__body) {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 16px 20px;
-}
-.cm-title { text-align: center; font-weight: 600; font-size: 16px; }
-.cm-block { flex-shrink: 0; }
-.cm-block--grow {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-.cm-cols {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-.cm-col {
-  flex: 1;
-  min-width: 0;
+.cm-block {
+  margin-bottom: 12px;
 }
 .cm-label {
   font-size: 15px;
   font-weight: 500;
   margin-bottom: 6px;
 }
-.cm-group { margin-bottom: 4px; }
+.cm-group {
+  margin-bottom: 8px;
+}
 .cm-group__title {
   display: inline-block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   border-bottom: 2px solid #6366f1;
-  padding-bottom: 2px;
-  margin-bottom: 4px;
+  padding-bottom: 3px;
+  margin-bottom: 5px;
 }
-.cm-group__title--muted { color: #909399; border-bottom: none; }
+.cm-group__title--muted {
+  color: #909399;
+  border-bottom: none;
+}
 .cm-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  row-gap: 1px;
-  column-gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  row-gap: 2px;
+  column-gap: 8px;
 }
 .cm-grid :deep(.el-checkbox) {
   margin-right: 0;
-  height: 22px;
+  height: 24px;
   white-space: nowrap;
 }
-.cm-check--bold :deep(.el-checkbox__label) { font-weight: 700; }
+.cm-check--bold :deep(.el-checkbox__label) {
+  font-weight: 700;
+}
 .cm-opt {
-  flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #e4e7ed;
 }
-.cm-sep { color: #c0c4cc; margin: 0 4px; }
-.cm-panel--result {
-  flex-shrink: 0;
+.cm-sep {
+  color: #c0c4cc;
+  margin: 0 4px;
 }
-.cm-panel--result :deep(.el-card__body) {
-  min-height: 48px;
-  padding: 12px 20px;
+.cm-actions {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
 }
 .cm-result {
-  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #f5f6f8;
+  border-radius: 6px;
   font-size: 15px;
   color: #6366f1;
   white-space: pre-wrap;
