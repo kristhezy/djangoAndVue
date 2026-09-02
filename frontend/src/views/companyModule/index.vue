@@ -4,24 +4,20 @@
       <!-- 企业 IDs -->
       <div class="cm-block">
         <div class="cm-label">企 业 IDs:</div>
-        <el-input
-          v-model="form.companyId"
-          placeholder="示例:'727972691243679744,593467466257072128,583716956373278720'"
-        />
+        <el-input v-model="form.companyId"
+          placeholder="示例:'727972691243679744,593467466257072128,583716956373278720'" />
       </div>
 
       <!-- 企业模块：单列，6 组从上到下依次排布（保持原模板语义分组顺序） -->
       <div class="cm-label">企业模块:</div>
       <div v-for="g in groups" :key="g.title" class="cm-group">
-        <div class="cm-group__title" :class="{ 'cm-group__title--muted': g.muted }">{{ g.title }}</div>
+        <div class="cm-group__title" :class="{ 'cm-group__title--muted': g.muted }">
+          {{ g.title }}<span v-if="g.isNew" class="cm-new">NEW</span>
+        </div>
         <div class="cm-grid">
-          <el-checkbox
-            v-for="it in g.items"
-            :key="it.k"
-            v-model="it.checked"
-            :class="{ 'cm-check--bold': it.bold }"
-            @change="onCheckChange(it)"
-          >{{ it.label }}</el-checkbox>
+          <el-checkbox v-for="it in g.items" :key="it.k" v-model="it.checked"
+            :class="{ 'cm-check--bold': it.bold, 'cm-check--muted': g.muted }"
+            @change="onCheckChange(it)">{{ it.label }}</el-checkbox>
         </div>
       </div>
 
@@ -40,6 +36,7 @@
 
       <!-- 提交 + 重置 -->
       <div class="cm-actions">
+        <span class="cm-count" :class="{ 'cm-count--active': checkedCount > 0 }">已选 {{ checkedCount }} 个模块</span>
         <el-button type="primary" :loading="loading" @click="submit">提交</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
@@ -51,7 +48,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
 
@@ -87,6 +84,7 @@ const groups = reactive([
   },
   {
     title: '• Saleskits专属',
+    isNew: true,
     items: [
       { k: 'mk140', v: 'M140', label: 'M140(PLG「企管」)', checked: false },
       { k: 'sk107', v: 'M107', label: 'M107(推广表单)', checked: false, mutex: true },
@@ -135,6 +133,7 @@ const groups = reactive([
 ])
 
 const allItems = groups.flatMap(g => g.items)
+const checkedCount = computed(() => allItems.filter(i => i.checked).length)
 
 // M107 互斥：勾选其一，取消另一个
 function onCheckChange(item) {
@@ -189,21 +188,26 @@ function reset() {
   background: #f0f2f5;
   box-sizing: border-box;
 }
+
 .cm-panel {
   max-width: 1200px;
   margin: 0 auto;
 }
+
 .cm-block {
   margin-bottom: 12px;
 }
+
 .cm-label {
   font-size: 15px;
   font-weight: 500;
   margin-bottom: 6px;
 }
+
 .cm-group {
   margin-bottom: 8px;
 }
+
 .cm-group__title {
   display: inline-block;
   font-size: 14px;
@@ -212,24 +216,46 @@ function reset() {
   padding-bottom: 3px;
   margin-bottom: 5px;
 }
+
 .cm-group__title--muted {
   color: #909399;
   border-bottom: none;
 }
+
+.cm-new {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  color: #fff;
+  background: #f56c6c;
+  border-radius: 3px;
+  vertical-align: 1px;
+}
+
 .cm-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   row-gap: 2px;
   column-gap: 8px;
 }
+
 .cm-grid :deep(.el-checkbox) {
   margin-right: 0;
   height: 24px;
   white-space: nowrap;
 }
+
 .cm-check--bold :deep(.el-checkbox__label) {
   font-weight: 700;
 }
+
+.cm-check--muted :deep(.el-checkbox__label) {
+  color: #c0c4cc;
+}
+
 .cm-opt {
   display: flex;
   flex-wrap: wrap;
@@ -240,16 +266,32 @@ function reset() {
   padding-top: 12px;
   border-top: 1px solid #e4e7ed;
 }
+
 .cm-sep {
   color: #c0c4cc;
   margin: 0 4px;
 }
+
 .cm-actions {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 12px;
   margin-top: 12px;
 }
+
+.cm-count {
+  font-size: 13px;
+  color: #909399;
+  min-width: 96px;
+  text-align: left;
+}
+
+.cm-count--active {
+  color: #6366f1;
+  font-weight: 600;
+}
+
 .cm-result {
   margin-top: 12px;
   padding: 10px 16px;
@@ -259,5 +301,6 @@ function reset() {
   color: #6366f1;
   white-space: pre-wrap;
   word-break: break-all;
+  text-align: center;
 }
 </style>
