@@ -90,6 +90,7 @@ MIGRATED = {
     'companyModule': '/companyModule',
     'updateCI': '/updateCI',
     'afterSales': '/afterSales',
+    'miniprogram': '/miniprogram',
 }
 
 

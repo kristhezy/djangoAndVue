@@ -262,3 +262,13 @@ class MenuApiTests(TestCase):
         # afterSales 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'afterSales')
         self.assertEqual(item['url'], '/afterSales')
+
+    def test_miniprogram_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['miniprogram']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # miniprogram 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'miniprogram')
+        self.assertEqual(item['url'], '/miniprogram')
