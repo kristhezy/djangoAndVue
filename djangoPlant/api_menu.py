@@ -93,6 +93,7 @@ MIGRATED = {
     'miniprogram': '/miniprogram',
     'usercenter': '/usercenter',
     'easyIC': '/easyIC',
+    'aitools': '/aitools',
 }
 
 
