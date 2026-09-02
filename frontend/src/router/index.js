@@ -24,6 +24,7 @@ const migrated = {
   afterSales: () => import('../views/afterSales/index.vue'),
   miniprogram: () => import('../views/miniprogram/index.vue'),
   usercenter: () => import('../views/usercenter/index.vue'),
+  easyIC: () => import('../views/easyIC/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -61,7 +62,7 @@ const routes = [
       { path: 'miniprogram', component: migrated.miniprogram || LegacyIframe },
       { path: 'mynote', component: migrated.mynote || LegacyIframe },
       { path: 'usercenter', component: migrated.usercenter || LegacyIframe },
-      legacy('/pv/easyIC'),
+      { path: 'easyIC', component: migrated.easyIC || LegacyIframe },
       legacy('/pv/aitools'),
       legacy('/pv/agent'),
     ],

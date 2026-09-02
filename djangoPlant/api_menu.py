@@ -92,6 +92,7 @@ MIGRATED = {
     'afterSales': '/afterSales',
     'miniprogram': '/miniprogram',
     'usercenter': '/usercenter',
+    'easyIC': '/easyIC',
 }
 
 

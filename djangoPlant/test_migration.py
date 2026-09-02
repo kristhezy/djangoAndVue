@@ -282,3 +282,13 @@ class MenuApiTests(TestCase):
         # usercenter 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'usercenter')
         self.assertEqual(item['url'], '/usercenter')
+
+    def test_easyic_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['easyIC']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # easyIC 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'easyIC')
+        self.assertEqual(item['url'], '/easyIC')
