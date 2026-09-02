@@ -27,6 +27,7 @@ const migrated = {
   easyIC: () => import('../views/easyIC/index.vue'),
   aitools: () => import('../views/aitools/index.vue'),
   agent: () => import('../views/agent/index.vue'),
+  soon: () => import('../views/soon/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -44,7 +45,7 @@ const routes = [
       { path: 'mergeUser', component: migrated.mergeUser || LegacyIframe },
       legacy('/ov/mmeettopen'),
       { path: 'other', component: migrated.other || LegacyIframe },
-      legacy('/ov/soonConfig'),
+      { path: 'soon', component: migrated.soon || LegacyIframe },
       legacy('/ov/setting'),
       legacy('/ov/twCompSet'),
       { path: 'jtSaleskits', component: migrated.jtSaleskits || LegacyIframe },

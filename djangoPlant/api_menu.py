@@ -95,6 +95,7 @@ MIGRATED = {
     'easyIC': '/easyIC',
     'aitools': '/aitools',
     'agent': '/agent',
+    'soon': '/soon',
 }
 
 
