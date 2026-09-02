@@ -23,6 +23,7 @@ const migrated = {
   updateCI: () => import('../views/updateCI/index.vue'),
   afterSales: () => import('../views/afterSales/index.vue'),
   miniprogram: () => import('../views/miniprogram/index.vue'),
+  usercenter: () => import('../views/usercenter/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -59,7 +60,7 @@ const routes = [
       { path: 'afterSales', component: migrated.afterSales || LegacyIframe },
       { path: 'miniprogram', component: migrated.miniprogram || LegacyIframe },
       { path: 'mynote', component: migrated.mynote || LegacyIframe },
-      legacy('/pv/usercenter'),
+      { path: 'usercenter', component: migrated.usercenter || LegacyIframe },
       legacy('/pv/easyIC'),
       legacy('/pv/aitools'),
       legacy('/pv/agent'),

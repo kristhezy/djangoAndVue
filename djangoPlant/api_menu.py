@@ -91,6 +91,7 @@ MIGRATED = {
     'updateCI': '/updateCI',
     'afterSales': '/afterSales',
     'miniprogram': '/miniprogram',
+    'usercenter': '/usercenter',
 }
 
 
