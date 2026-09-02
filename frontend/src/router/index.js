@@ -21,6 +21,7 @@ const migrated = {
   baseUpgradeSK: () => import('../views/baseUpgradeSK/index.vue'),
   companyModule: () => import('../views/companyModule/index.vue'),
   updateCI: () => import('../views/updateCI/index.vue'),
+  afterSales: () => import('../views/afterSales/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -54,7 +55,7 @@ const routes = [
       { path: 'aboutLogin', component: migrated.aboutLogin || LegacyIframe },
       { path: 'dzFunction', component: migrated.dzFunction || LegacyIframe },
       { path: 'batchDeleteClue', component: migrated.batchDeleteClue || LegacyIframe },
-      legacy('/sv/afterSales'),
+      { path: 'afterSales', component: migrated.afterSales || LegacyIframe },
       legacy('/sv/miniprogram'),
       { path: 'mynote', component: migrated.mynote || LegacyIframe },
       legacy('/pv/usercenter'),

@@ -89,6 +89,7 @@ MIGRATED = {
     'baseUpgradeSK': '/baseUpgradeSK',
     'companyModule': '/companyModule',
     'updateCI': '/updateCI',
+    'afterSales': '/afterSales',
 }
 
 

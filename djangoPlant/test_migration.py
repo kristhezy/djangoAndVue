@@ -252,3 +252,13 @@ class MenuApiTests(TestCase):
         # updateCI 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'updateCI')
         self.assertEqual(item['url'], '/updateCI')
+
+    def test_aftersales_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['afterSales']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # afterSales 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'afterSales')
+        self.assertEqual(item['url'], '/afterSales')
