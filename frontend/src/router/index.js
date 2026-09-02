@@ -17,6 +17,7 @@ const migrated = {
   hwskset: () => import('../views/hwskset/index.vue'),
   upgradeR3: () => import('../views/upgradeR3/index.vue'),
   basicComp: () => import('../views/basicComp/index.vue'),
+  baseUpgradeSK: () => import('../views/baseUpgradeSK/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -41,7 +42,7 @@ const routes = [
       { path: 'hwskset', component: migrated.hwskset || LegacyIframe },
       { path: 'upgradeR3', component: migrated.upgradeR3 || LegacyIframe },
       { path: 'basicComp', component: migrated.basicComp || LegacyIframe },
-      legacy('/sv/baseUpgradeSK'),
+      { path: 'baseUpgradeSK', component: migrated.baseUpgradeSK || LegacyIframe },
       legacy('/sv/updateCT'),
       legacy('/sv/companyModule'),
       { path: 'delCP', component: migrated.delCP || LegacyIframe },

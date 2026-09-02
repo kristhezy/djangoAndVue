@@ -201,3 +201,13 @@ class MenuApiTests(TestCase):
         # basicComp 在 compconfig 分组里
         item = next(x for x in data['groups'][0]['items'] if x['key'] == 'basicComp')
         self.assertEqual(item['url'], '/basicComp')
+
+    def test_baseupgradesk_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['baseUpgradeSK']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # baseUpgradeSK 在 compconfig 分组里
+        item = next(x for x in data['groups'][0]['items'] if x['key'] == 'baseUpgradeSK')
+        self.assertEqual(item['url'], '/baseUpgradeSK')
