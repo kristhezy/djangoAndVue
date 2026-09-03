@@ -296,6 +296,7 @@
             <i :class="['fa-solid fa-chevron-right chevron', {open:cards.account}]"></i>
           </div>
           <div class="m-card-bd">
+            <TabGroup :tabs="[{v:'1',l:'充值'},{v:'0',l:'扣减'}]" v-model="account.state" />
             <div class="fg">
               <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="account.uname" /></div>
               <div class="fgr"><label><span class="rq">*</span>金额</label><el-input v-model="account.amount" type="number" placeholder="请输入金额" /></div>
@@ -597,13 +598,15 @@ function submitGift() {
 }
 
 // ====== Card 10: 账户充值/扣减 ======
-const account = reactive({ uname:'', amount:'', env:'test', result:'', loading:false })
-function resetAccount() { Object.assign(account, { uname:'', amount:'', env:'test', result:'' }) }
+const account = reactive({ uname:'', amount:'', state:'1', env:'test', result:'', loading:false })
+function resetAccount() { Object.assign(account, { uname:'', amount:'', state:'1', env:'test', result:'' }) }
 function submitAccount() {
   if (!account.uname) { alert('请输入用户账号！'); return }
   if (!account.amount) { alert('请输入金额！'); return }
+  const typeLabel = account.state === '1' ? '充值' : '扣减'
+  if (!confirm(`确认对用户「${account.uname}」进行「${typeLabel}」操作，金额：${account.amount}？`)) return
   account.loading = true; account.result = ''
-  http.post('/ov/pmmeett/assetChange', { uname:account.uname, state:'1', camount:account.amount, env:account.env, version:7, emailSuffix, type:'assetChange' })
+  http.post('/ov/pmmeett/assetChange', { uname:account.uname, state:account.state, camount:account.amount, env:account.env, version:7, emailSuffix, type:'assetChange' })
     .then(r => { account.result = r.data?.data || '' }).catch(() => { account.result='请求失败' }).finally(() => { account.loading=false })
 }
 
