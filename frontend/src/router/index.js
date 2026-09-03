@@ -29,6 +29,8 @@ const migrated = {
   agent: () => import('../views/agent/index.vue'),
   soon: () => import('../views/soon/index.vue'),
   mmeett: () => import('../views/mmeett/index.vue'),
+  setting: () => import('../views/setting/index.vue'),
+  twCompSet: () => import('../views/twCompSet/index.vue'),
 }
 
 // 嵌套子路由：去掉前导斜杠作为 AppLayout（path:'/'）的 children
@@ -47,8 +49,8 @@ const routes = [
       { path: 'mmeett', component: migrated.mmeett || LegacyIframe },
       { path: 'other', component: migrated.other || LegacyIframe },
       { path: 'soon', component: migrated.soon || LegacyIframe },
-      legacy('/ov/setting'),
-      legacy('/ov/twCompSet'),
+      { path: 'setting', component: migrated.setting || LegacyIframe },
+      { path: 'twCompSet', component: migrated.twCompSet || LegacyIframe },
       { path: 'jtSaleskits', component: migrated.jtSaleskits || LegacyIframe },
       { path: 'hwskset', component: migrated.hwskset || LegacyIframe },
       { path: 'upgradeR3', component: migrated.upgradeR3 || LegacyIframe },

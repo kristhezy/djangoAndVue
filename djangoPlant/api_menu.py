@@ -97,6 +97,8 @@ MIGRATED = {
     'agent': '/agent',
     'soon': '/soon',
     'mmeett': '/mmeett',
+    'setting': '/setting',
+    'twCompSet': '/twCompSet',
 }
 
 

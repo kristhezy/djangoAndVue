@@ -332,3 +332,23 @@ class MenuApiTests(TestCase):
         # mmeett 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'mmeett')
         self.assertEqual(item['url'], '/mmeett')
+
+    def test_setting_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['setting']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # setting 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'setting')
+        self.assertEqual(item['url'], '/setting')
+
+    def test_twCompSet_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['twCompSet']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # twCompSet 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'twCompSet')
+        self.assertEqual(item['url'], '/twCompSet')
