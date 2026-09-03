@@ -31,7 +31,7 @@
               <el-button type="primary" :loading="c1.loading" @click="submit1">查询 &gt;&gt;</el-button>
               <el-button @click="reset1">重置</el-button>
             </div>
-            <div v-if="c1.result" class="as-result" v-html="c1.result"></div>
+            <div class="as-result" v-html="c1.result"></div>
           </div>
         </el-collapse-transition>
       </el-card>
@@ -70,7 +70,7 @@
                 <el-button @click="reset3">重置</el-button>
               </div>
             </div>
-            <div v-if="c3.result" class="as-result" v-html="c3.result"></div>
+            <div class="as-result" v-html="c3.result"></div>
           </div>
         </el-collapse-transition>
       </el-card>
@@ -98,7 +98,7 @@
               <el-button type="primary" :loading="c2.loading" @click="submit2">提交 &gt;&gt;</el-button>
               <el-button @click="reset2">重置</el-button>
             </div>
-            <div v-if="c2.result" class="as-result" v-html="c2.result"></div>
+            <div class="as-result" v-html="c2.result"></div>
           </div>
         </el-collapse-transition>
       </el-card>
@@ -125,7 +125,7 @@
               <el-button type="primary" :loading="c4.loading" @click="submit4">提交 &gt;&gt;</el-button>
               <el-button @click="reset4">重置</el-button>
             </div>
-            <div v-if="c4.result" class="as-result" v-html="c4.result"></div>
+            <div class="as-result" v-html="c4.result"></div>
           </div>
         </el-collapse-transition>
       </el-card>
@@ -153,7 +153,7 @@
               <el-button type="primary" :loading="c5.loading" @click="submit5">激活 &gt;&gt;</el-button>
               <el-button @click="reset5">重置</el-button>
             </div>
-            <div v-if="c5.result" class="as-result" v-html="c5.result"></div>
+            <div class="as-result" v-html="c5.result"></div>
           </div>
         </el-collapse-transition>
       </el-card>
@@ -410,6 +410,7 @@ function reset5() {
   display: flex;
   gap: 12px;
 }
+
 .as-column {
   display: flex;
   flex-direction: column;
@@ -419,19 +420,35 @@ function reset5() {
   overflow-y: auto;
   padding-top: 4px;
 }
-.as-column::-webkit-scrollbar { width: 5px; }
-.as-column::-webkit-scrollbar-track { background: transparent; }
-.as-column::-webkit-scrollbar-thumb { background: #c0c0c0; border-radius: 10px; }
-.as-column::-webkit-scrollbar-thumb:hover { background: #999; }
+
+.as-column::-webkit-scrollbar {
+  width: 5px;
+}
+
+.as-column::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.as-column::-webkit-scrollbar-thumb {
+  background: #ededed;
+  border-radius: 10px;
+}
+
+.as-column::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
 .as-card {
   flex-shrink: 0;
   border: 1px solid #e9e9e9;
   border-radius: 14px;
 }
+
 .as-card :deep(.el-card__header) {
   padding: 0;
   border-bottom: none;
 }
+
 .as-card-header {
   display: flex;
   justify-content: space-between;
@@ -444,22 +461,27 @@ function reset5() {
   user-select: none;
   border-radius: 14px 14px 0 0;
 }
+
 .as-card-header:hover {
   background: #fafafa;
 }
+
 .as-card-header__title {
   font-size: 15px;
   font-weight: 600;
   color: #1a1a1a;
 }
+
 .as-card-header__arrow {
   font-size: 12px;
   color: #666;
   transition: transform 0.3s;
 }
+
 .as-card-header__arrow.is-collapsed {
   transform: rotate(-90deg);
 }
+
 .as-card :deep(.el-card__body) {
   padding: 16px;
   display: flex;
@@ -467,6 +489,7 @@ function reset5() {
   align-items: center;
   gap: 8px;
 }
+
 /* 表单网格：label 宽度自适应 + 200px 输入框 */
 .as-form-grid {
   display: grid;
@@ -478,29 +501,34 @@ function reset5() {
   max-width: 420px;
   justify-content: center;
 }
+
 .as-form-grid label {
   text-align: right;
   font-size: 14px;
   white-space: nowrap;
   color: #606266;
 }
+
 .as-radio-group {
   display: flex;
   justify-content: center;
   margin: 10px 0;
 }
+
 .as-row-actions {
   display: flex;
   align-items: center;
   gap: 15px;
   margin-top: 10px;
 }
+
 .as-btns {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 8px;
 }
+
 .as-result {
   margin-top: 10px;
   padding: 10px;
@@ -515,7 +543,7 @@ function reset5() {
   word-wrap: break-word;
   word-break: break-all;
   white-space: pre-wrap;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
+  background: #ffffff;
+  /* border: 1px solid #f0f0f0; */
 }
 </style>

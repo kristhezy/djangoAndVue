@@ -34,7 +34,8 @@
                 <el-checkbox value="addm">添加域名</el-checkbox>
               </el-checkbox-group>
             </div>
-            <el-button type="primary" :loading="loading" :disabled="loading || !cid" @click="submitBaconfig">提交</el-button>
+            <el-button type="primary" :loading="loading" :disabled="loading || !cid"
+              @click="submitBaconfig">提交</el-button>
             <div v-if="tsqrlt" class="mp-result">{{ tsqrlt }}</div>
           </div>
 
@@ -48,7 +49,8 @@
                 <el-radio value="ucaudit">撤回审核</el-radio>
               </el-radio-group>
             </div>
-            <el-button type="primary" :loading="loading" :disabled="loading || !cid" @click="submitAuditRelease">提交</el-button>
+            <el-button type="primary" :loading="loading" :disabled="loading || !cid"
+              @click="submitAuditRelease">提交</el-button>
             <div v-if="tsrlt" class="mp-result">{{ tsrlt }}</div>
           </div>
 
@@ -62,7 +64,8 @@
               </el-radio-group>
             </div>
             <el-input v-if="tyb !== 'getqrcode'" v-model="wcid" placeholder="输入微信号" />
-            <el-button type="primary" :loading="loading" :disabled="loading || !cid" @click="submitTester">提交</el-button>
+            <el-button type="primary" :loading="loading" :disabled="loading || !cid"
+              @click="submitTester">提交</el-button>
             <div v-if="tybrlt" class="mp-result">
               <img v-if="tyb === 'getqrcode' && tybrlt.startsWith('/static/img/')" :src="tybrlt" height="180" />
               <template v-else>{{ tybrlt }}</template>
@@ -73,11 +76,13 @@
           <el-dialog v-model="showTips" title="提示" width="360px" :close-on-click-modal="false">
             <div class="mp-tips-content">
               <div>请先配置业务域名的
-                <el-button type="primary" plain size="small" :loading="loading" @click="downloadWdcFile">校验文件</el-button>
+                <el-button type="primary" plain size="small" :loading="loading"
+                  @click="downloadWdcFile">校验文件</el-button>
                 ，并点击按钮去上传。
               </div>
               <div class="mp-tips-actions">
-                <el-button type="primary" @click="window.open('https://dsa-app.aijiatui.com/upload.html', '_blank')">去上传</el-button>
+                <el-button type="primary"
+                  @click="window.open('https://dsa-app.aijiatui.com/upload.html', '_blank')">去上传</el-button>
               </div>
             </div>
           </el-dialog>
@@ -87,24 +92,26 @@
 
     <!-- 右侧：操作记录 -->
     <div class="mp-right">
-      <el-card class="mp-card" shadow="never">
+      <el-card class="mp-card mp-card--right" shadow="never">
+        <template #header>
+          <span class="mp-card-header__title">操作记录</span>
+        </template>
         <div class="mp-card-body">
           <!-- 搜索 -->
           <div class="mp-search">
-            <el-input v-model="qkey" placeholder="输入企业账号/ID/名称/appID查询" clearable
-              @keydown.enter="searchRecords" />
+            <el-input v-model="qkey" placeholder="输入企业账号/ID/名称/appID查询" clearable @keydown.enter="searchRecords" />
             <el-button type="primary" @click="searchRecords">查询</el-button>
           </div>
 
           <!-- 表格 -->
-          <el-table :data="records" stripe style="width: 100%" v-loading="loadingRecords"
-            @row-click="onRowClick" row-class-name="mp-clickable-row" empty-text="暂无数据">
-            <el-table-column prop="phone" label="账号" width="10%" />
-            <el-table-column prop="companyName" label="企业名称" width="22%" />
-            <el-table-column prop="appId" label="appID" width="18%" />
-            <el-table-column prop="oContent" label="操作信息" width="32%" />
-            <el-table-column prop="uname" label="操作人" width="8%" />
-            <el-table-column prop="createTime" label="操作时间" width="10%" />
+          <el-table :data="records" stripe class="mp-table" v-loading="loadingRecords" @row-click="onRowClick"
+            row-class-name="mp-clickable-row" empty-text="暂无数据">
+            <el-table-column prop="phone" label="账号" min-width="110" />
+            <el-table-column prop="companyName" label="企业名称" min-width="220" />
+            <el-table-column prop="appId" label="appID" min-width="160" />
+            <el-table-column prop="oContent" label="操作信息" min-width="220" show-overflow-tooltip />
+            <el-table-column prop="uname" label="操作人" min-width="80" />
+            <el-table-column prop="createTime" label="操作时间" min-width="160" />
           </el-table>
 
           <!-- 分页 -->
@@ -372,45 +379,58 @@ onMounted(() => {
   display: flex;
   gap: 12px;
 }
+
 .mp-left {
   width: 507px;
   min-width: 400px;
   padding: 15px 0;
   overflow-y: auto;
 }
+
 .mp-right {
   flex: 1;
   min-width: 0;
   padding: 15px 0;
   overflow-y: auto;
 }
+
 .mp-card {
   height: 100%;
   border-radius: 16px;
   overflow: hidden;
 }
+
+.mp-card--right {
+  border-radius: 16px;
+}
+
 .mp-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .mp-card-header__title {
   font-size: 14px;
   font-weight: 600;
   color: #333;
 }
+
 .mp-card-body {
-  padding: 12px 16px;
+  /* padding: 12px 16px; */
 }
+
 .mp-query {
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: center;
 }
+
 .mp-query .el-input {
   flex: 1;
 }
+
 .mp-cinfo {
   margin: 15px 0;
   min-height: 92px;
@@ -419,6 +439,7 @@ onMounted(() => {
   border-radius: 4px;
   line-height: 1.6;
 }
+
 .mp-section {
   margin: 12px 0;
   padding-bottom: 12px;
@@ -427,46 +448,62 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
 }
+
 .mp-section__row {
   display: flex;
   gap: 12px;
   align-items: center;
 }
+
 .mp-result {
   min-height: 20px;
   font-size: 14px;
   margin-top: 8px;
   color: #606266;
 }
+
 .mp-tips-content {
   text-align: center;
 }
+
 .mp-tips-actions {
   margin-top: 16px;
 }
+
 .mp-search {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
+
 .mp-search .el-input {
   flex: 1;
 }
-.mp-clickable-row {
+
+.mp-table {
+  width: 100%;
+}
+
+.mp-table :deep(.mp-clickable-row) {
   cursor: pointer;
 }
-.mp-clickable-row:hover {
-  background-color: #f5f5f5 !important;
+
+.mp-table :deep(.mp-clickable-row:hover > .el-table__cell) {
+  background-color: #f0f5ff !important;
 }
+
 .mp-pagination {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
 }
+
 .mp-stats {
   color: #666;
   font-size: 14px;
+  white-space: nowrap;
 }
 </style>

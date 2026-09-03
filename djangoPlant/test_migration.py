@@ -322,3 +322,13 @@ class MenuApiTests(TestCase):
         # soon 是 standalone 菜单
         item = next(x for x in data['standalone'] if x['key'] == 'soon')
         self.assertEqual(item['url'], '/soon')
+
+    def test_mmeett_menu_url_rewritten_to_frontend_path(self):
+        s = self.c.session
+        s['menus'] = ['mmeett']
+        s.save()
+        resp = self.c.get('/api/menu')
+        data = resp.json()['data']
+        # mmeett 是 standalone 菜单
+        item = next(x for x in data['standalone'] if x['key'] == 'mmeett')
+        self.assertEqual(item['url'], '/mmeett')

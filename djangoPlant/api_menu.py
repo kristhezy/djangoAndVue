@@ -96,6 +96,7 @@ MIGRATED = {
     'aitools': '/aitools',
     'agent': '/agent',
     'soon': '/soon',
+    'mmeett': '/mmeett',
 }
 
 

@@ -3,7 +3,9 @@
     <div class="delcp-cols">
       <!-- 卡片1: 删除线索/合伙人 -->
       <el-card class="delcp-card" shadow="never">
-        <template #header><div class="delcp-title">删除线索/合伙人</div></template>
+        <template #header>
+          <div class="delcp-title">删除线索/合伙人</div>
+        </template>
         <el-form label-width="90px">
           <el-form-item label="企业 ID" required>
             <el-input v-model="form1.companyName" placeholder="请输入企业ID" />
@@ -48,7 +50,9 @@
 
       <!-- 卡片2: 根据手机号查询用户ID -->
       <el-card class="delcp-card" shadow="never">
-        <template #header><div class="delcp-title">根据手机号查询用户ID</div></template>
+        <template #header>
+          <div class="delcp-title">根据手机号查询用户ID</div>
+        </template>
         <el-form label-width="90px">
           <el-form-item label="企业 ID" required>
             <el-input v-model="form2.cid" />
@@ -72,7 +76,9 @@
 
       <!-- 卡片3: 销售添加线索 -->
       <el-card class="delcp-card" shadow="never">
-        <template #header><div class="delcp-title">销售添加线索</div></template>
+        <template #header>
+          <div class="delcp-title">销售添加线索</div>
+        </template>
         <el-form label-width="90px">
           <el-form-item label="企业 ID" required>
             <el-input v-model="form3.companyId" />
@@ -274,11 +280,13 @@ function resetForm3() {
   padding: 16px;
   box-sizing: border-box;
 }
+
 .delcp-cols {
   height: 100%;
   display: flex;
   gap: 16px;
 }
+
 .delcp-card {
   flex: 1;
   min-width: 0;
@@ -286,10 +294,42 @@ function resetForm3() {
   flex-direction: column;
   overflow: hidden;
 }
-.delcp-card :deep(.el-card__body) { overflow-y: auto; }
-.delcp-title { text-align: center; font-weight: 600; font-size: 18px; }
-.delcp-actions { display: flex; justify-content: center; gap: 12px; margin: 12px 0; }
-.delcp-note { font-size: 12px; color: #f56c6c; text-align: center; margin: 6px 0; }
-.result { margin-top: 12px; font-size: 14px; color: #303133; white-space: pre-wrap; word-break: break-all; }
-.batch-input { width: 140px; margin-left: 8px; }
+
+.delcp-card :deep(.el-card__body) {
+  overflow-y: auto;
+}
+
+.delcp-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.delcp-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.delcp-note {
+  font-size: 12px;
+  color: #f56c6c;
+  text-align: center;
+  margin: 6px 0;
+}
+
+.result {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #303133;
+  white-space: pre-wrap;
+  word-break: break-all;
+  text-align: center;
+}
+
+.batch-input {
+  width: 140px;
+  margin-left: 8px;
+}
 </style>

@@ -19,14 +19,24 @@ http.interceptors.request.use((config) => {
   return config
 })
 
-// 拦截「后端重定向」：axios 跟随重定向后拿不到明确的 302 状态，
-// 通过返回体无 json 或最终 URL 判断。这里用 401/403 兜底 + 手动检查。
+// 拦截「后端重定向」：Django 的 login_required 默认返回 302 到登录页，
+// axios 跟随重向后拿到的是 HTML（200），无法解析为 JSON。
+// 通过检查响应类型和最终 URL 来判断是否需要跳登录页。
 http.interceptors.response.use(
-  (resp) => resp,
+  (resp) => {
+    // 后端 302 跟随后拿到 HTML：Content-Type 为 text/html 说明被重定向到了登录页
+    const ct = resp.headers['content-type'] || ''
+    if (ct.includes('text/html')) {
+      // 如果最终 URL 包含 /login 说明被重定向到了登录页
+      if (resp.request?.responseURL?.includes('/login')) {
+        window.location.href = '/login'
+      }
+    }
+    return resp
+  },
   (err) => {
     const status = err.response?.status
     if (status === 401 || status === 403) {
-      // 未登录/无权限：跳回登录页
       window.location.href = '/login'
     }
     return Promise.reject(err)
