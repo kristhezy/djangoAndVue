@@ -1,210 +1,310 @@
 <template>
   <div class="mo-page">
-    <div style="text-align:right;padding:2px 18px 0 0;">
-      <label style="font-size:12px;color:#666;">邮箱后缀:</label>
-      <el-input v-model="emailSuffix" style="width:120px;display:inline-flex" size="small" />
+    <!-- 顶部工具栏 -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <h2 class="page-title"><i class="fa-solid fa-layer-group"></i> Mmeett 开户 & 配置</h2>
+      </div>
+      <div class="toolbar-right">
+        <span class="suffix-label">邮箱后缀</span>
+        <el-input v-model="emailSuffix" size="small" style="width:130px" />
+      </div>
     </div>
+
     <div class="mo-body">
       <!-- 第一列 -->
       <div class="column">
         <!-- 卡片1: Mmeett注册用户 -->
-        <Card title="Mmeett注册用户" :open="cards.reg">
-          <template #header><span class="ct" @click="cards.reg=!cards.reg">▼</span></template>
-          <TabGroup :tabs="[{v:'regist',l:'用户注册'},{v:'bemaspp',l:'绑定邮箱&设置支付密码'}]" v-model="reg.mset" @change="onRegTab" />
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="reg.uname" placeholder="输入用户账号" /></div>
-            <div v-if="reg.mset==='regist'" class="fgr"><label><span class="rq">*</span>邀请码:</label><el-input v-model="reg.rcode" placeholder="输入邀请码" /></div>
-            <div v-if="reg.mset==='regist'" class="fgr"><label><span class="rq">*</span>国家/地区:</label><el-select v-model="reg.country" style="width:180px" @focus="loadCountries"><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
-            <div class="fgr"><label><span class="rq">*</span>登录密码:</label><el-input v-model="reg.pwd" /></div>
-            <div v-if="reg.mset==='regist' && reg.env==='test'" class="fgr"><label><span class="rq">*</span>绑定邮箱:</label><el-select v-model="reg.bemail" style="width:180px"><el-option label="是" value="yes" /><el-option label="否" value="no" /></el-select></div>
-            <div v-if="reg.mset==='regist' && reg.env==='test'" class="fgr"><label><span class="rq">*</span>支付密码:</label><el-input v-model="reg.paypwd" /></div>
-            <div class="fgr"><label><span class="rq">*</span>账号数量:</label><el-input v-model="reg.unum" type="number" /></div>
+        <div :class="['m-card', {collapsed:!cards.reg}]">
+          <div class="m-card-hd accent-blue" @click="cards.reg=!cards.reg">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-user-plus card-icon"></i>
+              <h3>Mmeett注册用户</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.reg}]"></i>
           </div>
-          <EnvRadio v-model="reg.env" name="reg-env" />
-          <BtnGroup @reset="resetReg" @submit="submitReg" />
-          <ResultBox :lines="reg.results" :loading="reg.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <TabGroup :tabs="[{v:'regist',l:'用户注册'},{v:'bemaspp',l:'绑定邮箱&设置支付密码'}]" v-model="reg.mset" @change="onRegTab" />
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="reg.uname" placeholder="输入用户账号" /></div>
+              <div v-if="reg.mset==='regist'" class="fgr"><label><span class="rq">*</span>邀请码</label><el-input v-model="reg.rcode" placeholder="输入邀请码" /></div>
+              <div v-if="reg.mset==='regist'" class="fgr"><label><span class="rq">*</span>国家/地区</label><el-select v-model="reg.country" @focus="loadCountries"><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
+              <div class="fgr"><label><span class="rq">*</span>登录密码</label><el-input v-model="reg.pwd" /></div>
+              <div v-if="reg.mset==='regist' && reg.env==='test'" class="fgr"><label><span class="rq">*</span>绑定邮箱</label><el-select v-model="reg.bemail"><el-option label="是" value="yes" /><el-option label="否" value="no" /></el-select></div>
+              <div v-if="reg.mset==='regist' && reg.env==='test'" class="fgr"><label><span class="rq">*</span>支付密码</label><el-input v-model="reg.paypwd" /></div>
+              <div class="fgr"><label><span class="rq">*</span>账号数量</label><el-input v-model="reg.unum" type="number" /></div>
+            </div>
+            <EnvRadio v-model="reg.env" name="reg-env" />
+            <BtnGroup @reset="resetReg" @submit="submitReg" />
+            <ResultBox :lines="reg.results" :loading="reg.loading" />
+          </div>
+        </div>
 
         <!-- 卡片4: 修改国家/地区 | 用户名 | 用户邮箱 -->
-        <Card title="修改国家/地区 | 用户名 | 用户邮箱" :open="cards.cfg">
-          <template #header><span class="ct" @click="cards.cfg=!cards.cfg">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="cfg.uname" /></div>
-            <div class="fgr"><label>用户名:</label>
-              <div style="display:flex;width:180px"><el-input v-model="cfg.userName" style="flex:1" /><el-button size="small" @click="queryUser('userName')" title="查询用户名"><i class="fa-solid fa-user"></i></el-button></div></div>
-            <div class="fgr"><label>用户邮箱:</label>
-              <div style="display:flex;width:180px"><el-input v-model="cfg.userEmail" style="flex:1" /><el-button size="small" @click="queryUser('userEmail')" title="查询用户邮箱"><i class="fa-solid fa-envelope"></i></el-button></div></div>
-            <div class="fgr"><label>国家/地区:</label>
-              <div style="display:flex;width:180px"><el-select v-model="cfg.country" style="flex:1" @focus="loadCountries"><el-option label="--请选择--" value="" /><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select><el-button size="small" @click="queryUser('country')" title="查询注册国家"><i class="fa-solid fa-earth-americas"></i></el-button></div></div>
+        <div :class="['m-card', {collapsed:!cards.cfg}]">
+          <div class="m-card-hd accent-orange" @click="cards.cfg=!cards.cfg">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-pen-to-square card-icon"></i>
+              <h3>修改用户信息</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.cfg}]"></i>
           </div>
-          <EnvRadio v-model="cfg.env" name="cfg-env" />
-          <BtnGroup @reset="resetCfg" @submit="submitCfg" />
-          <ResultBox :text="cfg.result" :loading="cfg.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="cfg.uname" /></div>
+              <div class="fgr"><label>用户名</label>
+                <div class="input-with-btn"><el-input v-model="cfg.userName" /><el-button size="small" @click="queryUser('userName')" title="查询用户名"><i class="fa-solid fa-user"></i></el-button></div></div>
+              <div class="fgr"><label>用户邮箱</label>
+                <div class="input-with-btn"><el-input v-model="cfg.userEmail" /><el-button size="small" @click="queryUser('userEmail')" title="查询用户邮箱"><i class="fa-solid fa-envelope"></i></el-button></div></div>
+              <div class="fgr"><label>国家/地区</label>
+                <div class="input-with-btn"><el-select v-model="cfg.country" @focus="loadCountries"><el-option label="--请选择--" value="" /><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select><el-button size="small" @click="queryUser('country')" title="查询注册国家"><i class="fa-solid fa-earth-americas"></i></el-button></div></div>
+            </div>
+            <EnvRadio v-model="cfg.env" name="cfg-env" />
+            <BtnGroup @reset="resetCfg" @submit="submitCfg" />
+            <ResultBox :text="cfg.result" :loading="cfg.loading" />
+          </div>
+        </div>
 
         <!-- 卡片7: 用户安置 -->
-        <Card title="用户安置" :open="cards.settle">
-          <template #header><span class="ct" @click="cards.settle=!cards.settle">▼</span></template>
-          <TabGroup :tabs="[{v:'place',l:'安置'},{v:'cancel',l:'取消安置'}]" v-model="settle.type" @change="onSettleTab" />
-          <div v-if="settle.type==='cancel'" class="radio-group">
-            <label><span class="rq">*</span>取消方向:</label>
-            <label v-for="d in [{v:'all',l:'全部'},{v:'up',l:'上级'},{v:'down',l:'下级'}]" :key="d.v" :class="{active:settle.cancelDir===d.v}"><input type="radio" :value="d.v" v-model="settle.cancelDir" /> {{ d.l }}</label>
+        <div :class="['m-card', {collapsed:!cards.settle}]">
+          <div class="m-card-hd accent-green" @click="cards.settle=!cards.settle">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-sitemap card-icon"></i>
+              <h3>用户安置</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.settle}]"></i>
           </div>
-          <div class="fgi"><label><span class="rq">*</span>用户账号:</label><el-input v-model="settle.uname" style="width:140px" />
-            <el-button size="small" text type="primary" @click="getTree('gettree')">查看树形结构</el-button>
-            <el-button size="small" text type="primary" @click="getTree('issettle')">是否被安置</el-button>
+          <div class="m-card-bd">
+            <TabGroup :tabs="[{v:'place',l:'安置'},{v:'cancel',l:'取消安置'}]" v-model="settle.type" @change="onSettleTab" />
+            <div v-if="settle.type==='cancel'" class="pill-group">
+              <span class="pill-label"><span class="rq">*</span>取消方向</span>
+              <div class="pill-options">
+                <label v-for="d in [{v:'all',l:'全部'},{v:'up',l:'上级'},{v:'down',l:'下级'}]" :key="d.v" :class="{active:settle.cancelDir===d.v}"><input type="radio" :value="d.v" v-model="settle.cancelDir" />{{ d.l }}</label>
+              </div>
+            </div>
+            <div class="fgi"><label><span class="rq">*</span>用户账号</label><el-input v-model="settle.uname" style="width:140px" />
+              <el-button size="small" text type="primary" @click="getTree('gettree')">查看树形结构</el-button>
+              <el-button size="small" text type="primary" @click="getTree('issettle')">是否被安置</el-button>
+            </div>
+            <div v-if="settle.checkResult" class="check-result">{{ settle.checkResult }}</div>
+            <div v-if="settle.type==='place'" class="pill-group">
+              <span class="pill-label"><span class="rq">*</span>是否批量</span>
+              <div class="pill-options">
+                <label :class="{active:settle.isBatch==='1'}"><input type="radio" value="1" v-model="settle.isBatch" />是</label>
+                <label :class="{active:settle.isBatch==='0'}"><input type="radio" value="0" v-model="settle.isBatch" />否</label>
+              </div>
+            </div>
+            <EnvRadio v-model="settle.env" name="settle-env" />
+            <BtnGroup @reset="resetSettle" @submit="submitSettle" />
+            <ResultBox :lines="settle.results" :loading="settle.loading" />
           </div>
-          <div v-if="settle.checkResult" style="color:blue;font-size:12px;margin:4px 0">{{ settle.checkResult }}</div>
-          <div v-if="settle.type==='place'" class="radio-group">
-            <label><span class="rq">*</span>是否批量:</label>
-            <label :class="{active:settle.isBatch==='1'}"><input type="radio" value="1" v-model="settle.isBatch" /> 是</label>
-            <label :class="{active:settle.isBatch==='0'}"><input type="radio" value="0" v-model="settle.isBatch" /> 否</label>
-          </div>
-          <EnvRadio v-model="settle.env" name="settle-env" />
-          <BtnGroup @reset="resetSettle" @submit="submitSettle" />
-          <ResultBox :lines="settle.results" :loading="settle.loading" />
-        </Card>
+        </div>
 
         <!-- 卡片9: 赠送点位 -->
-        <Card title="赠送点位" :open="cards.gift">
-          <template #header><span class="ct" @click="cards.gift=!cards.gift">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="gift.uname" /></div>
-            <div class="fgr"><label><span class="rq">*</span>会员等级:</label>
-              <el-select v-model="gift.level" placeholder="--请选择--" style="width:180px">
-                <el-option label="尊享" value="-1" /><el-option label="银级" value="3" /><el-option label="金级" value="1" /><el-option label="白金" value="2" /><el-option label="钻石" value="4" />
-              </el-select></div>
-            <div class="fgr"><label><span class="rq">*</span>会员数量:</label><el-input v-model="gift.amount" type="number" /></div>
-            <div class="fgr"><label><span class="rq">*</span>有效天数:</label><el-input v-model="gift.expire" type="number" /></div>
+        <div :class="['m-card', {collapsed:!cards.gift}]">
+          <div class="m-card-hd accent-purple" @click="cards.gift=!cards.gift">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-gift card-icon"></i>
+              <h3>赠送点位</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.gift}]"></i>
           </div>
-          <EnvRadio v-model="gift.env" name="gift-env" />
-          <BtnGroup @reset="resetGift" @submit="submitGift" />
-          <ResultBox :text="gift.result" :loading="gift.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="gift.uname" /></div>
+              <div class="fgr"><label><span class="rq">*</span>会员等级</label>
+                <el-select v-model="gift.level" placeholder="--请选择--">
+                  <el-option label="尊享" value="-1" /><el-option label="银级" value="3" /><el-option label="金级" value="1" /><el-option label="白金" value="2" /><el-option label="钻石" value="4" />
+                </el-select></div>
+              <div class="fgr"><label><span class="rq">*</span>会员数量</label><el-input v-model="gift.amount" type="number" /></div>
+              <div class="fgr"><label><span class="rq">*</span>有效天数</label><el-input v-model="gift.expire" type="number" /></div>
+            </div>
+            <EnvRadio v-model="gift.env" name="gift-env" />
+            <BtnGroup @reset="resetGift" @submit="submitGift" />
+            <ResultBox :text="gift.result" :loading="gift.loading" />
+          </div>
+        </div>
       </div>
 
       <!-- 第二列 -->
       <div class="column">
         <!-- 卡片2: Mmeett余额购买会员 -->
-        <Card title="Mmeett余额购买会员" :open="cards.buy">
-          <template #header><span class="ct" @click="cards.buy=!cards.buy">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="buy.uname" @blur="getRechargeConfig" /></div>
-            <div class="fgr"><label><span class="rq">*</span>会员类型:</label><el-select v-model="buy.level" placeholder="--请选择--" style="width:180px"><el-option v-for="l in buy.levels" :key="l.id" :label="l.name" :value="l.id" /></el-select></div>
-            <div class="fgr"><label><span class="rq">*</span>账号数量:</label><el-input v-model="buy.unum" type="number" /></div>
+        <div :class="['m-card', {collapsed:!cards.buy}]">
+          <div class="m-card-hd accent-blue" @click="cards.buy=!cards.buy">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-crown card-icon"></i>
+              <h3>余额购买会员</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.buy}]"></i>
           </div>
-          <EnvRadio v-model="buy.env" name="buy-env" />
-          <div style="color:red;font-size:13px;text-align:center;margin:4px 0">注：相同会员类型可批量执行，反之，则只可单个执行。</div>
-          <BtnGroup @reset="resetBuy" @submit="submitBuy" />
-          <ResultBox :lines="buy.results" :loading="buy.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="buy.uname" @blur="getRechargeConfig" /></div>
+              <div class="fgr"><label><span class="rq">*</span>会员类型</label><el-select v-model="buy.level" placeholder="--请选择--"><el-option v-for="l in buy.levels" :key="l.id" :label="l.name" :value="l.id" /></el-select></div>
+              <div class="fgr"><label><span class="rq">*</span>账号数量</label><el-input v-model="buy.unum" type="number" /></div>
+            </div>
+            <EnvRadio v-model="buy.env" name="buy-env" />
+            <div class="hint-text">注：相同会员类型可批量执行，反之仅可单个执行。</div>
+            <BtnGroup @reset="resetBuy" @submit="submitBuy" />
+            <ResultBox :lines="buy.results" :loading="buy.loading" />
+          </div>
+        </div>
 
         <!-- 卡片8: 会员降级 -->
-        <Card title="会员降级" :open="cards.sv">
-          <template #header><span class="ct" @click="cards.sv=!cards.sv">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="sv.uname" /></div>
-            <div class="fgr"><label><span class="rq">*</span>会员等级:</label>
-              <el-select v-model="sv.level" style="width:180px"><el-option label="非会员" :value="0" /><el-option label="银级" :value="3" /><el-option label="金级" :value="1" /><el-option label="白金" :value="2" /></el-select></div>
+        <div :class="['m-card', {collapsed:!cards.sv}]">
+          <div class="m-card-hd accent-orange" @click="cards.sv=!cards.sv">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-arrow-down-long card-icon"></i>
+              <h3>会员降级</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.sv}]"></i>
           </div>
-          <EnvRadio v-model="sv.env" name="sv-env" />
-          <BtnGroup @reset="resetSv" @submit="submitSv" />
-          <ResultBox :text="sv.result" :loading="sv.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="sv.uname" /></div>
+              <div class="fgr"><label><span class="rq">*</span>会员等级</label>
+                <el-select v-model="sv.level"><el-option label="非会员" :value="0" /><el-option label="银级" :value="3" /><el-option label="金级" :value="1" /><el-option label="白金" :value="2" /></el-select></div>
+            </div>
+            <EnvRadio v-model="sv.env" name="sv-env" />
+            <BtnGroup @reset="resetSv" @submit="submitSv" />
+            <ResultBox :text="sv.result" :loading="sv.loading" />
+          </div>
+        </div>
 
         <!-- 卡片5: 分成奖励重跑 -->
-        <Card title="分成奖励重跑" :open="cards.reward">
-          <template #header><span class="ct" @click="cards.reward=!cards.reward">▼</span></template>
-          <div class="checkbox-group">
-            <el-checkbox v-model="reward.pre">预结算</el-checkbox>
-            <el-checkbox v-model="reward.detail">明细</el-checkbox>
-            <el-checkbox v-model="reward.summary">汇总</el-checkbox>
+        <div :class="['m-card', {collapsed:!cards.reward}]">
+          <div class="m-card-hd accent-green" @click="cards.reward=!cards.reward">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-rotate card-icon"></i>
+              <h3>分成奖励重跑</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.reward}]"></i>
           </div>
-          <div class="cb-grid">
-            <span class="grid-title">奖励类型 <el-checkbox v-model="reward.allTypes" @change="onRewardAllChange" style="color:#4f6ef7">全选</el-checkbox></span>
-            <el-checkbox v-for="rt in rewardTypeList" :key="rt.v" :label="rt.l" :value="rt.v" v-model="reward.types" />
+          <div class="m-card-bd">
+            <div class="section-label">结算类型</div>
+            <div class="checkbox-group">
+              <el-checkbox v-model="reward.pre">预结算</el-checkbox>
+              <el-checkbox v-model="reward.detail">明细</el-checkbox>
+              <el-checkbox v-model="reward.summary">汇总</el-checkbox>
+            </div>
+            <div class="section-label">奖励类型 <el-checkbox v-model="reward.allTypes" @change="onRewardAllChange" class="select-all-cb">全选</el-checkbox></div>
+            <div class="cb-grid">
+              <el-checkbox v-for="rt in rewardTypeList" :key="rt.v" :label="rt.l" :value="rt.v" v-model="reward.types" />
+            </div>
+            <div v-if="reward.types.includes('43')" class="checkbox-group" style="margin-top:4px">
+              <span class="section-label" style="margin:0">集团奖励模式</span>
+              <el-checkbox v-model="reward.weekly">周结</el-checkbox>
+              <el-checkbox v-model="reward.monthly">月结</el-checkbox>
+            </div>
+            <div class="fgi">
+              <label><span class="rq">*</span>时间范围</label>
+              <el-date-picker v-model="reward.dateRange" type="daterange" start-placeholder="开始" end-placeholder="结束" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width:240px" />
+            </div>
+            <EnvRadio v-model="reward.env" name="reward-env" />
+            <BtnGroup @reset="resetReward" @submit="submitReward" />
+            <ResultBox :lines="reward.results" :loading="reward.loading" />
           </div>
-          <div v-if="reward.types.includes('43')" class="checkbox-group" style="margin-top:8px">
-            <span style="font-weight:500">集团奖励重跑模式:</span>
-            <el-checkbox v-model="reward.weekly">周结</el-checkbox>
-            <el-checkbox v-model="reward.monthly">月结</el-checkbox>
-          </div>
-          <div class="fgi">
-            <label><span class="rq">*</span>时间范围:</label>
-            <el-date-picker v-model="reward.dateRange" type="daterange" start-placeholder="开始" end-placeholder="结束" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width:220px" />
-          </div>
-          <EnvRadio v-model="reward.env" name="reward-env" />
-          <BtnGroup @reset="resetReward" @submit="submitReward" />
-          <ResultBox :lines="reward.results" :loading="reward.loading" />
-        </Card>
+        </div>
 
         <!-- 用户注销 -->
-        <Card title="用户注销" :open="cards.del">
-          <template #header><span class="ct" @click="cards.del=!cards.del">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>账号:</label><el-input v-model="del.account" placeholder="输入账号" /></div>
-            <div class="fgr"><label><span class="rq">*</span>密码:</label><el-input v-model="del.pwd" /></div>
-            <div class="fgr"><label><span class="rq">*</span>数量:</label><el-input v-model="del.num" type="number" :min="1" :max="10000" /></div>
+        <div :class="['m-card', {collapsed:!cards.del}]">
+          <div class="m-card-hd accent-red" @click="cards.del=!cards.del">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-user-slash card-icon"></i>
+              <h3>用户注销</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.del}]"></i>
           </div>
-          <EnvRadio v-model="del.env" name="del-env" />
-          <BtnGroup @reset="resetDel" @submit="submitDel" />
-          <ResultBox :text="del.result" :loading="del.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>账号</label><el-input v-model="del.account" placeholder="输入账号" /></div>
+              <div class="fgr"><label><span class="rq">*</span>密码</label><el-input v-model="del.pwd" /></div>
+              <div class="fgr"><label><span class="rq">*</span>数量</label><el-input v-model="del.num" type="number" :min="1" :max="10000" /></div>
+            </div>
+            <EnvRadio v-model="del.env" name="del-env" />
+            <BtnGroup @reset="resetDel" @submit="submitDel" />
+            <ResultBox :text="del.result" :loading="del.loading" />
+          </div>
+        </div>
       </div>
 
       <!-- 第三列 -->
       <div class="column">
         <!-- 卡片3: Mmeett生成邀请链路 -->
-        <Card title="Mmeett生成邀请链路" :open="cards.ref">
-          <template #header><span class="ct" @click="cards.ref=!cards.ref">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="ref.uname" @blur="queryRCode" /></div>
-            <div class="fgr"><label><span class="rq">*</span>邀请码:</label><el-input v-model="ref.rcode" /></div>
-            <div class="fgr"><label><span class="rq">*</span>国家/地区:</label><el-select v-model="ref.country" style="width:180px" @focus="loadCountries"><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
-            <div class="fgr"><label><span class="rq">*</span>会员类型:</label>
-              <el-select v-model="ref.level" style="width:180px"><el-option label="银级" value="3" /><el-option label="金级" value="1" /><el-option label="白金" value="2" /><el-option label="钻石" value="4" /></el-select></div>
-            <div class="fgr"><label><span class="rq">*</span>账号数量:</label><el-input v-model="ref.unum" type="number" /></div>
+        <div :class="['m-card', {collapsed:!cards.ref}]">
+          <div class="m-card-hd accent-blue" @click="cards.ref=!cards.ref">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-link card-icon"></i>
+              <h3>生成邀请链路</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.ref}]"></i>
           </div>
-          <EnvRadio v-model="ref.env" name="ref-env" />
-          <BtnGroup @reset="resetRef" @submit="submitRef" />
-          <ResultBox :lines="ref.results" :loading="ref.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="ref.uname" @blur="queryRCode" /></div>
+              <div class="fgr"><label><span class="rq">*</span>邀请码</label><el-input v-model="ref.rcode" /></div>
+              <div class="fgr"><label><span class="rq">*</span>国家/地区</label><el-select v-model="ref.country" @focus="loadCountries"><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
+              <div class="fgr"><label><span class="rq">*</span>会员类型</label>
+                <el-select v-model="ref.level"><el-option label="银级" value="3" /><el-option label="金级" value="1" /><el-option label="白金" value="2" /><el-option label="钻石" value="4" /></el-select></div>
+              <div class="fgr"><label><span class="rq">*</span>账号数量</label><el-input v-model="ref.unum" type="number" /></div>
+            </div>
+            <EnvRadio v-model="ref.env" name="ref-env" />
+            <BtnGroup @reset="resetRef" @submit="submitRef" />
+            <ResultBox :lines="ref.results" :loading="ref.loading" />
+          </div>
+        </div>
 
         <!-- 卡片6: 算力充值/扣减 -->
-        <Card title="算力充值/扣减" :open="cards.power">
-          <template #header><span class="ct" @click="cards.power=!cards.power">▼</span></template>
-          <TabGroup :tabs="[{v:'recharge',l:'充值'},{v:'deduct',l:'扣减'}]" v-model="power.op" />
-          <template v-if="power.op==='recharge'">
-            <div class="fg">
-              <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="power.uname" /></div>
-              <div class="fgr"><label><span class="rq">*</span>充值类型:</label><el-select v-model="power.computingType" placeholder="--请选择--" style="width:180px" @focus="loadComputing"><el-option v-for="c in computingList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
-              <div v-if="power.computingType==='0'" class="fgr"><label><span class="rq">*</span>算力数值:</label><el-input v-model="power.computingNum" type="number" placeholder="请输入算力数值" /></div>
-              <div class="fgr"><label><span class="rq">*</span>是否分佣:</label><el-select v-model="power.sendAward" style="width:180px"><el-option label="是" value="1" /><el-option label="否" value="0" /></el-select></div>
+        <div :class="['m-card', {collapsed:!cards.power}]">
+          <div class="m-card-hd accent-purple" @click="cards.power=!cards.power">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-bolt card-icon"></i>
+              <h3>算力充值 / 扣减</h3>
             </div>
-            <EnvRadio v-model="power.env" name="power-env" />
-          </template>
-          <template v-else>
-            <div class="fg">
-              <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="power.unameD" /></div>
-              <div class="fgr"><label><span class="rq">*</span>算力数值:</label><el-input v-model="power.deductNum" type="number" placeholder="请输入扣减算力数值" /></div>
-            </div>
-            <EnvRadio v-model="power.envD" name="power-envD" />
-          </template>
-          <BtnGroup @reset="resetPower" @submit="submitPower" />
-          <ResultBox :text="power.result" :loading="power.loading" />
-        </Card>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.power}]"></i>
+          </div>
+          <div class="m-card-bd">
+            <TabGroup :tabs="[{v:'recharge',l:'充值'},{v:'deduct',l:'扣减'}]" v-model="power.op" />
+            <template v-if="power.op==='recharge'">
+              <div class="fg">
+                <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="power.uname" /></div>
+                <div class="fgr"><label><span class="rq">*</span>充值类型</label><el-select v-model="power.computingType" placeholder="--请选择--" @focus="loadComputing"><el-option v-for="c in computingList" :key="c.value" :label="c.name" :value="c.value" /></el-select></div>
+                <div v-if="power.computingType==='0'" class="fgr"><label><span class="rq">*</span>算力数值</label><el-input v-model="power.computingNum" type="number" placeholder="请输入算力数值" /></div>
+                <div class="fgr"><label><span class="rq">*</span>是否分佣</label><el-select v-model="power.sendAward"><el-option label="是" value="1" /><el-option label="否" value="0" /></el-select></div>
+              </div>
+              <EnvRadio v-model="power.env" name="power-env" />
+            </template>
+            <template v-else>
+              <div class="fg">
+                <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="power.unameD" /></div>
+                <div class="fgr"><label><span class="rq">*</span>算力数值</label><el-input v-model="power.deductNum" type="number" placeholder="请输入扣减算力数值" /></div>
+              </div>
+              <EnvRadio v-model="power.envD" name="power-envD" />
+            </template>
+            <BtnGroup @reset="resetPower" @submit="submitPower" />
+            <ResultBox :text="power.result" :loading="power.loading" />
+          </div>
+        </div>
 
         <!-- 卡片10: 账户充值/扣减 -->
-        <Card title="账户充值/扣减" :open="cards.account">
-          <template #header><span class="ct" @click="cards.account=!cards.account">▼</span></template>
-          <div class="fg">
-            <div class="fgr"><label><span class="rq">*</span>用户账号:</label><el-input v-model="account.uname" /></div>
-            <div class="fgr"><label><span class="rq">*</span>金额:</label><el-input v-model="account.amount" type="number" placeholder="请输入金额" /></div>
+        <div :class="['m-card', {collapsed:!cards.account}]">
+          <div class="m-card-hd accent-purple" @click="cards.account=!cards.account">
+            <div class="m-card-hd-left">
+              <i class="fa-solid fa-wallet card-icon"></i>
+              <h3>账户充值 / 扣减</h3>
+            </div>
+            <i :class="['fa-solid fa-chevron-right chevron', {open:cards.account}]"></i>
           </div>
-          <EnvRadio v-model="account.env" name="account-env" />
-          <BtnGroup @reset="resetAccount" @submit="submitAccount" />
-          <ResultBox :text="account.result" :loading="account.loading" />
-        </Card>
+          <div class="m-card-bd">
+            <div class="fg">
+              <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="account.uname" /></div>
+              <div class="fgr"><label><span class="rq">*</span>金额</label><el-input v-model="account.amount" type="number" placeholder="请输入金额" /></div>
+            </div>
+            <EnvRadio v-model="account.env" name="account-env" />
+            <BtnGroup @reset="resetAccount" @submit="submitAccount" />
+            <ResultBox :text="account.result" :loading="account.loading" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -215,18 +315,14 @@ import { reactive, onMounted } from 'vue'
 import http from '../../api/http.js'
 
 // --- Inline sub-components ---
-const Card = {
-  props: ['title', 'open'],
-  template: `<div :class="['card',{collapsed:!open}]"><div class="card-header"><h1>{{ title }}</h1><slot name="header" /></div><div class="card-body"><slot /></div></div>`,
-}
 const EnvRadio = {
   props: ['modelValue','name'], emits:['update:modelValue'],
-  template:`<div class="env-group"><label :class="{active:modelValue==='test'}"><input type="radio" :name="name" value="test" :checked="modelValue==='test'" @change="$emit('update:modelValue','test')"/> 测试环境</label><label :class="{active:modelValue==='prod'}"><input type="radio" :name="name" value="prod" :checked="modelValue==='prod'" @change="$emit('update:modelValue','prod')"/> 生产环境</label></div>`,
+  template:`<div class="env-group"><div class="env-track"><label :class="{active:modelValue==='test'}"><input type="radio" :name="name" value="test" :checked="modelValue==='test'" @change="$emit('update:modelValue','test')"/><i class="fa-solid fa-flask"></i> 测试环境</label><label :class="{active:modelValue==='prod'}"><input type="radio" :name="name" value="prod" :checked="modelValue==='prod'" @change="$emit('update:modelValue','prod')"/><i class="fa-solid fa-server"></i> 生产环境</label></div></div>`,
 }
-const BtnGroup = { emits:['reset','submit'], template:`<div class="btn-group"><el-button @click="$emit('reset')">重置</el-button><el-button type="primary" @click="$emit('submit')">提交</el-button></div>` }
+const BtnGroup = { emits:['reset','submit'], template:`<div class="btn-group"><el-button class="btn-reset" @click="$emit('reset')">重置</el-button><el-button class="btn-submit" type="primary" @click="$emit('submit')">提交</el-button></div>` }
 const ResultBox = {
   props:['text','lines','loading'],
-  template:`<div class="result"><span v-if="loading" style="color:#6366f1">处理中...</span><template v-else-if="lines&&lines.length"><div v-for="(l,i) in lines" :key="i" v-html="l" style="border-bottom:1px solid #e0e0e0;padding:6px 0"></div></template><span v-else v-html="text||''"></span></div>`,
+  template:`<div class="result"><span v-if="loading" class="result-loading"><i class="fa-solid fa-spinner fa-spin"></i> 处理中...</span><template v-else-if="lines&&lines.length"><div v-for="(l,i) in lines" :key="i" class="result-line" v-html="l"></div></template><span v-else v-html="text||''"></span></div>`,
 }
 const TabGroup = {
   props:['tabs','modelValue'], emits:['update:modelValue','change'],
@@ -284,12 +380,12 @@ async function submitReg() {
   reg.loading = true; reg.results = []
   const unames = genUnames(reg.uname, parseInt(reg.unum))
   for (let i = 0; i < unames.length; i++) {
-    reg.results.unshift(`<span style="color:#999">第${i+1}条 [${unames[i]}] 请求中...</span>`)
+    reg.results.unshift(`<span class="rl-pending">第${i+1}条 [${unames[i]}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/mmeettRegist', { mset:reg.mset, uname:unames[i], rcode:reg.rcode, pwd:reg.pwd, repwd:reg.pwd, country:reg.country, bemail:reg.bemail, paypwd:reg.paypwd, unum:1, env:reg.env, version:7, emailSuffix, type:'mmeettRegist' })
-      if (r.data?.code >= 500) { reg.results[0] = `<span style="color:red">第${i+1}条 [${unames[i]}] 服务端异常 (code=${r.data.code})</span>`; break }
+      if (r.data?.code >= 500) { reg.results[0] = `<span class="rl-error">第${i+1}条 [${unames[i]}] 服务端异常 (code=${r.data.code})</span>`; break }
       reg.results[0] = r.data?.data || '完成'
-    } catch(e) { reg.results[0] = `<span style="color:red">第${i+1}条 [${unames[i]}] 失败: ${e.message||e}</span>`; break }
+    } catch(e) { reg.results[0] = `<span class="rl-error">第${i+1}条 [${unames[i]}] 失败: ${e.message||e}</span>`; break }
   }
   reg.loading = false
 }
@@ -319,11 +415,11 @@ async function submitBuy() {
   buy.loading = true; buy.results = []
   const unames = genUnames(buy.uname, parseInt(buy.unum))
   for (let i = 0; i < unames.length; i++) {
-    buy.results.unshift(`<span style="color:#999">第${i+1}条 [${unames[i]}] 请求中...</span>`)
+    buy.results.unshift(`<span class="rl-pending">第${i+1}条 [${unames[i]}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/buyVip', { rcinfo:buy.rcinfo, uname:unames[i], level:buy.level, unum:1, env:buy.env, version:7, emailSuffix, type:'buyVip' })
       buy.results[0] = r.data?.data || '完成'
-    } catch(e) { buy.results[0] = `<span style="color:red">第${i+1}条 失败: ${e.message||e}</span>` }
+    } catch(e) { buy.results[0] = `<span class="rl-error">第${i+1}条 失败: ${e.message||e}</span>` }
   }
   buy.loading = false
 }
@@ -348,11 +444,11 @@ async function submitRef() {
   ref.loading = true; ref.results = []
   const unames = genUnames(ref.uname, parseInt(ref.unum))
   for (let i = 0; i < unames.length; i++) {
-    ref.results.unshift(`<span style="color:#999">第${i+1}条 [${unames[i]}] 请求中...</span>`)
+    ref.results.unshift(`<span class="rl-pending">第${i+1}条 [${unames[i]}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/mmeettAddReferralLinks', { uname:unames[i], rcode:ref.rcode, country:ref.country, level:ref.level, unum:1, env:ref.env, version:7, emailSuffix, type:'mmeettAddReferralLinks' })
       ref.results[0] = r.data?.data || '完成'
-    } catch(e) { ref.results[0] = `<span style="color:red">第${i+1}条 失败: ${e.message||e}</span>` }
+    } catch(e) { ref.results[0] = `<span class="rl-error">第${i+1}条 失败: ${e.message||e}</span>` }
   }
   ref.loading = false
 }
@@ -407,11 +503,11 @@ async function submitReward() {
   const rerunMode = reward.types.includes('43') ? [reward.weekly&&'1', reward.monthly&&'2'].filter(Boolean) : []
   for (let i = 0; i < reward.types.length; i++) {
     const rt = reward.types[i]
-    reward.results.unshift(`<span style="color:#999">第${i+1}条 [${typeNames[rt]}] 请求中...</span>`)
+    reward.results.unshift(`<span class="rl-pending">第${i+1}条 [${typeNames[rt]}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/runReward', { uname:'', rewardType:rt, startTime, endTime, env:reward.env, types:sendTypes(rt), rerunMode, version:7, emailSuffix, type:'runReward' })
       reward.results[0] = r.data?.data || '完成'
-    } catch(e) { reward.results[0] = `<span style="color:red">第${i+1}条 失败: ${e.message||e}</span>` }
+    } catch(e) { reward.results[0] = `<span class="rl-error">第${i+1}条 失败: ${e.message||e}</span>` }
   }
   reward.loading = false
 }
@@ -451,30 +547,30 @@ async function submitSettle() {
   if (!settle.uname) { alert('用户账号不能为空！'); return }
   settle.loading = true; settle.results = []
   if (settle.type === 'cancel') {
-    settle.results.push(`<span style="color:#999">[${settle.uname}] 请求中...</span>`)
+    settle.results.push(`<span class="rl-pending">[${settle.uname}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/userCancelSettle', { uname:settle.uname, env:settle.env, version:7, settleType:settle.type, cancelDirs:settle.cancelDir, emailSuffix, type:'userCancelSettle' })
       settle.results[0] = r.data?.data || '完成'
-    } catch(e) { settle.results[0] = `<span style="color:red">失败: ${e.message||e}</span>` }
+    } catch(e) { settle.results[0] = `<span class="rl-error">失败: ${e.message||e}</span>` }
   } else if (settle.isBatch === '1') {
     const unames = genUnames(settle.uname, 1000)
     let notFound = 0
     for (let i = 0; i < unames.length; i++) {
-      settle.results.unshift(`<span style="color:#999">第${i+1}条 [${unames[i]}] 请求中...</span>`)
+      settle.results.unshift(`<span class="rl-pending">第${i+1}条 [${unames[i]}] 请求中...</span>`)
       try {
         const r = await http.post('/ov/pmmeett/userSettle', { uname:unames[i], isBatch:settle.isBatch, idx:i+1, env:settle.env, version:7, emailSuffix, type:'userSettle' })
         const res = r.data?.data || {}
         settle.results[0] = res.usrlt || '完成'
-        if (res.usrlt?.includes('不存在')) { notFound++; if (notFound >= 3) { settle.results.unshift('<span style="color:#999">连续3次用户不存在，已停止</span>'); break } } else { notFound = 0 }
-        if (res.stop == 1) { settle.results.unshift('<span style="color:#999">已停止</span>'); break }
-      } catch(e) { settle.results[0] = `<span style="color:red">第${i+1}条 失败: ${e.message||e}</span>` }
+        if (res.usrlt?.includes('不存在')) { notFound++; if (notFound >= 3) { settle.results.unshift('<span class="rl-info">连续3次用户不存在，已停止</span>'); break } } else { notFound = 0 }
+        if (res.stop == 1) { settle.results.unshift('<span class="rl-info">已停止</span>'); break }
+      } catch(e) { settle.results[0] = `<span class="rl-error">第${i+1}条 失败: ${e.message||e}</span>` }
     }
   } else {
-    settle.results.push(`<span style="color:#999">[${settle.uname}] 请求中...</span>`)
+    settle.results.push(`<span class="rl-pending">[${settle.uname}] 请求中...</span>`)
     try {
       const r = await http.post('/ov/pmmeett/userSettle', { uname:settle.uname, isBatch:settle.isBatch, env:settle.env, version:7, emailSuffix, type:'userSettle' })
       settle.results[0] = r.data?.data?.usrlt || '完成'
-    } catch(e) { settle.results[0] = `<span style="color:red">失败: ${e.message||e}</span>` }
+    } catch(e) { settle.results[0] = `<span class="rl-error">失败: ${e.message||e}</span>` }
   }
   settle.loading = false
 }
@@ -515,62 +611,152 @@ function submitAccount() {
 const del = reactive({ account:'', pwd:'qq123456', num:1, env:'test', result:'', loading:false })
 function resetDel() { Object.assign(del, { account:'', pwd:'qq123456', num:1, env:'test', result:'' }) }
 function submitDel() {
-  if (!del.account) { del.result = '<span style="color:red">请输入账号</span>'; return }
+  if (!del.account) { del.result = '<span class="rl-error">请输入账号</span>'; return }
   const accounts = genUnames(del.account, parseInt(del.num))
   if (!confirm(`确定要注销 ${accounts.length} 个账号吗？（${del.env==='prod'?'生产':'测试'}环境）此操作不可逆！`)) return
   del.loading = true; del.result = ''
   http.post('/ov/pmmeett/delAccount', { account:accounts[0], accounts, pwd:del.pwd, env:del.env, version:7, type:'delAccount' })
     .then(r => {
-      if (r.data?.code == '0') del.result = `✅ ${r.data?.data || '注销成功'}`
-      else del.result = `<span style="color:red">❌ 注销失败: ${r.data?.msg||'未知错误'}</span>`
-    }).catch(e => { del.result = `<span style="color:red">❌ 请求异常: ${e.message||e}</span>` }).finally(() => { del.loading=false })
+      if (r.data?.code == '0') del.result = `<span class="rl-ok">✅ ${r.data?.data || '注销成功'}</span>`
+      else del.result = `<span class="rl-error">❌ 注销失败: ${r.data?.msg||'未知错误'}</span>`
+    }).catch(e => { del.result = `<span class="rl-error">❌ 请求异常: ${e.message||e}</span>` }).finally(() => { del.loading=false })
 }
 
 onMounted(() => { setDefaultDates() })
 </script>
 
 <style scoped>
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; }
-.mo-body { display:flex; flex-direction:row; gap:12px; padding:0 10px; height:calc(100% - 30px); overflow:hidden; }
-.column { display:flex; flex-direction:column; gap:12px; flex:1; min-width:280px; overflow-y:auto; height:100%; padding-top:4px; }
-.column::-webkit-scrollbar { width:5px; }
-.column::-webkit-scrollbar-thumb { background:#c0c0c0; border-radius:10px; }
+/* ===================== 页面骨架 ===================== */
+.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:#f5f6fa; }
 
-:deep(.card) { background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,.08); overflow:hidden; flex-shrink:0; border:1px solid #e9e9e9; }
-:deep(.card-header) { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; cursor:pointer; background:#f0f2f5; border-bottom:1px solid #f0f0f0; user-select:none; }
-:deep(.card-header:hover) { background:#fafafa; }
-:deep(.card-header h1) { margin:0; font-size:15px; font-weight:600; color:#1a1a1a; }
-:deep(.card.collapsed .card-body) { max-height:0; padding:0 16px; opacity:0; overflow:hidden; }
-:deep(.card-body) { padding:12px 16px; display:flex; flex-direction:column; align-items:center; max-height:800px; transition:max-height .3s,padding .3s,opacity .3s; opacity:1; }
-.ct { font-size:12px; color:#666; transition:transform .3s; }
-.card.collapsed .ct { transform:rotate(-90deg); }
+.toolbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 20px 8px; flex-shrink:0;
+}
+.toolbar-left { display:flex; align-items:center; gap:8px; }
+.page-title { margin:0; font-size:16px; font-weight:700; color:#1e293b; letter-spacing:.3px; }
+.page-title i { color:#6366f1; margin-right:4px; }
+.toolbar-right { display:flex; align-items:center; gap:8px; }
+.suffix-label { font-size:12px; color:#94a3b8; white-space:nowrap; }
 
-.fg { display:grid; grid-template-columns:max-content 180px; column-gap:8px; row-gap:8px; align-items:center; }
+.mo-body { display:flex; gap:14px; padding:0 14px 14px; height:calc(100% - 48px); overflow:hidden; }
+.column { display:flex; flex-direction:column; gap:12px; flex:1; min-width:300px; overflow-y:auto; height:100%; padding:2px; }
+.column::-webkit-scrollbar { width:4px; }
+.column::-webkit-scrollbar-track { background:transparent; }
+.column::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+.column::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+
+/* ===================== 卡片 ===================== */
+.m-card {
+  background:#fff; border-radius:12px; flex-shrink:0;
+  box-shadow:0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  overflow:hidden; transition:box-shadow .2s;
+}
+.m-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04); }
+
+/* 卡片头 */
+.m-card-hd {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 18px; cursor:pointer; user-select:none;
+  border-left:4px solid transparent; transition:background .15s;
+}
+.m-card-hd:hover { background:#fafbfc; }
+.m-card-hd-left { display:flex; align-items:center; gap:10px; }
+.card-icon { font-size:15px; width:18px; text-align:center; }
+.m-card-hd h3 { margin:0; font-size:14px; font-weight:600; color:#1e293b; letter-spacing:.2px; }
+
+/* 折叠箭头 */
+.chevron { font-size:11px; color:#94a3b8; transition:transform .25s ease; }
+.chevron.open { transform:rotate(90deg); }
+
+/* 折叠状态 */
+.m-card.collapsed .m-card-bd { max-height:0; padding-top:0; padding-bottom:0; opacity:0; overflow:hidden; }
+.m-card-bd {
+  padding:16px 18px; display:flex; flex-direction:column; align-items:center;
+  max-height:800px; transition:max-height .3s ease, padding .3s ease, opacity .25s; opacity:1;
+  border-top:1px solid #f1f5f9;
+}
+
+/* 色彩主题：左侧竖条 */
+.accent-blue  { border-left-color:#3b82f6; }  .accent-blue  .card-icon { color:#3b82f6; }
+.accent-green { border-left-color:#22c55e; }  .accent-green .card-icon { color:#22c55e; }
+.accent-orange{ border-left-color:#f59e0b; }  .accent-orange .card-icon { color:#f59e0b; }
+.accent-purple{ border-left-color:#8b5cf6; }  .accent-purple .card-icon { color:#8b5cf6; }
+.accent-red   { border-left-color:#ef4444; }  .accent-red   .card-icon { color:#ef4444; }
+
+/* ===================== 表单 Grid ===================== */
+.fg { display:grid; grid-template-columns:auto 1fr; column-gap:10px; row-gap:10px; align-items:center; width:100%; }
 .fgr { display:contents; }
-.fgr label { text-align:right; white-space:nowrap; }
-.rq { color:red; }
-.fgi { display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:8px; }
+.fgr label { text-align:right; white-space:nowrap; font-size:13px; color:#475569; }
+.fgr :deep(.el-input), .fgr :deep(.el-select) { width:100% !important; }
+.rq { color:#ef4444; margin-right:2px; }
 
-:deep(.env-group) { display:flex; justify-content:center; gap:20px; margin:10px 0; }
-:deep(.env-group label) { cursor:pointer; display:inline-flex; align-items:center; gap:4px; padding:5px 16px; border-radius:9999px; border:1px solid #d1d5db; background:#fff; font-size:13px; transition:all .15s; user-select:none; }
-:deep(.env-group label.active) { background:#6366f1; color:#fff; border-color:#6366f1; }
-:deep(.env-group input[type="radio"]) { display:none; }
+.fgi { display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:8px; width:100%; }
 
-:deep(.btn-group) { display:flex; justify-content:center; gap:15px; margin-bottom:15px; }
-.result { flex:1; padding:10px; border-radius:8px; overflow-y:auto; font-size:14px; text-align:center; width:100%; word-wrap:break-word; word-break:break-all; white-space:pre-wrap; color:#444; line-height:1.8; }
+.input-with-btn { display:flex; gap:4px; width:100%; }
+.input-with-btn :deep(.el-input), .input-with-btn :deep(.el-select) { flex:1; }
 
-:deep(.tab-group) { display:flex; justify-content:center; gap:6px; margin-bottom:15px; padding:4px; background:#f0f2f5; border-radius:10px; }
-:deep(.tab-group label) { cursor:pointer; margin:0; display:flex; }
-:deep(.tab-group .tab-item) { padding:7px 20px; background:transparent; color:#555; border:none; border-radius:8px; font-size:14px; font-weight:500; transition:all .25s; }
-:deep(.tab-group label.active .tab-item) { background:#fff; color:#6366f1; box-shadow:0 1px 4px rgba(0,0,0,.1); font-weight:600; }
+/* ===================== 环境切换 ===================== */
+:deep(.env-group) { display:flex; justify-content:center; margin:14px 0 10px; width:100%; }
+:deep(.env-track) { display:inline-flex; gap:0; background:#f1f5f9; border-radius:8px; padding:3px; }
+:deep(.env-track label) {
+  cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+  padding:6px 16px; border-radius:6px; border:none; background:transparent;
+  font-size:12px; font-weight:500; color:#64748b; transition:all .2s; user-select:none;
+}
+:deep(.env-track label.active) { background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,.1); font-weight:600; }
+:deep(.env-track label i) { font-size:11px; }
+:deep(.env-track input[type="radio"]) { display:none; }
+
+/* ===================== 按钮 ===================== */
+:deep(.btn-group) { display:flex; justify-content:center; gap:12px; margin:10px 0 12px; width:100%; }
+:deep(.btn-reset) { min-width:72px; }
+:deep(.btn-submit) { min-width:72px; }
+
+/* ===================== 结果区 ===================== */
+.result {
+  width:100%; min-height:32px; max-height:160px; overflow-y:auto;
+  padding:10px 14px; border-radius:8px; background:#f8fafc;
+  font-size:13px; text-align:center; line-height:1.7; color:#475569;
+  word-wrap:break-word; word-break:break-all; white-space:pre-wrap;
+}
+.result:empty { display:none; }
+.result-loading { color:#6366f1; font-weight:500; }
+.result-loading i { margin-right:4px; }
+:deep(.result-line) { padding:4px 0; border-bottom:1px solid #e2e8f0; }
+:deep(.result-line:last-child) { border-bottom:none; }
+:deep(.rl-pending) { color:#94a3b8; }
+:deep(.rl-error)   { color:#ef4444; }
+:deep(.rl-ok)      { color:#22c55e; font-weight:500; }
+:deep(.rl-info)    { color:#3b82f6; }
+
+/* ===================== Tab 切换 ===================== */
+:deep(.tab-group) { display:flex; justify-content:center; gap:0; margin-bottom:14px; background:#f1f5f9; border-radius:8px; padding:3px; width:100%; }
+:deep(.tab-group label) { cursor:pointer; margin:0; display:flex; flex:1; justify-content:center; }
+:deep(.tab-group .tab-item) { padding:7px 20px; background:transparent; color:#64748b; border:none; border-radius:6px; font-size:13px; font-weight:500; transition:all .2s; }
+:deep(.tab-group label.active .tab-item) { background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,.08); font-weight:600; }
 :deep(.tab-group input[type="radio"]) { display:none; }
 
-.radio-group { margin-bottom:15px; display:flex; gap:6px; justify-content:center; flex-wrap:wrap; align-items:center; }
-.radio-group label { display:inline-flex; align-items:center; gap:5px; padding:5px 14px; border:1px solid #d9d9d9; border-radius:14px; font-size:13px; cursor:pointer; user-select:none; background:#fff; }
-.radio-group label.active { background:#6366f1; color:#fff; border-color:#6366f1; }
-.radio-group input[type="radio"] { accent-color:#6366f1; }
+/* ===================== Pill 选项组 ===================== */
+.pill-group { display:flex; align-items:center; gap:8px; margin-bottom:12px; width:100%; justify-content:center; flex-wrap:wrap; }
+.pill-label { font-size:13px; color:#475569; white-space:nowrap; }
+.pill-options { display:inline-flex; gap:0; background:#f1f5f9; border-radius:6px; padding:2px; }
+.pill-options label {
+  cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+  padding:5px 12px; border-radius:5px; font-size:12px; color:#64748b;
+  transition:all .15s; user-select:none;
+}
+.pill-options label.active { background:#fff; color:#6366f1; box-shadow:0 1px 2px rgba(0,0,0,.06); font-weight:500; }
+.pill-options input[type="radio"] { display:none; }
 
-.checkbox-group { margin-bottom:15px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
-.cb-grid { display:grid; grid-template-columns:repeat(3,auto); gap:4px 12px; justify-content:center; padding:10px 16px; border:1px solid #d9d9d9; border-radius:6px; position:relative; margin-bottom:12px; }
-.grid-title { position:absolute; top:-10px; left:12px; background:#fff; padding:0 6px; font-size:13px; font-weight:500; white-space:nowrap; }
+.check-result { color:#3b82f6; font-size:12px; margin:4px 0 8px; text-align:center; }
+
+/* ===================== Checkbox 区 ===================== */
+.checkbox-group { margin-bottom:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.section-label { font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; text-align:center; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; }
+.select-all-cb { font-size:12px !important; font-weight:400 !important; text-transform:none !important; letter-spacing:0 !important; }
+.cb-grid { display:grid; grid-template-columns:repeat(3,auto); gap:6px 16px; justify-content:center; padding:10px 16px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; width:100%; box-sizing:border-box; background:#fafbfc; }
+
+/* ===================== 提示文字 ===================== */
+.hint-text { color:#f59e0b; font-size:12px; text-align:center; margin:4px 0 8px; }
 </style>
