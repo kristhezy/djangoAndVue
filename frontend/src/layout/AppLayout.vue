@@ -11,20 +11,15 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import HeaderBar from './HeaderBar.vue'
 import SidebarMenu from './SidebarMenu.vue'
 import { useMenuStore } from '../store/menu'
 
 const menuStore = useMenuStore()
-onMounted(async () => {
-  try {
-    await menuStore.fetchMenu()
-  } catch (e) {
-    // 未登录（后端 302 跟随到 login.html，getMenu 解析失败）→ 跳登录页
-    window.location.href = '/login'
-  }
-})
+// 菜单数据由 router beforeEach 守卫预加载，此处兜底确保
+if (!menuStore.loaded) {
+  menuStore.fetchMenu()
+}
 </script>
 
 <style scoped>

@@ -48,16 +48,16 @@ STANDS = [
     ('agent', C['SITE_AGENT'], C['SITE_AGENT_NAME']),
 ]
 
-# 分组菜单（title 用 group icon，items 无独立 icon）
+# 分组菜单（title 用 group icon，items 无独立 icon，before 指定插入到哪个 standalone 之前）
 GROUPS = [
-    ('compconfig', C['TITLE_COMPCONFIG'], [
+    ('compconfig', C['TITLE_COMPCONFIG'], 'updateCI', [
         ('jtSaleskits', C['SITE_JTSK'], C['SITE_JTSK_NAME']),
         ('hwskset', C['SITE_HWSKSET'], C['SITE_HWSKSET_NAME']),
         ('upgradeR3', C['SITE_UPGRADER3'], C['SITE_UPGRADER3_NAME']),
         ('basicComp', C['SITE_BASICCOMP'], C['SITE_BASICCOMP_NAME']),
         ('baseUpgradeSK', C['SITE_BASEUPGSK'], C['SITE_BASEUPGSK_NAME']),
     ]),
-    ('tools', C['TITLE_TOOLS'], [
+    ('tools', C['TITLE_TOOLS'], 'afterSales', [
         ('delCP', C['SITE_DELCP'], C['SITE_DELCP_NAME']),
         ('forWeCom', C['SITE_FORWECOM'], C['SITE_FORWECOM_NAME']),
         ('mergeUser', C['SITE_MERGEUSER'], C['SITE_MERGEUSER_NAME']),
@@ -69,9 +69,8 @@ GROUPS = [
 ]
 
 
-# 已迁移到 Vue 组件的菜单：url 改写为独立前端路径（避免与真实旧路由 /sv/*、/pv/* 冲突，
-# 使刷新/直达也能由 vue-router 渲染 Vue 版；POST 仍复用旧视图的 POST 分支，旧视图不动）
-MIGRATED = {
+# Vue 前端路由映射
+ROUTE = {
     'home': '/home',
     'mergeUser': '/mergeUser',
     'other': '/other',
@@ -102,8 +101,8 @@ MIGRATED = {
 }
 
 
-def _item(key, url, title):
-    return {'key': key, 'title': title, 'url': MIGRATED.get(key, url), 'icon': I.get(key, '')}
+def _item(key, title):
+    return {'key': key, 'title': title, 'url': ROUTE[key], 'icon': I.get(key, '')}
 
 
 @login_required
@@ -114,11 +113,12 @@ def menu_api(request):
         'uid': request.session.get('uid'),
         'uname': request.session.get('uname'),
         'rn': request.session.get('rn'),
+        'lid': request.session.get('uid'),
     }
-    standalone = [_item(k, u, t) for (k, u, t) in STANDS if k in menus]
+    standalone = [_item(k, t) for (k, _u, t) in STANDS if k in menus]
     groups = []
-    for gkey, gtitle, items in GROUPS:
-        visible = [_item(k, u, t) for (k, u, t) in items if k in menus]
+    for gkey, gtitle, before, items in GROUPS:
+        visible = [_item(k, t) for (k, _u, t) in items if k in menus]
         if visible:
-            groups.append({'key': gkey, 'title': gtitle, 'icon': I.get(gkey, ''), 'items': visible})
+            groups.append({'key': gkey, 'title': gtitle, 'icon': I.get(gkey, ''), 'items': visible, 'before': before})
     return JsonResponse({'code': '0', 'msg': '成功', 'data': {'user': user, 'groups': groups, 'standalone': standalone}})

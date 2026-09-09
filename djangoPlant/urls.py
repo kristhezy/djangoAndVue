@@ -27,7 +27,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login',ul.user_login,name="login"),
     path('logout',ul.user_logout,name="logout"),
-    path('denied',pv.denied,name="denied"),
     #publicview
     path('',spa.spa_index,name="index"),
     path('home',spa.spa_index,name="home"),
@@ -110,6 +109,3 @@ if settings.DEBUG:
 urlpatterns += [
     re_path(r'^.*$', spa.spa_index, name='spa'),
 ]
-
-# 自定义 404 页面（仅 DEBUG=False 时生效；开发环境用 @login_required 控制访问）
-handler404 = 'djangoPlant.publicview.page_not_found'

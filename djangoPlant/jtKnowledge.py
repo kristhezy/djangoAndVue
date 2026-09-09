@@ -4,7 +4,7 @@ from. import current_dir
 
 di = DeleteInterface()
 qi = QueryInterface()
-grayci = current_dir / "static/configFile/grayCI.txt"
+grayci = current_dir / "djangoPlant/configFile/grayCI.txt"
 
 def gct():
     return pdef.getctime()

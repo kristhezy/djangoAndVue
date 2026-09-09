@@ -1,4 +1,4 @@
-from. import render,logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time
+from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time
 from django.views.decorators.http import condition
 from.pub_InputAndQuery import InputAndQuery
 from.publicDef import publicDef,fivemillion
@@ -23,8 +23,8 @@ def _get_scc():
         _scc_instance = SparkChatClient()
     return _scc_instance
 
-cccache = current_dir / 'static/configFile/CCCache.json' # 构建配置文件路径
-mynote = current_dir / "static/configFile/mynote.json"
+cccache = current_dir / 'djangoPlant/configFile/CCCache.json' # 构建配置文件路径
+mynote = current_dir / "djangoPlant/configFile/mynote.json"
 
 def gct():
     return pdef.getctime()
@@ -32,22 +32,15 @@ def gct():
 @login_required
 @never_cache
 def shell(request):
-    status = request.islogin
-    if status:
-        return render(request, "shell.html", {"rn": request.rn, "mr": request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 
 @login_required
 @never_cache
 def home(request):
-    status = request.islogin
-    if status:
-        return render(request, "home.html",{"rn":request.rn, "mr":request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 
 #查询操作记录页数
+@never_cache
 def pagecount(request):
     print(' ===== [%s] "查询操作记录页数" ====='%pdef.getctime())
     # 优先 Redis 缓存
@@ -85,12 +78,7 @@ def pagecount(request):
 # @cache_page(3600)
 def other(request):
     if request.method == 'GET':
-        status = request.islogin
-        if status:
-
-            return render(request,"other.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' ===== [%s] "其他" ====='%pdef.getctime())
         #获取页面数，设置默认值
@@ -134,6 +122,7 @@ def other(request):
         rlt = pdef.get_result(code,msg,crlt)
         return jr(rlt)
 
+@never_cache
 def other_part(request, part):
     grlt = ""
     if part == "queryOpraterName":
@@ -166,12 +155,9 @@ def other_part(request, part):
 @login_required
 @never_cache
 def gmynote(request):
-    status = request.islogin
-    if status:
-        return render(request,"mynote.html",{"rn":request.rn, "mr":request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 
+@never_cache
 def pmynote(request,opration):
     print(' ===== [%s] "我的记录" ====='%pdef.getctime())
     if True:
@@ -257,12 +243,8 @@ def pmynote(request,opration):
 @login_required
 @never_cache
 def gusercenter(request):
-    status = request.islogin
-    if status:
-        print(f'lid:{request.uid}')
-        return render(request,"usercenter.html",{"rn":request.rn,"mr":request.mr,"lid":request.uid,"uname":request.session.get("ln","")})
-    else:
-        return redirect("/login")
+    return redirect('/')
+@never_cache
 def usercenter(request,uctype):
     print(' ===== [%s] "用户中心" ====='%pdef.getctime())
     data = json.loads(request.body)
@@ -347,9 +329,14 @@ def usercenter(request,uctype):
         rlt = {"cleanLocalData": crlt}
     elif uctype == "gdt":
         rlt = pdef.getctime()
+    elif uctype == "queryuinfo":
+        uid = request.session.get("uid", 0)
+        job = iaq.query_user_job(uid)
+        rlt = {"job": job}
     gr = pdef.get_result(code,msg,rlt)
     return jr(gr)
 
+@never_cache
 def registTP(request):
     # 管理员校验：用户管理操作（注册/改角色/删用户）仅 mr==99 可调用，顺带堵住未登录越权
     if request.session.get('mr') != 99:
@@ -436,11 +423,7 @@ def registTP(request):
 @never_cache
 def easyIC(request):
     if request.method == 'GET':
-        status = request.islogin
-        if status:
-            return render(request,"easyIC.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         data = json.loads(request.body)
         uid = request.session.get('uid')
@@ -528,11 +511,7 @@ def easyIC(request):
 @login_required
 @never_cache
 def aitools(request):
-    status = request.islogin
-    if status:
-        return render(request,"aitools.html",{"rn":request.rn, "mr":request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 @login_required
 @never_cache
 @condition(etag_func=None)
@@ -561,6 +540,11 @@ def aitools_stream(request):
 
     def event_stream():
         nonlocal chat_id, full_text, cloud_image_url, image_storage
+
+        # 新对话时清除该用户的内存历史，避免旧对话污染新对话
+        if int(chat_id) == 0:
+            scc = _get_scc()
+            scc._histories.pop(session_id, None)
 
         yield f"data: {json.dumps({'type':'start'})}\n\n"
 
@@ -595,10 +579,10 @@ def aitools_stream(request):
                 elif evt_type == "error":
                     yield f"data: {json.dumps({'type':'error','content':content})}\n\n"
                     return
-                elif evt_type in ("status", "search_result", "thinking", "done"):
+                elif evt_type in ("status", "search_result", "thinking"):
                     yield f"data: {json.dumps({'type':evt_type,'content':content})}\n\n"
-                    if evt_type == "done":
-                        break
+                elif evt_type == "done":
+                    break
         except Exception as e:
             print(f"[aitools_stream] 生成异常: {e}")
             yield f"data: {json.dumps({'type':'error','content':f'服务异常：{e}'})}\n\n"
@@ -610,7 +594,7 @@ def aitools_stream(request):
             rlt["image"] = image_storage
         try:
             if int(chat_id) == 0:
-                iaq.inst_aiText(uid, prompt, json.dumps([rlt], ensure_ascii=False))
+                chat_id = iaq.inst_aiText(uid, prompt, json.dumps([rlt], ensure_ascii=False))
             else:
                 for h in (iaq.query_aiText(user_id=uid) or []):
                     if h["id"] == int(chat_id):
@@ -637,18 +621,13 @@ def aitools_stream(request):
 @login_required
 @never_cache
 def agent(request):
-    status = request.islogin
-    if status:
-        return render(request, "agent.html", {"rn": request.rn, "mr": request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 
 
+@never_cache
 def agent_float(request):
-    """悬浮 Agent 面板（独立文档，供 shell 顶层的悬浮窗 iframe 加载）"""
-    if not request.islogin:
-        return redirect("/login")
-    return render(request, "agent_float_panel.html", {"rn": request.rn, "mr": request.mr})
+    """悬浮 Agent 面板（已迁移至 Vue SPA）"""
+    return redirect('/')
 
 
 @login_required
@@ -767,6 +746,7 @@ def agent_history(request):
     return jr(pdef.get_result(rescode, msg, rlt))
 
 
+@never_cache
 def paitools(request,ptype):
     data = json.loads(request.body)
     ptype = data["type"]
@@ -799,15 +779,3 @@ def paitools(request,ptype):
             rescode, msg, rlt = c['reserror'], m['reserror'], f"删除失败: {e}"
     grlt = pdef.get_result(rescode,msg,rlt)
     return jr(grlt)
-
-
-# ── 自定义 404 页面 ──
-def page_not_found(request, exception=None):
-    """404 页面，不依赖任何认证，直接渲染"""
-    return render(request, "404.html", status=404)
-
-
-# ── 无权限页面 ──
-def denied(request):
-    """无权限提示页，MenuPermissionMiddleware 拦截后跳转到这里"""
-    return render(request, "denied.html", status=403)

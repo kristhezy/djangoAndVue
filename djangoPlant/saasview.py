@@ -33,7 +33,7 @@ payment = 3
 thirdparty_id = 1
 msr = [' msr&eureka: 华为云 ','2']
 
-cccache = current_dir / 'static/configFile/CCCache.json' # 构建配置文件路径
+cccache = current_dir / 'djangoPlant/configFile/CCCache.json' # 构建配置文件路径
 
 def gct():
     return pdef.getctime()
@@ -43,11 +43,7 @@ def gct():
 @never_cache  #清除页面缓存的装饰器
 def upgradeR3(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"OP_upgradeR3.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "升级转介绍3.0"'%pdef.getctime())
         if True:
@@ -150,11 +146,7 @@ def upgradeR3(request):
 @never_cache
 def basicCompCfg(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"OP_basicCompCfg.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "基础版企业配置"'%pdef.getctime())
         if True:
@@ -232,11 +224,7 @@ def basicCompCfg(request):
 @never_cache
 def hwskset(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"OP_hwskset.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "华为云SK企业配置"'%pdef.getctime())
         if True:
@@ -320,11 +308,7 @@ def hwskset(request):
 @never_cache
 def jtSaleskits(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"OP_jtSaleskits.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "SK版本配置"'%pdef.getctime())
         if True:
@@ -390,11 +374,7 @@ def jtSaleskits(request):
 @never_cache
 def baseUpgradeSK(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"OP_baseUpgradeSK.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "工具版升级至SK版"'%pdef.getctime())
         if True:
@@ -443,12 +423,9 @@ def baseUpgradeSK(request):
 @login_required
 @never_cache
 def updateCT(request):
-    status = request.session.get("isLoggedIn")
-    if status:
-        return render(request,"updateCI.html",{"rn":request.rn, "mr":request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 #更新企业信息
+@never_cache
 def updateCInfo(request):
     print(' -- [%s] "更新企业信息"'%pdef.getctime())
     if True:
@@ -633,11 +610,7 @@ def updateCInfo(request):
 @never_cache
 def companyModule(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"companyModule.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "更新企业模块"'%pdef.getctime())
         if True:
@@ -751,6 +724,7 @@ def companyModule(request):
         return jr(grlt)
 
 # 激活注销的手机号
+@never_cache
 def removeTagTel(request):
     print(' -- [%s] "辅助工具-激活注销的手机号"'%pdef.getctime())
     data = json.loads(request.body)
@@ -770,6 +744,7 @@ def removeTagTel(request):
     gr = pdef.get_result(code,msg,r)
     return jr(gr)
 
+@never_cache
 def delclueinfo(request):
     print(' -- [%s] "辅助工具-删除线索"'%pdef.getctime())
     if True:
@@ -802,13 +777,10 @@ def delclueinfo(request):
 @login_required
 @never_cache
 def delCP(request):
-    status = request.session.get("isLoggedIn")
-    if status:
-        return render(request,"AT_delCP.html",{"rn":request.rn, "mr":request.mr})
-    else:
-        return redirect("/login")
+    return redirect('/')
 
 #根据手机号查看userId
+@never_cache
 def queryuibycp(request):
     print(' -- [%s] "辅助工具-据手机号查userId和parnterId"'%pdef.getctime())
     if True:
@@ -834,6 +806,7 @@ def queryuibycp(request):
     return jr(gr)
 
 #销售添加线索
+@never_cache
 def saci(request):
     print(' -- [%s] "辅助工具-销售添加线索"'%pdef.getctime())
     if True:
@@ -892,6 +865,7 @@ def saci(request):
     return jr(grlt)
 
 #设置合伙人登录APP验证码
+@never_cache
 def splc(request):
     print(' -- [%s] "辅助工具-设置合伙人登录APP验证码"'%pdef.getctime())
     if True:
@@ -932,11 +906,7 @@ def getdict(adict, start, end):
 @never_cache
 def forWechatCom(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_wecom.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "辅助工具-企业微信相关"'%pdef.getctime())
         if True:
@@ -969,11 +939,7 @@ def forWechatCom(request):
 @never_cache
 def mergeUser(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_mergeUser.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "辅助工具-手工合并企业用户"'%pdef.getctime())
         if True:
@@ -1016,11 +982,7 @@ def mergeUser(request):
 @never_cache
 def delBindRelation(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_delBindRelation.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "辅助工具-清除过期企业信息数据"'%pdef.getctime())
         if True:
@@ -1061,6 +1023,7 @@ def delBindRelation(request):
 
 #辅助工具--清除app登录token
 @login_required
+@never_cache
 def cleanAppToken(request):
     print(' -- [%s] "辅助工具-清除app登录token"' % pdef.getctime())
     data = json.loads(request.body)
@@ -1086,11 +1049,7 @@ def cleanAppToken(request):
 @never_cache
 def queryLoginCode(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_aboutLogin.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "辅助工具-查询登录验证码"'%pdef.getctime())
         data = json.loads(request.body)
@@ -1107,11 +1066,7 @@ def queryLoginCode(request):
 @never_cache
 def dzFunction(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_dzFunction.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         print(' -- [%s] "辅助工具-定制企业功能"'%pdef.getctime())
         if True:
@@ -1156,11 +1111,7 @@ def dzFunction(request):
 @never_cache
 def batchDeleteClue(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"AT_batchDeleteClue.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
     else:
         data = json.loads(request.body)
         cid = data["cid"]
@@ -1194,12 +1145,9 @@ def batchDeleteClue(request):
 @never_cache
 def afterSales(request):
     if request.method == 'GET':
-        status = request.session.get("isLoggedIn")
-        if status:
-            return render(request,"afterSales.html",{"rn":request.rn, "mr":request.mr})
-        else:
-            return redirect("/login")
+        return redirect('/')
 #查询企业ID
+@never_cache
 def queryCompanyId(request,sysvs):
     if True:
         data = json.loads(request.body)
@@ -1249,6 +1197,7 @@ def queryCompanyId(request,sysvs):
     return jr(qrlt)
     
 # 查询企微ID
+@never_cache
 def queryCI(request):
     data = json.loads(request.body)
     companyId = data['companyId']
@@ -1279,6 +1228,7 @@ def queryCI(request):
     return jr(gr)
 
 # 查询明文查询密文企微ID
+@never_cache
 def querySCID(request):
     data = json.loads(request.body)
     corpId = data['companyId']
@@ -1297,6 +1247,7 @@ def querySCID(request):
     return jr(gr)
 
 #查询小程序、公众号、通讯录、雷达、自建应用绑定状态
+@never_cache
 def queryCA(request):
     data = json.loads(request.body)
     companyId = data['companyId']
@@ -1336,6 +1287,7 @@ def queryCA(request):
 
 # /agent/authAppList
 # 查询企业已授权的企微应用
+@never_cache
 def queryAAL(request):
     data = json.loads(request.body)
     companyId = data['companyId']
@@ -1370,6 +1322,7 @@ def queryAAL(request):
     return jr(gr)
 
 #绑定企业和企微加密corpid
+@never_cache
 def selfcreatedCS(request):
     data = json.loads(request.body) #获取ajax提交页面的data4的数据
     companyId = data['companyId']
@@ -1388,6 +1341,7 @@ def selfcreatedCS(request):
     return jr(gr)
 
 #配置小程序隐私保护
+@never_cache
 def privset(request):
     data = json.loads(request.body) #获取ajax提交页面的数据
     companyId = data['companyId']
@@ -1411,6 +1365,7 @@ def privset(request):
     return jr(gr)
 
 #定制化小程序配置保存
+@never_cache
 def dzconfig(request):
     data = json.loads(request.body) #获取ajax提交页面的data4的数据
     companyId = data['companyId']
@@ -1456,6 +1411,7 @@ def dzconfig(request):
 
 dsname = {1:'utsj',2:'bssj',3:'sksj',4:'ucisj',15:'hwsksj'}
 
+@never_cache
 def getappid(request):
     data = json.loads(request.body)
     cid = data['cid']
@@ -1470,12 +1426,9 @@ def getappid(request):
 @login_required
 @never_cache
 def miniprogram(request):
-    status = request.islogin
-    if status:
-        return render(request,"miniProgram.html",{"rn":request.rn,"mr":request.mr})
-    else:
-        return redirect("/login")
-    
+    return redirect('/')
+
+@never_cache
 def miniprogramRelease(request,type):
     data = json.loads(request.body)
     type = data['type']
@@ -1489,6 +1442,10 @@ def miniprogramRelease(request,type):
     isinst = True
     if type == "baconfig":
         tsq = data['tsq']
+        template_id = data.get('template_id', '535')
+        template_version = data.get('template_version', 'v4.3.0')
+        template_desc = data.get('template_desc', 'vr配置')
+        custom_domains = data.get('domains', [])
         mp.gettoken(cid,env)
         tsq = [x for x in shd(tsq) if x]
         rlt = ""
@@ -1500,15 +1457,18 @@ def miniprogramRelease(request,type):
                 if ps["msg"] == "成功":
                     rlt += "隐私权限配置成功"
             elif "ulcm" == tsqs:
-                ucmrlt = mp.wxacommit(cid,env,appid)
+                ucmrlt = mp.wxacommit(cid,env,appid,template_id,template_version,template_desc)
                 if ucmrlt['errcode'] == 0:
                     rlt += "上传代码模板成功"
             elif "addm" == tsqs:
+                # 合并默认域名和用户自定义域名（去重）
+                default_domain = "https://dsa-app.aijiatui.com"
+                all_domains = list(set([default_domain] + [d.strip() for d in custom_domains if d.strip()]))
                 dmss = iaq.query_domain_status(appid)
                 if not dmss:
                     smd = mp.setmodifydomain()
                     smdec = str(smd["errcode"])
-                    swd= mp.setwebviewdomain()
+                    swd= mp.setwebviewdomain(all_domains)
                     swdec = str(swd["errcode"])
                     if smdec == "0" and swdec == "0":
                         rlt += '添加域名成功'
@@ -1526,7 +1486,7 @@ def miniprogramRelease(request,type):
                         errtips = "业务域名配置失败，请先配置业务域名校验文件！"
                 elif dmss:
                     if dmss['status'] == "1":
-                        swd= mp.setwebviewdomain()
+                        swd= mp.setwebviewdomain(all_domains)
                         swdec = str(swd["errcode"])
                         if swdec == "0":
                             rlt += '添加域名成功'
@@ -1673,6 +1633,7 @@ def miniprogramRelease(request,type):
     gr = pdef.get_result(code,msg,rltd)
     return jr(gr)
 
+@never_cache
 def queryMiniprogramRecord(request,type):
     data = json.loads(request.body)
     type = data['type']
@@ -1716,6 +1677,7 @@ def queryMiniprogramRecord(request,type):
     return jr(gr)
 
 #根据ds查询message
+@never_cache
 def qmbydsan(request):
     print(' -- [%s] "根据dss查询message"'%pdef.getctime())
     data = json.loads(request.body)
@@ -1759,6 +1721,7 @@ def qmbydsan(request):
     return jr(rlt)
 
 
+@never_cache
 def aftergetqmbydsan(request): #异步调用query_message_by_dsandnum查询开户企业数据并替换json文件内容
     data = json.loads(request.body)
     qdss = data['dss']  # list[int]
@@ -1777,12 +1740,14 @@ def aftergetqmbydsan(request): #异步调用query_message_by_dsandnum查询开�
                 cached_value = ast.literal_eval(fdata[kn])
             except Exception:
                 cached_value = []
-        # 用“最新 min(条数) 的 id 序列”比较，消除 num 前后不一致(如 10→6)导致的必然误报
+        # 先比数量，再比 id 序列，任一不同即视为变更
         if bool(a) != bool(cached_value):
             changed = True
         elif a and cached_value:
-            n = min(len(a), len(cached_value))
-            changed = [str(x.get('id')) for x in a[:n]] != [str(x.get('id')) for x in cached_value[:n]]
+            if len(a) != len(cached_value):
+                changed = True
+            else:
+                changed = [str(x.get('id')) for x in a] != [str(x.get('id')) for x in cached_value]
         else:
             changed = False
         if changed:

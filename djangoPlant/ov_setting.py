@@ -84,12 +84,23 @@ class OVSetting(object):
         print(pdef.logcss(gct(),"【ov_setting-query_company_info】"),"company info:",res.json())
         return res.json()
 
+    @handle_request_errors()
+    def getOprationAdminToken(self,env,version):
+        host_uri = self.versionUri(env,version)
+        uri = host_uri + "/admin/operate/login/account"
+        req_json = {"password":"cf79ae6addba60ad018347359bd144d2","email":"admin@aijiatui.com"}
+        res = _get_session().post(uri, json = req_json)
+        print(pdef.logcss(gct(),"【ov_setting-query_company_info】"),"company info:",res.json())
+        token = res.json()["data"][0]["token"]
+        return token
+
     #基线版/soon企业开户
     @handle_request_errors()
     def origin_openAccount(self,cname,csname,phone,lname,pwd,langType,etime,env,version,privaddr=""):
         host_uri = self.versionUri(env,version,privaddr)
         uri = host_uri + "/user/unLogin/openAccount"
         if version == 4:
+            token = self.getOprationAdminToken(env,version)
             req_json = {
                 "companyName": cname,
                 "shortName": csname,
@@ -102,6 +113,7 @@ class OVSetting(object):
             }
             vnm = "SOON"
         elif version == 3:
+            token = ""
             req_json = {
                 "companyName": cname,
                 "shortName": csname,
@@ -111,7 +123,7 @@ class OVSetting(object):
                 "expireTime": etime
             }
             vnm = "基线版"
-        res = _get_session().post(uri, json=req_json)
+        res = _get_session().post(uri, json=req_json, headers={"i-token": token})
         print(pdef.logcss(gct(),"【ov_setting-origin_openAccount】"),'【%s企业开户】:%s, 入参: %s, 返回数据: json:%s'%(vnm,uri,req_json,res.json()))
         return res.json()
 
@@ -393,7 +405,7 @@ class OVSetting(object):
         data = {"value": value}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
-        print(pdef.logcss(gct(), "【ov_setting-cryptoEncrypt】"), f"接口: {uri}; 入参:data={data}; 返回: {rlt}")
+        print(pdef.logcss(gct(), "【ov_setting-cryptoEncrypt】"), f"接口: {uri}; 入参:data={data}, header={header}; 返回: {rlt}")
         return rlt
 
     @handle_request_errors()

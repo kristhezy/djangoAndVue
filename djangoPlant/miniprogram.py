@@ -54,14 +54,14 @@ class miniProgram(object):
         print(self.logcss(pd().getctime(),f'miniProgram-gettoken: {uri}, 返回数据: {rlt}'))
         self.mptoken = rlt['data']
         
-    def wxacommit(self,companyId,env,appId): #上传代码（同时生成体验版）
+    def wxacommit(self,companyId,env,appId,template_id="535",user_version="v4.3.0",user_desc="vr配置"): #上传代码（同时生成体验版）
         self.gettoken(companyId,env)
         uri = f"https://api.weixin.qq.com/wxa/commit?access_token={self.mptoken}"
         data = {
-            "template_id": "510",
+            "template_id": str(template_id),
             "ext_json": "{\"extEnable\":true,\"extAppid\":\"%s\",\"ext\":{\"baseUrl\":\"dsa-app.aijiatui.com\",\"md\":\"%s\",\"companyType\":0,\"token\":2,\"ultimate\":0,\"imAppKey\":\"a941f5923e72b27adc646f2193e76219\"}}"%(appId,companyId),
-            "user_version": "v3.10.36",
-            "user_desc": "安卓兼容"
+            "user_version": user_version,
+            "user_desc": user_desc
         }
         try:
             res = requests.post(url=uri,json=data)
@@ -128,13 +128,13 @@ class miniProgram(object):
         print(self.logcss(pd().getctime(),f'miniProgram-setmodifydomain23: {uri}, 返回数据: {rlt}'))
         return rlt
     
-    def setwebviewdomain(self): #配置业务域名
-        uri = f"https://api.weixin.qq.com/wxa/setwebviewdomain_directly?access_token={self.mptoken}"
+    def setwebviewdomain(self, domains=None): #配置业务域名
+        if domains is None:
+            domains = ["https://dsa-app.aijiatui.com"]
+        uri = f"https://api.weixin.qq.com/wxa/setwebviewdomain?access_token={self.mptoken}"
         data = {
             "action": "add",
-            "webviewdomain": [
-                "https://dsa-app.aijiatui.com"
-            ]
+            "webviewdomain": domains
         }
         try:
             res = requests.post(url=uri,json=data)
@@ -333,10 +333,12 @@ class miniProgram(object):
 
 
 from django.http import HttpResponse #type: ignore
+from django.views.decorators.cache import never_cache #type: ignore
 import csv
 from urllib.parse import quote  # 解决中文文件名乱码
 from datetime import datetime
 
+@never_cache
 def download_dynamic_file(request):
     # 1. 接收前端传递的参数（支持GET/POST，根据需求选择）
     # GET方式：从URL参数获取（如 /download/?type=user&date=20251225）

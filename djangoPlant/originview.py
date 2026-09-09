@@ -1,4 +1,4 @@
-from. import logger,render,JsonResponse as jr,json,redirect,pub_utils as pu,re,login_required,never_cache,cache_page,time,Colors,current_dir
+from. import logger,JsonResponse as jr,json,redirect,pub_utils as pu,re,login_required,never_cache,cache_page,time,Colors,current_dir
 from.ov_setting import OVSetting,pdef
 from.mmeett import mmeettIF
 from.xcard import xcard
@@ -27,7 +27,7 @@ def _get_xc():
 
 msp = mySqlPool  # mySqlPool 只是类别名，不需要实例化
 msr = [' msr&eureka: 华为云 ','2','私有化部署','3']
-mmeett_regist_log = current_dir / "static/configFile/mmeettRegist.json"
+mmeett_regist_log = current_dir / "djangoPlant/configFile/mmeettRegist.json"
 
 def _log_mmeett_regist(rcode, uname, pwd, country, env):
     """记录 mmeett 注册信息（邀请码、账号、密码、地区、注册时间）"""
@@ -131,10 +131,9 @@ def _getLevelLoction(location_list):
 @login_required
 @never_cache
 def mmeettopen(request):
-    if not check_login(request):
-        return redirect("/login")
-    return render(request, "MmeettOpen.html", {"rn": request.rn, "mr": request.mr})
+    return redirect('/')
 
+@never_cache
 def pmmeett_action(request, action):
     """action 从 URL 路径获取"""
     data = json.loads(request.body)
@@ -781,10 +780,9 @@ def _process_pmmeett(request, data):
 @login_required
 @never_cache
 def mmeettTreeView(request):
-    if not check_login(request):
-        return redirect("/login")
-    return render(request, "mmeettTreeView.html", {"rn": request.rn, "mr": request.mr})
+    return redirect('/')
 
+@never_cache
 def pmmeettTreeData(request):
     data = json.loads(request.body)
     uname = data.get("uname", "")
@@ -803,6 +801,7 @@ def pmmeettTreeData(request):
     tree_rlt = _get_mif().getTree(env, version, userId, deep)
     return jr(tree_rlt)
 
+@never_cache
 def pmmeettTreeChildren(request):
     """懒加载指定用户的子节点"""
     data = json.loads(request.body)
@@ -816,10 +815,9 @@ def pmmeettTreeChildren(request):
 @login_required
 @never_cache
 def xcard(request):
-    if not check_login(request):
-        return redirect("/login")
-    return render(request, "XCardConfig.html", {"rn": request.rn, "mr": request.mr})
+    return redirect('/')
 
+@never_cache
 def pxcard(request, action):
     data = json.loads(request.body)
     desc = data["desc"]
@@ -923,21 +921,18 @@ def pxcard(request, action):
 @login_required
 @never_cache
 def soonConfig(request):
-    if not check_login(request):
-        return redirect("/login")
-    return render(request, "soonConfig.html", {"rn": request.rn, "mr": request.mr})
+    return redirect('/')
 
 @login_required
 @never_cache
 def setting(request):
     """兼容旧调用方式"""
     if request.method == 'GET':
-        if not check_login(request):
-            return redirect("/login")
-        return render(request, "OV_setting.html", {"rn": request.rn, "mr": request.mr})
+        return redirect('/')
     data = json.loads(request.body)
     return _process_setting(request, data)
 
+@never_cache
 def setting_action(request, action):
     """action 从 URL 路径获取"""
     data = json.loads(request.body)
@@ -1099,6 +1094,8 @@ def _process_setting_impl(request, data):
         sguberlt = _get_ovs().soon_getUidByEmail(data["email"], env, version)
         if sguberlt['code'] == 0:
             rescode, msg, rlt = c['success'], m['success'], sguberlt['data']["id"]
+        elif sguberlt['code'] == 43266:
+            rescode, msg, rlt = sguberlt['code'], "用户‘邮箱/手机’不存在。", sguberlt["msg"]
         else:
             rescode, msg, rlt = c['reserror'], m['reserror'], sguberlt["msg"]
 
@@ -1165,9 +1162,7 @@ def _process_setting_impl(request, data):
 @never_cache
 def twCompSet(request):
     if request.method == 'GET':
-        if not check_login(request):
-            return redirect("/login")
-        return render(request, "TW_compSet.html", {"rn": request.rn, "mr": request.mr})
+        return redirect('/')
     else:
         print(' -- [%s] "通威企业设置"' % gct())
         code, msg, rlt = "", "", ""
@@ -1229,4 +1224,5 @@ def twCompSet(request):
 
 def page_404(request, action=None):
     """自定义 404（已禁用的页面）"""
-    return render(request, "404.html", status=404)
+    from django.http import Http404
+    raise Http404("页面已禁用")

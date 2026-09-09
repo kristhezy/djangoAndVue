@@ -19,10 +19,14 @@
         </el-select>
         <el-input v-model="uri" placeholder="输入接口地址" class="ic-uri" />
         <el-button class="ic-icon-btn" @click="toggleHistory" title="请求历史">
-          <el-icon><Clock /></el-icon>
+          <el-icon>
+            <Clock />
+          </el-icon>
         </el-button>
         <el-button class="ic-icon-btn" @click="toggleCurl" title="粘贴curl命令">
-          <el-icon><Monitor /></el-icon>
+          <el-icon>
+            <Monitor />
+          </el-icon>
         </el-button>
       </div>
 
@@ -39,7 +43,8 @@
           </div>
           <div class="ic-actions">
             <el-button style="flex:1" @click="resetParam">重&nbsp;&nbsp;置</el-button>
-            <el-button type="primary" style="flex:1" :loading="loading" :disabled="loading" @click="sendRequest">调&nbsp;&nbsp;用</el-button>
+            <el-button type="primary" style="flex:1" :loading="loading" :disabled="loading"
+              @click="sendRequest">调&nbsp;&nbsp;用</el-button>
           </div>
         </div>
         <div class="ic-result">
@@ -52,9 +57,12 @@
                 <span class="ic-card__uri">{{ card.hostUri }}</span>
               </div>
               <div class="ic-card__fields">
-                <div class="ic-field"><span class="ic-field__label">请求头部:</span><span class="ic-field__value">{{ card.reqHeader }}</span></div>
-                <div class="ic-field"><span class="ic-field__label">请求内容:</span><span class="ic-field__value">{{ card.reqParam }}</span></div>
-                <div class="ic-field"><span class="ic-field__label">响应头部:</span><span class="ic-field__value">{{ card.resHeader }}</span></div>
+                <div class="ic-field"><span class="ic-field__label">请求头部:</span><span class="ic-field__value">{{
+                  card.reqHeader }}</span></div>
+                <div class="ic-field"><span class="ic-field__label">请求内容:</span><span class="ic-field__value">{{
+                  card.reqParam }}</span></div>
+                <div class="ic-field"><span class="ic-field__label">响应头部:</span><span class="ic-field__value">{{
+                  card.resHeader }}</span></div>
                 <div class="ic-field ic-field--top">
                   <span class="ic-field__label">响应内容:</span>
                   <div class="ic-field__body">
@@ -73,7 +81,9 @@
       <div v-if="showHistory" class="ic-dropdown">
         <div class="ic-dropdown__header">
           <span class="ic-dropdown__title">Request history</span>
-          <el-icon class="ic-dropdown__close" @click="showHistory = false"><Close /></el-icon>
+          <el-icon class="ic-dropdown__close" @click="showHistory = false">
+            <Close />
+          </el-icon>
         </div>
         <div class="ic-dropdown__body">
           <div v-if="historyLoading" style="padding: 16px; text-align: center">加载中...</div>
@@ -83,10 +93,14 @@
               【{{ h.method }}】{{ h.host }}{{ h.uri }}
             </span>
             <el-button class="ic-his-replay" text type="primary" @click.stop="replayRequest(h)" title="一键重放">
-              <el-icon><RefreshRight /></el-icon>
+              <el-icon>
+                <RefreshRight />
+              </el-icon>
             </el-button>
             <el-button class="ic-his-delete" text type="danger" @click.stop="deleteHistory(h)" title="删除">
-              <el-icon><Delete /></el-icon>
+              <el-icon>
+                <Delete />
+              </el-icon>
             </el-button>
           </div>
         </div>
@@ -95,7 +109,8 @@
       <!-- curl 粘贴面板 -->
       <div v-if="showCurl" class="ic-dropdown ic-dropdown--center">
         <div style="font-weight: 600; color: #374151; margin-bottom: 8px">粘贴curl命令，自动解析填充</div>
-        <el-input v-model="curlInput" type="textarea" :rows="5" placeholder="粘贴curl命令，例如：&#10;curl -X POST https://example.com/api -H 'Content-Type: application/json' -d '{&quot;key&quot;:&quot;value&quot;}'" />
+        <el-input v-model="curlInput" type="textarea" :rows="5"
+          placeholder="粘贴curl命令，例如：&#10;curl -X POST https://example.com/api -H 'Content-Type: application/json' -d '{&quot;key&quot;:&quot;value&quot;}'" />
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px">
           <el-button @click="closeCurl">取消</el-button>
           <el-button type="primary" @click="parseCurl">解析并填充</el-button>
@@ -207,12 +222,12 @@ function parseTextToJSON(text) {
   try {
     const parsed = JSON.parse(text)
     if (typeof parsed === 'object' && parsed !== null) return parsed
-  } catch (e) {}
+  } catch (e) { }
   if (text.includes("'")) {
     try {
       const pyParsed = JSON.parse(pythonToJSON(text))
       if (typeof pyParsed === 'object' && pyParsed !== null) return pyParsed
-    } catch (e) {}
+    } catch (e) { }
   }
   const lines = text.split('\n')
   const result = {}
@@ -234,7 +249,7 @@ function parseTextToJSON(text) {
       const urlResult = {}
       params.forEach((v, k) => { urlResult[k] = v })
       if (Object.keys(urlResult).length > 0) return urlResult
-    } catch (e) {}
+    } catch (e) { }
   }
   return text
 }
@@ -321,7 +336,8 @@ async function loadHistory() {
   historyLoading.value = true
   try {
     const resp = await http.post('/pv/easyIC', { type: 'gethistory' })
-    history.value = resp.data?.data || []
+    const raw = resp.data?.data
+    history.value = Array.isArray(raw) ? raw : Object.values(raw || {})
   } catch (e) {
     history.value = []
   } finally {
@@ -428,11 +444,12 @@ function parseCurl() {
 .ic-page {
   height: 100%;
   overflow: hidden;
-  background: #f0f2f5;
-  padding: 16px;
+  background: #f5f6fa;
+  padding: 12px;
   box-sizing: border-box;
   display: flex;
 }
+
 .ic-panel {
   position: relative;
   flex: 1;
@@ -440,77 +457,93 @@ function parseCurl() {
   max-width: 1440px;
   margin: 0 auto;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
+
 .ic-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
+
 .ic-method :deep(.el-input__inner) {
   font-size: 20px;
   font-weight: 600;
   color: #6366f1;
 }
+
+.ic-env {
+  width: 200px;
+}
+
 .ic-uri {
   flex: 1;
-  min-width: 0;
+  min-width: 200px;
 }
+
 .ic-icon-btn {
   width: 36px;
   height: 36px;
   flex-shrink: 0;
   border-radius: 8px;
 }
+
 .ic-body {
   display: flex;
   flex: 1;
   min-height: 0;
 }
+
 .ic-left {
   width: 520px;
   flex-shrink: 0;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   padding: 16px;
   gap: 16px;
   overflow-y: auto;
 }
+
 .ic-label {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #4b5563;
+  color: #475569;
   margin-bottom: 6px;
 }
+
 .ic-actions {
   display: flex;
   gap: 12px;
   margin-top: auto;
 }
+
 .ic-result {
   flex: 1;
   min-width: 0;
-  background: #f9fafb;
+  background: #f8fafc;
   overflow-y: auto;
 }
+
 .ic-result-inner {
   padding: 16px;
 }
+
 .ic-note {
   text-align: center;
-  color: #999;
+  color: #94a3b8;
   padding: 20px;
 }
+
 .ic-error {
   color: #ef4444;
   margin-bottom: 12px;
@@ -518,57 +551,68 @@ function parseCurl() {
   background: #fef2f2;
   border-radius: 8px;
 }
+
 .ic-card {
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   background: #fff;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
 }
+
 .ic-card__head {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
+
 .ic-card__method {
   font-size: 24px;
   font-weight: 600;
   color: #6366f1;
   line-height: 1;
 }
+
 .ic-card__uri {
   font-size: 16px;
-  color: #374151;
+  color: #1e293b;
   word-break: break-all;
   padding-top: 2px;
 }
+
 .ic-card__fields {
   margin-top: 12px;
   font-size: 14px;
 }
+
 .ic-field {
   display: flex;
   gap: 12px;
   margin: 6px 0;
 }
+
 .ic-field--top {
   align-items: flex-start;
 }
+
 .ic-field__label {
   width: 80px;
   flex-shrink: 0;
   font-weight: 600;
-  color: #6b7280;
+  color: #64748b;
 }
+
 .ic-field__value {
   word-break: break-all;
-  color: #374151;
+  color: #1e293b;
 }
+
 .ic-field__value--mono {
   font-family: monospace;
   font-size: 12px;
 }
+
 .ic-field__body {
   flex: 1;
   min-width: 0;
@@ -576,13 +620,14 @@ function parseCurl() {
   flex-direction: column;
   gap: 8px;
 }
+
 .ic-card__footer {
   margin-top: 12px;
   padding-top: 8px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e2e8f0;
   text-align: center;
   font-size: 12px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 /* 下拉面板（历史 / curl） */
@@ -595,10 +640,11 @@ function parseCurl() {
   max-height: 320px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+  border: 1px solid #e2e8f0;
   overflow: hidden;
 }
+
 .ic-dropdown--center {
   left: 50%;
   transform: translateX(-50%);
@@ -606,27 +652,32 @@ function parseCurl() {
   width: 520px;
   padding: 16px;
 }
+
 .ic-dropdown__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
   height: 36px;
-  background: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
 }
+
 .ic-dropdown__title {
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
+  color: #1e293b;
 }
+
 .ic-dropdown__close {
   cursor: pointer;
-  color: #9ca3af;
+  color: #94a3b8;
 }
+
 .ic-dropdown__close:hover {
-  color: #4b5563;
+  color: #475569;
 }
+
 .ic-dropdown__body {
   overflow-y: auto;
   max-height: 280px;
@@ -638,11 +689,13 @@ function parseCurl() {
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f1f5f9;
 }
+
 .ic-his-row:hover {
-  background: #f9fafb;
+  background: #f8fafc;
 }
+
 .ic-his-text {
   flex: 1;
   cursor: pointer;
@@ -650,12 +703,14 @@ function parseCurl() {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 14px;
-  color: #374151;
+  color: #1e293b;
   padding-right: 8px;
 }
+
 .ic-his-replay {
   flex-shrink: 0;
 }
+
 .ic-his-delete {
   flex-shrink: 0;
 }

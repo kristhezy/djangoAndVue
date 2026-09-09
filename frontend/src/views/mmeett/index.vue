@@ -53,11 +53,11 @@
             <div class="fg">
               <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="cfg.uname" /></div>
               <div class="fgr"><label>用户名</label>
-                <div class="input-with-btn"><el-input v-model="cfg.userName" /><el-button size="small" @click="queryUser('userName')" title="查询用户名"><i class="fa-solid fa-user"></i></el-button></div></div>
+                <div class="iwb"><el-input v-model="cfg.userName" placeholder="用户名" /><button class="iwb-btn" type="button" @click="queryUser('userName')" title="查询用户名"><i class="fa-solid fa-user"></i></button></div></div>
               <div class="fgr"><label>用户邮箱</label>
-                <div class="input-with-btn"><el-input v-model="cfg.userEmail" /><el-button size="small" @click="queryUser('userEmail')" title="查询用户邮箱"><i class="fa-solid fa-envelope"></i></el-button></div></div>
+                <div class="iwb"><el-input v-model="cfg.userEmail" placeholder="用户邮箱" /><button class="iwb-btn" type="button" @click="queryUser('userEmail')" title="查询用户邮箱"><i class="fa-solid fa-envelope"></i></button></div></div>
               <div class="fgr"><label>国家/地区</label>
-                <div class="input-with-btn"><el-select v-model="cfg.country" @focus="loadCountries"><el-option label="--请选择--" value="" /><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select><el-button size="small" @click="queryUser('country')" title="查询注册国家"><i class="fa-solid fa-earth-americas"></i></el-button></div></div>
+                <div class="iwb"><el-select v-model="cfg.country" @focus="loadCountries"><el-option label="--请选择--" value="" /><el-option v-for="c in countryList" :key="c.value" :label="c.name" :value="c.value" /></el-select><button class="iwb-btn" type="button" @click="queryUser('country')" title="查询注册国家"><i class="fa-solid fa-earth-americas"></i></button></div></div>
             </div>
             <EnvRadio v-model="cfg.env" name="cfg-env" />
             <BtnGroup @reset="resetCfg" @submit="submitCfg" />
@@ -296,7 +296,6 @@
             <i :class="['fa-solid fa-chevron-right chevron', {open:cards.account}]"></i>
           </div>
           <div class="m-card-bd">
-            <TabGroup :tabs="[{v:'1',l:'充值'},{v:'0',l:'扣减'}]" v-model="account.state" />
             <div class="fg">
               <div class="fgr"><label><span class="rq">*</span>用户账号</label><el-input v-model="account.uname" /></div>
               <div class="fgr"><label><span class="rq">*</span>金额</label><el-input v-model="account.amount" type="number" placeholder="请输入金额" /></div>
@@ -313,7 +312,10 @@
 
 <script setup>
 import { reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import http from '../../api/http.js'
+
+const warn = (msg) => ElMessage({ message: msg, type: 'warning', duration: 2500 })
 
 // --- Inline sub-components ---
 const EnvRadio = {
@@ -373,11 +375,11 @@ function genUnames(base, count) {
 }
 
 // ====== Card 1: Mmeett注册用户 ======
-const reg = reactive({ mset:'regist', uname:'', rcode:'', country:'3630979328926013', pwd:'qq123456', bemail:'yes', paypwd:'123123', unum:1, env:'test', results:[], loading:false })
+const reg = reactive({ mset:'regist', uname:'', rcode:'', country:3630979328926013, pwd:'qq123456', bemail:'yes', paypwd:'123123', unum:1, env:'test', results:[], loading:false })
 function onRegTab() {}
-function resetReg() { Object.assign(reg, { mset:'regist', uname:'', rcode:'', country:'3630979328926013', pwd:'qq123456', bemail:'yes', paypwd:'123123', unum:1, env:'test', results:[] }) }
+function resetReg() { Object.assign(reg, { mset:'regist', uname:'', rcode:'', country:3630979328926013, pwd:'qq123456', bemail:'yes', paypwd:'123123', unum:1, env:'test', results:[] }) }
 async function submitReg() {
-  if (reg.mset==='regist' && (!reg.uname || !reg.rcode)) { alert('必填项不能为空！'); return }
+  if (reg.mset==='regist' && (!reg.uname || !reg.rcode)) { warn('必填项不能为空！'); return }
   reg.loading = true; reg.results = []
   const unames = genUnames(reg.uname, parseInt(reg.unum))
   for (let i = 0; i < unames.length; i++) {
@@ -404,15 +406,15 @@ function getRechargeConfig() {
         const order = [30,1,3,35,39,43,47,5,45,41,33,7,9,37]
         buy.levels = order.map(id => rcinfo.find(x => x.id === id)).filter(Boolean)
       } else if (r.data?.code == -15) {
-        alert((r.data?.msg||'') + '【本系统仅支持默认密码为 qq123456 的用户操作!】')
+        warn((r.data?.msg||'') + '【本系统仅支持默认密码为 qq123456 的用户操作!】')
       } else {
-        alert('用户已是钻石会员，请先降级再购买！')
+        warn('用户已是钻石会员，请先降级再购买！')
       }
     }).catch(() => {})
 }
 async function submitBuy() {
-  if (!buy.uname) { alert('用户账号不能为空！'); return }
-  if (!buy.level) { alert('请选择会员类型！'); return }
+  if (!buy.uname) { warn('用户账号不能为空！'); return }
+  if (!buy.level) { warn('请选择会员类型！'); return }
   buy.loading = true; buy.results = []
   const unames = genUnames(buy.uname, parseInt(buy.unum))
   for (let i = 0; i < unames.length; i++) {
@@ -426,8 +428,8 @@ async function submitBuy() {
 }
 
 // ====== Card 3: 生成邀请链路 ======
-const ref = reactive({ uname:'', rcode:'', country:'3630979328926013', level:'3', unum:1, env:'test', results:[], loading:false })
-function resetRef() { Object.assign(ref, { uname:'', rcode:'', country:'3630979328926013', level:'3', unum:1, env:'test', results:[] }) }
+const ref = reactive({ uname:'', rcode:'', country:3630979328926013, level:'3', unum:1, env:'test', results:[], loading:false })
+function resetRef() { Object.assign(ref, { uname:'', rcode:'', country:3630979328926013, level:'3', unum:1, env:'test', results:[] }) }
 function queryRCode() {
   if (!ref.uname) return
   http.post('/ov/pmmeett/queryRCode', { uname:ref.uname, env:ref.env, version:7, emailSuffix, type:'queryRCode' })
@@ -435,13 +437,13 @@ function queryRCode() {
       const d = r.data?.data
       if (d) {
         ref.rcode = d.rcode || ''
-        const cm = {'TW':'3630979328926013','JP':'3630979328926009','ID':'3630979328925988','TH':'3630979328926003','SG':'3630979328925990','MY':'3630979328925992'}
+        const cm = {'TW':3630979328926013,'JP':3630979328926009,'ID':3630979328925988,'TH':3630979328926003,'SG':3630979328925990,'MY':3630979328925992}
         ref.country = cm[d.country] || ''
       }
     }).catch(() => {})
 }
 async function submitRef() {
-  if (!ref.uname) { alert('用户账号不能为空！'); return }
+  if (!ref.uname) { warn('用户账号不能为空！'); return }
   ref.loading = true; ref.results = []
   const unames = genUnames(ref.uname, parseInt(ref.unum))
   for (let i = 0; i < unames.length; i++) {
@@ -458,7 +460,7 @@ async function submitRef() {
 const cfg = reactive({ uname:'', userName:'', userEmail:'', country:'', env:'test', result:'', loading:false })
 function resetCfg() { Object.assign(cfg, { uname:'', userName:'', userEmail:'', country:'', env:'test', result:'' }) }
 function queryUser(type) {
-  if (!cfg.uname) { alert('请输入用户账号！'); return }
+  if (!cfg.uname) { warn('请输入用户账号！'); return }
   const actionMap = { userName:'queryUserName', userEmail:'queryUserEmail', country:'queryRCode' }
   http.post('/ov/pmmeett/' + actionMap[type], { uname:cfg.uname, env:cfg.env, version:7, emailSuffix })
     .then(r => {
@@ -466,14 +468,14 @@ function queryUser(type) {
       if (type==='userName' && d?.userName) cfg.userName = d.userName
       else if (type==='userEmail' && d?.email) cfg.userEmail = d.email
       else if (type==='country' && d?.country) {
-        const cm = {'TW':'3630979328926013','JP':'3630979328926009','ID':'3630979328925988','TH':'3630979328926003','SG':'3630979328925990','MY':'3630979328925992'}
+        const cm = {'TW':3630979328926013,'JP':3630979328926009,'ID':3630979328925988,'TH':3630979328926003,'SG':3630979328925990,'MY':3630979328925992}
         cfg.country = cm[d.country] || ''
         loadCountries()
       }
     }).catch(() => {})
 }
 function submitCfg() {
-  if (!cfg.uname) { alert('用户账号不能为空！'); return }
+  if (!cfg.uname) { warn('用户账号不能为空！'); return }
   cfg.loading = true; cfg.result = ''
   http.post('/ov/pmmeett/updateUserInfo', { uname:cfg.uname, userName:cfg.userName, userEmail:cfg.userEmail, country:cfg.country, env:cfg.env, version:7, emailSuffix, type:'updateUserInfo' })
     .then(r => { cfg.result = r.data?.data || '' }).catch(() => { cfg.result = '请求失败' }).finally(() => { cfg.loading = false })
@@ -495,9 +497,9 @@ function setDefaultDates() {
   reward.dateRange = [fmt(new Date(y,m,s)), fmt(new Date(y,m,e))]
 }
 async function submitReward() {
-  if (!reward.types.length) { alert('请选择奖励类型！'); return }
+  if (!reward.types.length) { warn('请选择奖励类型！'); return }
   const [startTime, endTime] = reward.dateRange || []
-  if (!startTime || !endTime) { alert('请选择时间范围！'); return }
+  if (!startTime || !endTime) { warn('请选择时间范围！'); return }
   reward.loading = true; reward.results = []
   const typeNames = Object.fromEntries(rewardTypeList.map(r=>[r.v,r.l]))
   const sendTypes = (rt) => rt==='43' ? ['summary'] : [reward.pre&&'pre', reward.detail&&'detail', reward.summary&&'summary'].filter(Boolean)
@@ -519,13 +521,13 @@ function resetPower() { Object.assign(power, { op:'recharge', uname:'', computin
 function submitPower() {
   power.loading = true; power.result = ''
   if (power.op === 'recharge') {
-    if (!power.uname) { alert('请输入用户账号！'); power.loading=false; return }
-    if (!power.computingType) { alert('请选择充值类型！'); power.loading=false; return }
+    if (!power.uname) { warn('请输入用户账号！'); power.loading=false; return }
+    if (!power.computingType) { warn('请选择充值类型！'); power.loading=false; return }
     http.post('/ov/pmmeett/sendComputing', { computingNames, ccntlist:computingList, uname:power.uname, computingType:power.computingType, computingNum:power.computingNum, sendAward:power.sendAward, env:power.env, version:7, emailSuffix, type:'sendComputing' })
       .then(r => { power.result = r.data?.data || '' }).catch(() => { power.result='请求失败' }).finally(() => { power.loading=false })
   } else {
-    if (!power.unameD) { alert('请输入用户账号！'); power.loading=false; return }
-    if (!power.deductNum) { alert('请输入算力数值！'); power.loading=false; return }
+    if (!power.unameD) { warn('请输入用户账号！'); power.loading=false; return }
+    if (!power.deductNum) { warn('请输入算力数值！'); power.loading=false; return }
     http.post('/ov/pmmeett/computingConsumption', { uname:power.unameD, amount:power.deductNum, env:power.envD, version:7, emailSuffix, type:'computingConsumption' })
       .then(r => { power.result = r.data?.data || '' }).catch(() => { power.result='请求失败' }).finally(() => { power.loading=false })
   }
@@ -536,7 +538,7 @@ const settle = reactive({ type:'place', uname:'', cancelDir:'all', isBatch:'1', 
 function onSettleTab() { settle.checkResult = '' }
 function resetSettle() { Object.assign(settle, { type:'place', uname:'', cancelDir:'all', isBatch:'1', env:'test', results:[], checkResult:'' }) }
 function getTree(gtype) {
-  if (!settle.uname) { alert('请先输入用户账号！'); return }
+  if (!settle.uname) { warn('请先输入用户账号！'); return }
   if (gtype === 'issettle') {
     http.post('/ov/pmmeett/issettle', { uname:settle.uname, emailSuffix, env:settle.env, version:7, type:gtype })
       .then(r => { settle.checkResult = r.data?.data || '' }).catch(() => {})
@@ -545,7 +547,7 @@ function getTree(gtype) {
   }
 }
 async function submitSettle() {
-  if (!settle.uname) { alert('用户账号不能为空！'); return }
+  if (!settle.uname) { warn('用户账号不能为空！'); return }
   settle.loading = true; settle.results = []
   if (settle.type === 'cancel') {
     settle.results.push(`<span class="rl-pending">[${settle.uname}] 请求中...</span>`)
@@ -580,7 +582,7 @@ async function submitSettle() {
 const sv = reactive({ uname:'', level:0, env:'test', result:'', loading:false })
 function resetSv() { Object.assign(sv, { uname:'', level:0, env:'test', result:'' }) }
 function submitSv() {
-  if (!sv.uname) { alert('用户账号不能为空！'); return }
+  if (!sv.uname) { warn('用户账号不能为空！'); return }
   sv.loading = true; sv.result = ''
   http.post('/ov/pmmeett/demotionVip', { uname:sv.uname, level:sv.level, env:sv.env, version:7, emailSuffix, type:'demotionVip' })
     .then(r => { sv.result = r.data?.data || '' }).catch(() => { sv.result='请求失败' }).finally(() => { sv.loading=false })
@@ -590,33 +592,33 @@ function submitSv() {
 const gift = reactive({ uname:'', level:'', amount:1, expire:'', env:'test', result:'', loading:false })
 function resetGift() { Object.assign(gift, { uname:'', level:'', amount:1, expire:'', env:'test', result:'' }) }
 function submitGift() {
-  if (!gift.uname) { alert('用户账号不能为空！'); return }
-  if (!gift.level) { alert('等级不能为空！'); return }
+  if (!gift.uname) { warn('用户账号不能为空！'); return }
+  if (!gift.level) { warn('等级不能为空！'); return }
   gift.loading = true; gift.result = ''
   http.post('/ov/pmmeett/assetChange', { uname:gift.uname, level:gift.level, amount:gift.amount, expire:gift.expire, env:gift.env, version:7, emailSuffix, type:'giftPoints' })
     .then(r => { gift.result = r.data?.data || '' }).catch(() => { gift.result='请求失败' }).finally(() => { gift.loading=false })
 }
 
 // ====== Card 10: 账户充值/扣减 ======
-const account = reactive({ uname:'', amount:'', state:'1', env:'test', result:'', loading:false })
-function resetAccount() { Object.assign(account, { uname:'', amount:'', state:'1', env:'test', result:'' }) }
+const account = reactive({ uname:'', amount:'', env:'test', result:'', loading:false })
+function resetAccount() { Object.assign(account, { uname:'', amount:'', env:'test', result:'' }) }
 function submitAccount() {
-  if (!account.uname) { alert('请输入用户账号！'); return }
-  if (!account.amount) { alert('请输入金额！'); return }
-  const typeLabel = account.state === '1' ? '充值' : '扣减'
-  if (!confirm(`确认对用户「${account.uname}」进行「${typeLabel}」操作，金额：${account.amount}？`)) return
+  if (!account.uname) { warn('请输入用户账号！'); return }
+  if (!account.amount) { warn('请输入金额！'); return }
   account.loading = true; account.result = ''
-  http.post('/ov/pmmeett/assetChange', { uname:account.uname, state:account.state, camount:account.amount, env:account.env, version:7, emailSuffix, type:'assetChange' })
+  http.post('/ov/pmmeett/assetChange', { uname:account.uname, state:'1', camount:account.amount, env:account.env, version:7, emailSuffix, type:'assetChange' })
     .then(r => { account.result = r.data?.data || '' }).catch(() => { account.result='请求失败' }).finally(() => { account.loading=false })
 }
 
 // ====== Card: 用户注销 ======
 const del = reactive({ account:'', pwd:'qq123456', num:1, env:'test', result:'', loading:false })
 function resetDel() { Object.assign(del, { account:'', pwd:'qq123456', num:1, env:'test', result:'' }) }
-function submitDel() {
+async function submitDel() {
   if (!del.account) { del.result = '<span class="rl-error">请输入账号</span>'; return }
   const accounts = genUnames(del.account, parseInt(del.num))
-  if (!confirm(`确定要注销 ${accounts.length} 个账号吗？（${del.env==='prod'?'生产':'测试'}环境）此操作不可逆！`)) return
+  try {
+    await ElMessageBox.confirm(`确定要注销 ${accounts.length} 个账号吗？（${del.env==='prod'?'生产':'测试'}环境）此操作不可逆！`, '危险操作确认', { confirmButtonText: '确认注销', cancelButtonText: '取消', type: 'error' })
+  } catch { return }
   del.loading = true; del.result = ''
   http.post('/ov/pmmeett/delAccount', { account:accounts[0], accounts, pwd:del.pwd, env:del.env, version:7, type:'delAccount' })
     .then(r => {
@@ -625,7 +627,7 @@ function submitDel() {
     }).catch(e => { del.result = `<span class="rl-error">❌ 请求异常: ${e.message||e}</span>` }).finally(() => { del.loading=false })
 }
 
-onMounted(() => { setDefaultDates() })
+onMounted(() => { setDefaultDates(); loadCountries() })
 </script>
 
 <style scoped>
@@ -688,31 +690,51 @@ onMounted(() => { setDefaultDates() })
 .accent-red   { border-left-color:#ef4444; }  .accent-red   .card-icon { color:#ef4444; }
 
 /* ===================== 表单 Grid ===================== */
-.fg { display:grid; grid-template-columns:auto 1fr; column-gap:10px; row-gap:10px; align-items:center; width:100%; }
+.fg { display:grid; grid-template-columns:auto 180px; column-gap:14px; row-gap:12px; align-items:center; width:fit-content; margin:0 auto; }
 .fgr { display:contents; }
-.fgr label { text-align:right; white-space:nowrap; font-size:13px; color:#475569; }
+.fgr label { text-align:left; white-space:nowrap; font-size:13px; color:#475569; }
 .fgr :deep(.el-input), .fgr :deep(.el-select) { width:100% !important; }
 .rq { color:#ef4444; margin-right:2px; }
 
 .fgi { display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:8px; width:100%; }
 
-.input-with-btn { display:flex; gap:4px; width:100%; }
-.input-with-btn :deep(.el-input), .input-with-btn :deep(.el-select) { flex:1; }
+/* 带查询图标的输入框（统一边框风格） */
+.iwb {
+  display:flex; align-items:center; width:100%;
+  border:1px solid #dcdfe6; border-radius:4px; background:#fff;
+  transition:border-color .2s; overflow:hidden;
+}
+.iwb:focus-within { border-color:#409eff; }
+.iwb :deep(.el-input__wrapper) {
+  box-shadow:none !important; background:transparent !important; flex:1; min-width:0;
+}
+.iwb :deep(.el-input__inner) { text-align:left; font-size:13px; }
+.iwb :deep(.el-select__wrapper) {
+  box-shadow:none !important; background:transparent !important; flex:1; min-width:0;
+}
+.iwb .iwb-btn {
+  border:none; border-left:1px solid #e8e8e8; background:#f5f7fa;
+  cursor:pointer; padding:0 10px; color:#64748b; font-size:14px;
+  flex-shrink:0; transition:color .15s, background .15s;
+  display:inline-flex; align-items:center; justify-content:center; height:30px;
+}
+.iwb .iwb-btn:hover { color:#409eff; background:#ecf5ff; }
 
 /* ===================== 环境切换 ===================== */
-:deep(.env-group) { display:flex; justify-content:center; margin:14px 0 10px; width:100%; }
-:deep(.env-track) { display:inline-flex; gap:0; background:#f1f5f9; border-radius:8px; padding:3px; }
+:deep(.env-group) { display:inline-flex; justify-content:center; margin:14px auto 10px; }
+:deep(.env-track) { display:inline-flex; gap:0; background:#f1f5f9; border-radius:6px; padding:2px; flex-wrap:nowrap; }
 :deep(.env-track label) {
-  cursor:pointer; display:inline-flex; align-items:center; gap:5px;
-  padding:6px 16px; border-radius:6px; border:none; background:transparent;
-  font-size:12px; font-weight:500; color:#64748b; transition:all .2s; user-select:none;
+  cursor:pointer; display:inline-flex; align-items:center; gap:4px;
+  padding:5px 14px; border-radius:5px; border:none; background:transparent;
+  font-size:12px; font-weight:500; color:#64748b; transition:all .2s;
+  user-select:none; white-space:nowrap;
 }
 :deep(.env-track label.active) { background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,.1); font-weight:600; }
 :deep(.env-track label i) { font-size:11px; }
 :deep(.env-track input[type="radio"]) { display:none; }
 
 /* ===================== 按钮 ===================== */
-:deep(.btn-group) { display:flex; justify-content:center; gap:12px; margin:10px 0 12px; width:100%; }
+:deep(.btn-group) { display:flex; justify-content:center; gap:12px; margin:10px 0 12px; }
 :deep(.btn-reset) { min-width:72px; }
 :deep(.btn-submit) { min-width:72px; }
 
@@ -734,14 +756,14 @@ onMounted(() => { setDefaultDates() })
 :deep(.rl-info)    { color:#3b82f6; }
 
 /* ===================== Tab 切换 ===================== */
-:deep(.tab-group) { display:flex; justify-content:center; gap:0; margin-bottom:14px; background:#f1f5f9; border-radius:8px; padding:3px; width:100%; }
-:deep(.tab-group label) { cursor:pointer; margin:0; display:flex; flex:1; justify-content:center; }
-:deep(.tab-group .tab-item) { padding:7px 20px; background:transparent; color:#64748b; border:none; border-radius:6px; font-size:13px; font-weight:500; transition:all .2s; }
+:deep(.tab-group) { display:inline-flex; justify-content:center; gap:0; margin:0 auto 14px; background:#f1f5f9; border-radius:6px; padding:2px; flex-wrap:nowrap; }
+:deep(.tab-group label) { cursor:pointer; margin:0; display:flex; flex:1; justify-content:center; white-space:nowrap; }
+:deep(.tab-group .tab-item) { padding:6px 16px; background:transparent; color:#64748b; border:none; border-radius:5px; font-size:12px; font-weight:500; transition:all .2s; white-space:nowrap; }
 :deep(.tab-group label.active .tab-item) { background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,.08); font-weight:600; }
 :deep(.tab-group input[type="radio"]) { display:none; }
 
 /* ===================== Pill 选项组 ===================== */
-.pill-group { display:flex; align-items:center; gap:8px; margin-bottom:12px; width:100%; justify-content:center; flex-wrap:wrap; }
+.pill-group { display:flex; align-items:center; gap:8px; margin:0 auto 12px; justify-content:center; flex-wrap:wrap; width:fit-content; }
 .pill-label { font-size:13px; color:#475569; white-space:nowrap; }
 .pill-options { display:inline-flex; gap:0; background:#f1f5f9; border-radius:6px; padding:2px; }
 .pill-options label {

@@ -37,6 +37,7 @@ class User(models.Model):
     create_time = models.DateTimeField(null=True, blank=True)
     update_time = models.DateTimeField(null=True, blank=True)
     deleted = models.IntegerField(default=0)
+    job = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         managed = False

@@ -30,7 +30,7 @@ class InputAndQuery(object):
     # ---- ORM → dict 适配器（保持与旧 raw SQL 相同的返回格式） ----
     @staticmethod
     def _fmt_val(v):
-        """datetime → str（去掉自动附加的 +00:00 时区后缀）"""
+        """datetime → str"""
         if isinstance(v, datetime):
             return v.strftime('%Y-%m-%d %H:%M:%S')
         return v
@@ -112,6 +112,7 @@ class InputAndQuery(object):
               .order_by('-_sort'))
         if int(num) > 0:
             qs = qs[:int(num)]
+        print(f"query_message_by_dsandnum: {qs}")
         return self._one(qs, single=False)
 
     def query_message_ops(self, keyword="", env="", uname="", limit=50):
@@ -201,6 +202,13 @@ class InputAndQuery(object):
             single=True,
         )
         return d
+
+    def query_user_job(self, uid):
+        """按 users.id 查职位"""
+        try:
+            return User.objects.filter(id=self._esc_int(uid)).values_list('job', flat=True).first() or ''
+        except Exception:
+            return ''
 
     def query_roles_byuuid(self, uuid):
         """按 auth_user.id(uuid)查用户角色列表，返回 [{'code','legacy_mr'},...]"""
@@ -342,8 +350,8 @@ class InputAndQuery(object):
     # ================================================================
 
     def _now(self):
-        """当前时间 — timezone-aware"""
-        return timezone.now()
+        """当前时间 — 本地时间（naive，Django 不做时区转换直接入库）"""
+        return timezone.localtime(timezone.now()).replace(tzinfo=None)
 
     def delete_user(self, ln):
         """软删除用户（原 update_userInfo，modkw 恒为 'deleted = 1'）"""

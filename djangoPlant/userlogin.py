@@ -1,7 +1,10 @@
-from. import render,redirect,json,JsonResponse,login_required,authenticate,login,logout,HttpResponseRedirect
+from. import redirect,json,JsonResponse,login_required,authenticate,login,logout,HttpResponseRedirect
 from.pub_InputAndQuery import InputAndQuery as iaq
+from.spa import spa_index
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect # type: ignore
+from django.views.decorators.cache import never_cache # type: ignore
 
+@never_cache
 @ensure_csrf_cookie
 @csrf_protect
 def user_login(request):
@@ -41,10 +44,11 @@ def user_login(request):
                 'error': '用户名或密码错误，或用户已被禁用！'
             })
     else:
-        if 'isLoggedIn' in request.session and request.session['isLoggedIn']:
+        if request.user.is_authenticated:
             return redirect('/')
-        return render(request, 'login.html')
+        return spa_index(request)
 
+@never_cache
 @login_required
 def user_logout(request):
     # 记录来源路径，登录成功后跳回原页面

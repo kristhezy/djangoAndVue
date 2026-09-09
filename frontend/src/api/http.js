@@ -11,7 +11,7 @@ const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
-  const token = getCookie('csrftoken')
+  const token = getCookie('djv_csrftoken')
   if (token) {
     config.headers['X-CSRFToken'] = token
   }
@@ -42,5 +42,8 @@ http.interceptors.response.use(
     return Promise.reject(err)
   }
 )
+
+// 供 fetch 等非 axios 场景获取 CSRF token（如 SSE 流式请求）
+http.getCSRF = () => getCookie('djv_csrftoken')
 
 export default http

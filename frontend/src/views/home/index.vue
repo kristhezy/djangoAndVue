@@ -2,7 +2,7 @@
   <div class="home-page">
     <!-- 快捷入口 -->
     <section class="panel panel--centered">
-      <h2 class="panel__title">快捷入口</h2>
+      <h2 class="panel__title"><i class="fa-solid fa-bolt"></i> 快捷入口</h2>
       <div class="quick-grid">
         <div v-for="c in quickCards" :key="c.name" class="quick-card" :class="{ 'quick-card--highlight': c.highlight }">
           <div class="quick-card__name">{{ c.name }}</div>
@@ -19,7 +19,7 @@
 
     <!-- 常用工具 -->
     <section class="panel panel--centered">
-      <h2 class="panel__title">常用工具</h2>
+      <h2 class="panel__title"><i class="fa-solid fa-toolbox"></i> 常用工具</h2>
       <div class="link-grid">
         <a v-for="l in commonTools" :key="l.label" class="tool-link"
           :href="l.href" target="_blank" rel="noopener noreferrer">{{ l.label }}</a>
@@ -28,7 +28,7 @@
 
     <!-- 工作相关 -->
     <section class="panel panel--centered">
-      <h2 class="panel__title">工作相关</h2>
+      <h2 class="panel__title"><i class="fa-solid fa-briefcase"></i> 工作相关</h2>
       <div class="link-grid">
         <div v-for="r in resources" :key="r.title" class="resource-card">
           <div class="resource-card__title">{{ r.title }}</div>
@@ -45,7 +45,6 @@
 </template>
 
 <script setup>
-// 快捷入口：每卡片三个环境行，href 为空表示「无入口」
 const quickCards = [
   {
     name: 'k8s平台',
@@ -195,15 +194,15 @@ const workLinks = [
 .home-page {
   height: 100%;
   overflow-y: auto;
-  padding: 24px;
-  background: #f0f2f5;
+  padding: 20px;
+  background: #f5f6fa;
 }
 
 .panel {
   background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
   padding: 24px;
   margin-bottom: 16px;
 }
@@ -214,49 +213,52 @@ const workLinks = [
   margin-right: auto;
 }
 .panel__title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: #1e293b;
   padding-bottom: 8px;
   margin-bottom: 16px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid #e2e8f0;
 }
+.panel__title i { color: #6366f1; margin-right: 6px; }
 
-.useable { color: #409eff; }
-.notavailable { color: #c0c4cc; text-decoration: line-through; cursor: not-allowed; }
-.empty { color: #c0c4cc; }
+.useable { color: #6366f1; }
+.notavailable { color: #cbd5e1; text-decoration: line-through; cursor: not-allowed; }
+.empty { color: #cbd5e1; }
 
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  gap: 12px;
 }
 .quick-card {
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   padding: 16px;
   background: #fff;
+  transition: box-shadow .2s;
 }
-.quick-card--highlight { background: #ecf5ff; }
+.quick-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.quick-card--highlight { background: #fef2f2; border-color: #fca5a5; }
 .quick-card__name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: #303133;
-  margin-bottom: 12px;
+  color: #1e293b;
+  margin-bottom: 10px;
 }
-.quick-card--highlight .quick-card__name { color: #f56c6c; }
+.quick-card--highlight .quick-card__name { color: #ef4444; }
 .quick-card__row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 0;
-  font-size: 14px;
+  padding: 4px 0;
+  font-size: 13px;
 }
 .quick-card__env {
   width: 36px;
   flex-shrink: 0;
   font-size: 12px;
-  color: #909399;
+  color: #94a3b8;
 }
 
 .link-grid {
@@ -268,31 +270,31 @@ const workLinks = [
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 12px;
-  border: 1px solid #e4e7ed;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #fff;
-  color: #409eff;
-  font-size: 14px;
+  color: #6366f1;
+  font-size: 13px;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: all .2s;
 }
 .tool-link:hover {
   border-color: #6366f1;
-  background: #fafafa;
+  background: #f8fafc;
 }
-.tool-link--danger { color: #f56c6c; }
+.tool-link--danger { color: #ef4444; }
 
 .resource-card {
   padding: 16px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   background: #fff;
 }
 .resource-card__title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #303133;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
   margin-bottom: 10px;
 }
 .resource-card__links {
@@ -302,6 +304,6 @@ const workLinks = [
 }
 .resource-card__links a {
   font-size: 13px;
-  color: #409eff;
+  color: #6366f1;
 }
 </style>

@@ -82,13 +82,14 @@ CACHES = {
             'retry_on_timeout': True,
             'health_check_interval': 30,
         },
-        'KEY_PREFIX': 'dp',
+        'KEY_PREFIX': 'djv',
     }
 }
 
 ROOT_URLCONF = 'djangoPlant.urls'
 # Session存储方式（默认数据库）
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'djv_sessionid'
 SESSION_COOKIE_AGE = 2592000  # 30天（秒）:2592000
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # 浏览器关闭后session保持有效
 
@@ -101,6 +102,7 @@ SECURE_SSL_REDIRECT = False  # 开发环境无需强制 HTTPS
 CSRF_COOKIE_SECURE = False   # 开发环境无需 HTTPS 下的 CSRF Cookie
 CSRF_COOKIE_HTTPONLY = False  # 关键！前端JS需要读取CSRF Cookie，必须设为False
 CSRF_COOKIE_SAMESITE = 'Lax'  # 兼容表单提交（不要设为Strict）
+CSRF_COOKIE_NAME = 'djv_csrftoken'
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8001', 'http://localhost:5173', 'http://127.0.0.1:8001', 'http://127.0.0.1:5173']
 
 # Session配置（删除Session后登录失败的核心）
