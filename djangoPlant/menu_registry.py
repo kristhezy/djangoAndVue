@@ -44,6 +44,7 @@ MENU_MAP = {
     'easyIC': '/pv/easyIC',
     'aitools': '/pv/aitools',
     'agent': '/pv/agent',
+    'radar': '/radar',
 }
 
 # 公共菜单 key（种子数据里给 user 角色默认配的，也是「非管理员也可见」的定义）

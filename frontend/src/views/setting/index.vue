@@ -232,7 +232,7 @@ onMounted(() => { })
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -253,12 +253,12 @@ onMounted(() => { })
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -290,17 +290,17 @@ onMounted(() => { })
 }
 
 .column::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 .column::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* ===================== 卡片 ===================== */
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
@@ -325,7 +325,7 @@ onMounted(() => { })
 }
 
 .m-card-hd:hover {
-  background: #fafbfc;
+  background: var(--bg-hover);
 }
 
 .m-card-hd-left {
@@ -344,14 +344,14 @@ onMounted(() => { })
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
 /* 折叠箭头 */
 .chevron {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   transition: transform .25s ease;
 }
 
@@ -376,7 +376,7 @@ onMounted(() => { })
   max-height: 800px;
   transition: max-height .3s ease, padding .3s ease, opacity .25s;
   opacity: 1;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 /* 色彩主题：左侧竖条 */
@@ -415,7 +415,7 @@ onMounted(() => { })
 /* ===================== 表单 Grid ===================== */
 .fg {
   display: grid;
-  grid-template-columns: auto 250px;
+  grid-template-columns: auto 300px;
   column-gap: 12px;
   row-gap: 12px;
   align-items: center;
@@ -431,7 +431,7 @@ onMounted(() => { })
   text-align: left;
   white-space: nowrap;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .fgr :deep(.el-input),
@@ -454,7 +454,7 @@ onMounted(() => { })
 :deep(.env-track) {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   flex-wrap: nowrap;
@@ -471,15 +471,15 @@ onMounted(() => { })
   background: transparent;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 :deep(.env-track label.active) {
-  background: #fff;
-  color: #6366f1;
+  background: var(--bg-card);
+  color: var(--color-primary-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
 }
@@ -508,11 +508,11 @@ onMounted(() => { })
   overflow-y: auto;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   font-size: 13px;
   text-align: center;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
   word-wrap: break-word;
   word-break: break-all;
   white-space: pre-wrap;
@@ -523,7 +523,7 @@ onMounted(() => { })
 }
 
 .result-loading {
-  color: #6366f1;
+  color: var(--color-primary-light);
   font-weight: 500;
 }
 

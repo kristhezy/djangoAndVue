@@ -185,7 +185,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -206,12 +206,12 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -221,7 +221,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 }
 
 .search-bar__inner {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 14px 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
@@ -231,7 +231,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  gap: 12px 12px;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -244,26 +244,26 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 .filter-form :deep(.el-form-item__label) {
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
   padding: 0;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .filter-form :deep(.el-input) {
-  width: 200px;
+  width: 240px;
 }
 
 .filter-form :deep(.cid-input .el-input) {
-  width: 172px;
+  width: 200px;
 }
 
 .filter-form :deep(.el-select) {
-  width: 100px;
+  width: 120px;
 }
 
 .filter-form :deep(.opr-select .el-select) {
-  width: 120px;
+  width: 140px;
 }
 
 .filter-actions {
@@ -277,7 +277,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 }
 
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
   overflow: hidden;
@@ -302,8 +302,8 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 .table-wrap :deep(.el-table th.el-table__cell) {
   font-size: 14px;
   font-weight: 700;
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
 }
 
 .table-wrap :deep(.el-table td.el-table__cell) {
@@ -320,7 +320,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   justify-content: flex-end;
   padding: 12px 16px;
   flex-shrink: 0;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 .msg-wrap {

@@ -7,8 +7,92 @@ body,
 
 body {
   margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Element Plus 全局覆盖 */
+.el-message-box { border-radius: 12px !important; }
+.el-message { border-radius: 8px !important; }
+
+/* 暗色模式 Element Plus 组件补充 */
+html.dark .el-table {
+  --el-table-bg-color: var(--bg-card);
+  --el-table-tr-bg-color: var(--bg-card);
+  --el-table-header-bg-color: var(--bg-subtle);
+  --el-table-border-color: var(--border-light);
+  --el-table-text-color: var(--text-primary);
+  --el-table-header-text-color: var(--text-primary);
+  --el-table-row-hover-bg-color: var(--bg-hover);
+}
+
+html.dark .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--bg-subtle);
+}
+
+html.dark .el-input__wrapper {
+  background-color: var(--bg-subtle);
+  box-shadow: 0 0 0 1px var(--border-light) inset;
+}
+
+html.dark .el-input__inner {
+  color: var(--text-primary);
+}
+
+html.dark .el-select-dropdown {
+  background-color: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+html.dark .el-select-dropdown__item {
+  color: var(--text-secondary);
+}
+
+html.dark .el-select-dropdown__item.is-hovering {
+  background-color: var(--bg-hover);
+}
+
+html.dark .el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-text-color: var(--text-secondary);
+  --el-pagination-button-bg-color: var(--bg-subtle);
+  --el-pagination-hover-color: var(--color-primary);
+}
+
+html.dark .el-dialog {
+  --el-dialog-bg-color: var(--bg-card);
+  --el-dialog-title-font-size: 16px;
+  --el-dialog-border-radius: 12px;
+}
+
+html.dark .el-popover {
+  --el-popover-bg-color: var(--bg-card);
+  --el-popover-border-color: var(--border-light);
+}
+
+html.dark .el-popconfirm__main {
+  color: var(--text-primary);
+}
+
+html.dark .el-radio {
+  --el-radio-text-color: var(--text-secondary);
+}
+
+html.dark .el-checkbox {
+  --el-checkbox-text-color: var(--text-secondary);
+}
+
+html.dark .el-tag {
+  --el-tag-bg-color: var(--bg-subtle);
+  --el-tag-border-color: var(--border-light);
+  --el-tag-text-color: var(--text-secondary);
+}
+
+html.dark .el-card {
+  --el-card-bg-color: var(--bg-card);
+  --el-card-border-color: var(--border-light);
 }

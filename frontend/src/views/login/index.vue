@@ -34,7 +34,7 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-checkbox v-model="form.remember">记住密码</el-checkbox>
+            <el-checkbox v-model="form.remember">记住账号</el-checkbox>
           </el-form-item>
           <el-form-item>
             <el-button
@@ -71,9 +71,10 @@ const form = reactive({
 })
 
 onMounted(() => {
-  // 恢复记住的密码
+  // 恢复记住的用户名
   form.username = localStorage.getItem('username') || ''
-  form.password = localStorage.getItem('password') || ''
+  // 清理旧版明文密码缓存
+  localStorage.removeItem('password')
   if (form.username) {
     form.remember = true
   }
@@ -94,13 +95,11 @@ async function handleLogin() {
     const next = route.query.next || ''
     const { data: res } = await doLogin(form.username, form.password, next)
     if (res.success) {
-      // 保存/清除记住的密码
+      // 保存/清除记住的用户名
       if (form.remember) {
         localStorage.setItem('username', form.username)
-        localStorage.setItem('password', form.password)
       } else {
         localStorage.removeItem('username')
-        localStorage.removeItem('password')
       }
       ElMessage.success('登录成功')
       let target = res.redirect_url || '/home'
@@ -168,7 +167,7 @@ async function handleLogin() {
 /* 右侧表单面板 */
 .right-panel {
   flex: 1;
-  background: #fff;
+  background: var(--bg-card);
   display: flex;
   flex-direction: column;
   align-items: center;

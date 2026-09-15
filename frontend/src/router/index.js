@@ -42,6 +42,7 @@ const routes = [
       { path: 'easyIC', component: () => import('../views/easyIC/index.vue') },
       { path: 'aitools', component: () => import('../views/aitools/index.vue') },
       { path: 'agent', component: () => import('../views/agent/index.vue') },
+      { path: 'radar', component: () => import('../views/radar/index.vue') },
     ],
   },
 

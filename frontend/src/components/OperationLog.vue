@@ -79,12 +79,12 @@ defineExpose({ refresh })
 
 <style scoped>
 .oplog-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   flex: 1;
   min-width: 0;
   height: 100%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -92,7 +92,7 @@ defineExpose({ refresh })
 }
 
 .oplog-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .08), 0 2px 4px rgba(0, 0, 0, .04);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .oplog-hd {
@@ -120,7 +120,7 @@ defineExpose({ refresh })
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
@@ -128,19 +128,19 @@ defineExpose({ refresh })
   flex: 1;
   overflow-y: auto;
   min-height: 200px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
   padding: 0;
 }
 
 .oplog-empty {
-  color: #c0c4cc;
+  color: var(--text-placeholder);
   text-align: center;
   padding: 48px 20px;
 }
 
 .oplog-item {
   padding: 10px 18px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-card);
 }
 
 .oplog-item:last-child {
@@ -157,25 +157,25 @@ defineExpose({ refresh })
 .oplog-item__title {
   font-weight: 600;
   font-size: 13px;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .oplog-item__time {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   white-space: nowrap;
 }
 
 .oplog-item__msg {
   margin-top: 4px;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   word-break: break-all;
   line-height: 1.5;
 }
 
 .oplog-item__msg :deep(b) {
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 </style>

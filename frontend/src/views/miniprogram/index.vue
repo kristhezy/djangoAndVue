@@ -30,7 +30,7 @@
                 <div>appID: {{ appid }}</div>
               </div>
               <div v-else-if="queryError" style="color:#dc2626;">{{ queryError }}</div>
-              <div v-else style="color:#94a3b8;">未查询</div>
+              <div v-else style="color:var(--text-placeholder);">未查询</div>
             </div>
           </div>
         </div>
@@ -352,7 +352,7 @@ onMounted(() => { loadRecords() })
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -373,12 +373,12 @@ onMounted(() => { loadRecords() })
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -408,7 +408,7 @@ onMounted(() => { loadRecords() })
 }
 
 .left-col::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
@@ -420,7 +420,7 @@ onMounted(() => { loadRecords() })
 }
 
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
   overflow: hidden;
@@ -457,7 +457,7 @@ onMounted(() => { loadRecords() })
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
@@ -467,7 +467,7 @@ onMounted(() => { loadRecords() })
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 .accent-blue {
@@ -520,7 +520,7 @@ onMounted(() => { loadRecords() })
   gap: 8px;
   width: 100%;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .mp-tpl label,
@@ -545,11 +545,11 @@ onMounted(() => { loadRecords() })
   width: 100%;
   min-height: 72px;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 :deep(.btn-only) {
@@ -562,11 +562,11 @@ onMounted(() => { loadRecords() })
   min-height: 20px;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   font-size: 13px;
   text-align: left;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -604,7 +604,7 @@ onMounted(() => { loadRecords() })
 }
 
 .mp-stats {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
   white-space: nowrap;
 }

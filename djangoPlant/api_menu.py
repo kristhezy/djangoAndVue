@@ -27,6 +27,21 @@ I = {
     'easyIC': 'fa-brands fa-linode',
     'aitools': 'fa-brands fa-think-peaks',
     'agent': 'fa-solid fa-robot',
+    'radar': 'fa-solid fa-satellite-dish',
+    # ── compconfig 子项 ──
+    'jtSaleskits': 'fa-solid fa-bullhorn',
+    'hwskset': 'fa-solid fa-cloud',
+    'upgradeR3': 'fa-solid fa-share-nodes',
+    'basicComp': 'fa-solid fa-toolbox',
+    'baseUpgradeSK': 'fa-solid fa-arrow-up-right-dots',
+    # ── tools 子项 ──
+    'delCP': 'fa-solid fa-trash-can',
+    'forWeCom': 'fa-solid fa-comments',
+    'mergeUser': 'fa-solid fa-users-rectangle',
+    'delBindRelation': 'fa-solid fa-link-slash',
+    'aboutLogin': 'fa-solid fa-right-to-bracket',
+    'dzFunction': 'fa-solid fa-sliders',
+    'batchDeleteClue': 'fa-solid fa-broom',
 }
 
 # 独立菜单项（按 sidebar 顺序）
@@ -46,6 +61,7 @@ STANDS = [
     ('easyIC', C['SITE_EASYIC'], C['SITE_EASYIC_NAME']),
     ('aitools', C['SITE_AITOOLS'], C['SITE_AITOOLS_NAME']),
     ('agent', C['SITE_AGENT'], C['SITE_AGENT_NAME']),
+    ('radar', C['SITE_RADAR'], C['SITE_RADAR_NAME']),
 ]
 
 # 分组菜单（title 用 group icon，items 无独立 icon，before 指定插入到哪个 standalone 之前）
@@ -94,6 +110,7 @@ ROUTE = {
     'easyIC': '/easyIC',
     'aitools': '/aitools',
     'agent': '/agent',
+    'radar': '/radar',
     'soon': '/soon',
     'mmeett': '/mmeett',
     'setting': '/setting',

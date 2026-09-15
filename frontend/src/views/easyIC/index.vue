@@ -444,7 +444,7 @@ function parseCurl() {
 .ic-page {
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
   padding: 12px;
   box-sizing: border-box;
   display: flex;
@@ -456,10 +456,10 @@ function parseCurl() {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -470,14 +470,14 @@ function parseCurl() {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-light);
   flex-shrink: 0;
 }
 
 .ic-method :deep(.el-input__inner) {
   font-size: 20px;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--color-primary-light);
 }
 
 .ic-env {
@@ -505,7 +505,7 @@ function parseCurl() {
 .ic-left {
   width: 520px;
   flex-shrink: 0;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -517,7 +517,7 @@ function parseCurl() {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
@@ -530,7 +530,7 @@ function parseCurl() {
 .ic-result {
   flex: 1;
   min-width: 0;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   overflow-y: auto;
 }
 
@@ -540,7 +540,7 @@ function parseCurl() {
 
 .ic-note {
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   padding: 20px;
 }
 
@@ -554,8 +554,8 @@ function parseCurl() {
 
 .ic-card {
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
   padding: 16px;
   margin-bottom: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
@@ -570,13 +570,13 @@ function parseCurl() {
 .ic-card__method {
   font-size: 24px;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--color-primary-light);
   line-height: 1;
 }
 
 .ic-card__uri {
   font-size: 16px;
-  color: #1e293b;
+  color: var(--text-primary);
   word-break: break-all;
   padding-top: 2px;
 }
@@ -600,12 +600,12 @@ function parseCurl() {
   width: 80px;
   flex-shrink: 0;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .ic-field__value {
   word-break: break-all;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .ic-field__value--mono {
@@ -624,10 +624,10 @@ function parseCurl() {
 .ic-card__footer {
   margin-top: 12px;
   padding-top: 8px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-light);
   text-align: center;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
 }
 
 /* 下拉面板（历史 / curl） */
@@ -638,10 +638,10 @@ function parseCurl() {
   z-index: 50;
   width: 500px;
   max-height: 320px;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   overflow: hidden;
 }
 
@@ -659,23 +659,23 @@ function parseCurl() {
   justify-content: space-between;
   padding: 0 12px;
   height: 36px;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .ic-dropdown__title {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .ic-dropdown__close {
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--text-placeholder);
 }
 
 .ic-dropdown__close:hover {
-  color: #475569;
+  color: var(--text-secondary);
 }
 
 .ic-dropdown__body {
@@ -689,11 +689,11 @@ function parseCurl() {
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-card);
 }
 
 .ic-his-row:hover {
-  background: #f8fafc;
+  background: var(--bg-subtle);
 }
 
 .ic-his-text {
@@ -703,7 +703,7 @@ function parseCurl() {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 14px;
-  color: #1e293b;
+  color: var(--text-primary);
   padding-right: 8px;
 }
 

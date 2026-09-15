@@ -25,5 +25,5 @@ if (!menuStore.loaded) {
 <style scoped>
 .layout { height: 100vh; display: flex; flex-direction: column; }
 .body { flex: 1; display: flex; overflow: hidden; }
-.content { flex: 1; overflow: hidden; background: #f0f2f5; }
+.content { flex: 1; overflow: hidden; background: var(--bg-page); }
 </style>

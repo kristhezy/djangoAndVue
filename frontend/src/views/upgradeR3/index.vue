@@ -104,7 +104,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -125,12 +125,12 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -143,7 +143,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
 }
 
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   flex: 1.2;
   min-width: 0;
@@ -183,7 +183,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
@@ -194,7 +194,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   align-items: center;
   flex: 1;
   overflow-y: auto;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 .accent-blue {
@@ -221,7 +221,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
 }
 
 .fg-wide {
-  grid-template-columns: auto minmax(280px, 440px);
+  grid-template-columns: auto minmax(300px, 500px);
 }
 
 .fgr {
@@ -232,7 +232,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   text-align: left;
   white-space: nowrap;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   padding-top: 6px;
 }
 
@@ -266,7 +266,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
 :deep(.env-track) {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   flex-wrap: nowrap;
@@ -283,15 +283,15 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   background: transparent;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 :deep(.env-track label.active) {
-  background: #fff;
-  color: #6366f1;
+  background: var(--bg-card);
+  color: var(--color-primary-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
 }
@@ -316,11 +316,11 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   min-height: 40px;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   font-size: 13px;
   text-align: left;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -332,17 +332,17 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
 .ur3-tips {
   margin-top: 12px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
 }
 
 .ur3-sql {
   margin-top: 6px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   white-space: pre-wrap;
   word-break: break-all;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   border-radius: 6px;
 }
 

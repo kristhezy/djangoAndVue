@@ -406,7 +406,7 @@ onMounted(() => {
 .at-page {
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
   padding: 12px;
   box-sizing: border-box;
   display: flex;
@@ -416,17 +416,17 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 .at-chat__hd {
   padding: 12px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-card);
   font-size: 15px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 .at-chat__area {
   flex: 1;
@@ -438,20 +438,20 @@ onMounted(() => {
   gap: 24px;
 }
 .at-chat__area::-webkit-scrollbar { width: 5px; }
-.at-chat__area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+.at-chat__area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 5px; }
 .at-welcome {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   font-size: 22px;
   font-family: "KaiTi", serif;
 }
 .at-qa {
   width: 800px;
   max-width: 100%;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 16px 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
@@ -472,7 +472,7 @@ onMounted(() => {
 .at-msg-body:not(.at-msg-body--user):not(.at-msg-body--streaming) {
   padding: 10px 14px;
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
 }
 .at-msg-body--user {
   flex: 0 1 auto;
@@ -484,7 +484,7 @@ onMounted(() => {
 .at-msg-body--streaming {
   padding: 10px 14px;
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
 }
 .at-msg-img {
   display: block;
@@ -496,7 +496,7 @@ onMounted(() => {
 }
 .at-thinking {
   margin-bottom: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 7px;
   overflow: hidden;
 }
@@ -504,16 +504,16 @@ onMounted(() => {
   padding: 6px 10px;
   cursor: pointer;
   font-size: 12px;
-  color: #94a3b8;
-  background: #f8fafc;
+  color: var(--text-placeholder);
+  background: var(--bg-subtle);
   user-select: none;
 }
 .at-thinking-content {
   padding: 8px 12px;
   font-size: 12px;
-  color: #64748b;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border-light);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -522,12 +522,12 @@ onMounted(() => {
   border-radius: 6px;
   font-size: 13px;
   margin-bottom: 8px;
-  background: #eef2ff;
-  color: #6366f1;
+  background: var(--bg-active);
+  color: var(--color-primary-light);
 }
 .at-stream-cursor {
   animation: pulse 1s infinite;
-  color: #6366f1;
+  color: var(--color-primary-light);
 }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .at-loading-dots {
@@ -537,7 +537,7 @@ onMounted(() => {
 .at-dot {
   width: 7px;
   height: 7px;
-  background: #94a3b8;
+  background: var(--scrollbar-thumb-hover);
   border-radius: 50%;
   animation: blink 1.4s infinite both;
 }
@@ -561,28 +561,28 @@ onMounted(() => {
   border-radius: 4px;
   border: 0;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   cursor: pointer;
   font-size: 12px;
 }
-.at-act-btn:hover { color: #475569; background: rgba(0,0,0,0.05); }
+.at-act-btn:hover { color: var(--text-secondary); background: rgba(0,0,0,0.05); }
 .at-chat__foot {
   padding: 10px 20px 16px;
   display: flex;
   justify-content: center;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 .at-input-wrap {
   width: 100%;
   max-width: 800px;
   display: flex;
   flex-direction: column;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 12px;
   padding: 10px 12px 8px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
 }
-.at-input-wrap:focus-within { border-color: #6366f1; }
+.at-input-wrap:focus-within { border-color: var(--color-primary-light); }
 .at-input-toolbar {
   display: flex;
   align-items: center;
@@ -608,9 +608,9 @@ onMounted(() => {
 .at-side {
   width: 280px;
   min-width: 280px;
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -620,12 +620,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-card);
 }
 .at-side__logo {
   font-size: 20px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 .at-newchat {
   display: flex;
@@ -633,16 +633,16 @@ onMounted(() => {
   justify-content: center;
   gap: 6px;
   padding: 9px 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  background: #fff;
-  color: #1e293b;
+  background: var(--bg-card);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 14px;
 }
-.at-newchat:hover { background: #f1f5f9; }
+.at-newchat:hover { background: var(--bg-hover); }
 .at-side__label {
-  color: #94a3b8;
+  color: var(--text-placeholder);
   font-size: 13px;
   margin-top: 4px;
 }
@@ -655,7 +655,7 @@ onMounted(() => {
   gap: 4px;
 }
 .at-side__list::-webkit-scrollbar { width: 4px; }
-.at-side__list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.at-side__list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
 .at-hht {
   display: flex;
   align-items: center;
@@ -664,10 +664,10 @@ onMounted(() => {
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #1e293b;
+  color: var(--text-primary);
 }
-.at-hht:hover { background: #f1f5f9; }
-.at-hht.active { background: #eef2ff; font-weight: 500; color: #6366f1; }
+.at-hht:hover { background: var(--bg-hover); }
+.at-hht.active { background: var(--bg-active); font-weight: 500; color: var(--color-primary-light); }
 .at-hht__tit {
   flex: 1;
   white-space: nowrap;

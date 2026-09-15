@@ -1,4 +1,4 @@
-from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time
+from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time,requests
 from django.views.decorators.http import condition
 from.pub_InputAndQuery import InputAndQuery
 from.publicDef import publicDef,fivemillion
@@ -779,3 +779,39 @@ def paitools(request,ptype):
             rescode, msg, rlt = c['reserror'], m['reserror'], f"删除失败: {e}"
     grlt = pdef.get_result(rescode,msg,rlt)
     return jr(grlt)
+
+
+# ==================== SAAS企业雷达数据 ====================
+RADAR_HOST = "https://agent.aijiatui.com"
+
+@never_cache
+def radar_data(request):
+    """代理查询雷达数据"""
+    company_id = request.GET.get('company_id', '')
+    start_time = request.GET.get('start_time', '')
+    end_time = request.GET.get('end_time', '')
+    page = request.GET.get('page', '1')
+    limit = request.GET.get('limit', '100')
+    params = {
+        'company_id': company_id,
+        'start_time': start_time,
+        'end_time': end_time,
+        'page': page,
+        'limit': limit,
+    }
+    try:
+        resp = requests.get(f"{RADAR_HOST}/radar/prod/data", params=params, timeout=30)
+        return jr(resp.json())
+    except Exception as e:
+        return jr({'code': 1, 'msg': f'请求失败: {e}', 'data': [], 'count': 0})
+
+
+@never_cache
+def radar_company(request):
+    """根据企业名称搜索企业ID"""
+    company_name = request.GET.get('company_name', '')
+    try:
+        resp = requests.get(f"{RADAR_HOST}/radar/prod/company", params={'company_name': company_name}, timeout=30)
+        return jr({'code': 0, 'msg': '成功', 'data': resp.json()})
+    except Exception as e:
+        return jr({'code': 1, 'msg': f'请求失败: {e}', 'data': []})

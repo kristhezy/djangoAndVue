@@ -128,6 +128,8 @@ SITE_CONFIG = {
     'SITE_AITOOLS_NAME':'my AIChat',
     'SITE_AGENT':'/pv/agent',
     'SITE_AGENT_NAME':'my Agent',
+    'SITE_RADAR':'/pv/radar',
+    'SITE_RADAR_NAME':'SAAS企业雷达数据',
 
     #文本
 }

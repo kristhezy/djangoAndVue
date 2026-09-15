@@ -125,43 +125,43 @@ onMounted(() => { load() })
 </script>
 
 <style scoped>
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:#f5f6fa; }
+.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:var(--bg-page); }
 .toolbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 8px; flex-shrink:0; }
 .toolbar-left { display:flex; align-items:center; gap:8px; }
-.page-title { margin:0; font-size:16px; font-weight:700; color:#1e293b; letter-spacing:.3px; }
-.page-title i { color:#6366f1; margin-right:4px; }
+.page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
+.page-title i { color:var(--color-primary-light); margin-right:4px; }
 
 .search-bar { flex-shrink:0; padding:0 14px; }
 .search-bar__inner {
-  background:#fff; border-radius:12px; padding:10px 16px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  background:var(--bg-card); border-radius:12px; padding:10px 16px;
+  box-shadow:var(--shadow-card);
   display:flex; align-items:center; gap:10px;
 }
 
 .mo-body { flex:1; padding:12px 14px 14px; overflow:hidden; }
 
 .m-card {
-  background:#fff; border-radius:12px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  background:var(--bg-card); border-radius:12px;
+  box-shadow:var(--shadow-card);
   overflow:hidden; transition:box-shadow .2s;
 }
-.m-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04); }
+.m-card:hover { box-shadow:var(--shadow-card-hover); }
 
 .note-list { height:100%; overflow-y:auto; padding:8px 20px; }
 .note-list::-webkit-scrollbar { width:4px; }
 .note-list::-webkit-scrollbar-track { background:transparent; }
-.note-list::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+.note-list::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
 
-.note-item { border-bottom:1px solid #e2e8f0; padding:12px 0; }
+.note-item { border-bottom:1px solid var(--border-light); padding:12px 0; }
 .note-badge {
   display:inline-block; padding:2px 10px; border-radius:0 4px 4px 0;
-  background:#f1f5f9; font-size:14px; font-weight:500; color:#1e293b; margin-bottom:8px;
+  background:var(--bg-hover); font-size:14px; font-weight:500; color:var(--text-primary); margin-bottom:8px;
 }
-.note-content { font-size:14px; color:#475569; line-height:1.625; margin-bottom:8px; word-break:break-word; }
-.note-content :deep(a) { color:#6366f1; }
+.note-content { font-size:14px; color:var(--text-secondary); line-height:1.625; margin-bottom:8px; word-break:break-word; }
+.note-content :deep(a) { color:var(--color-primary-light); }
 .note-footer { display:flex; align-items:center; justify-content:space-between; }
-.note-meta { font-size:12px; color:#94a3b8; }
+.note-meta { font-size:12px; color:var(--text-placeholder); }
 .note-actions { display:flex; align-items:center; }
-.note-actions .sep { color:#cbd5e1; margin:0 4px; }
-.note-bottom { text-align:center; font-weight:500; color:#94a3b8; padding:12px 0; font-size:13px; }
+.note-actions .sep { color:var(--text-placeholder); margin:0 4px; }
+.note-bottom { text-align:center; font-weight:500; color:var(--text-placeholder); padding:12px 0; font-size:13px; }
 </style>

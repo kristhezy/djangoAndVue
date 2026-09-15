@@ -195,14 +195,14 @@ const workLinks = [
   height: 100%;
   overflow-y: auto;
   padding: 20px;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .panel {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  box-shadow: var(--shadow-card);
   padding: 24px;
   margin-bottom: 16px;
 }
@@ -215,16 +215,16 @@ const workLinks = [
 .panel__title {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   padding-bottom: 8px;
   margin-bottom: 16px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-light);
 }
-.panel__title i { color: #6366f1; margin-right: 6px; }
+.panel__title i { color: var(--color-primary-light); margin-right: 6px; }
 
-.useable { color: #6366f1; }
-.notavailable { color: #cbd5e1; text-decoration: line-through; cursor: not-allowed; }
-.empty { color: #cbd5e1; }
+.useable { color: var(--color-primary-light); }
+.notavailable { color: var(--text-placeholder); text-decoration: line-through; cursor: not-allowed; }
+.empty { color: var(--text-placeholder); }
 
 .quick-grid {
   display: grid;
@@ -232,10 +232,10 @@ const workLinks = [
   gap: 12px;
 }
 .quick-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 10px;
   padding: 16px;
-  background: #fff;
+  background: var(--bg-card);
   transition: box-shadow .2s;
 }
 .quick-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
@@ -243,7 +243,7 @@ const workLinks = [
 .quick-card__name {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 .quick-card--highlight .quick-card__name { color: #ef4444; }
@@ -258,7 +258,7 @@ const workLinks = [
   width: 36px;
   flex-shrink: 0;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
 }
 
 .link-grid {
@@ -271,30 +271,30 @@ const workLinks = [
   align-items: center;
   justify-content: center;
   padding: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
-  background: #fff;
-  color: #6366f1;
+  background: var(--bg-card);
+  color: var(--color-primary-light);
   font-size: 13px;
   text-decoration: none;
   transition: all .2s;
 }
 .tool-link:hover {
-  border-color: #6366f1;
-  background: #f8fafc;
+  border-color: var(--color-primary-light);
+  background: var(--bg-subtle);
 }
 .tool-link--danger { color: #ef4444; }
 
 .resource-card {
   padding: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  background: #fff;
+  background: var(--bg-card);
 }
 .resource-card__title {
   font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 10px;
 }
 .resource-card__links {
@@ -304,6 +304,6 @@ const workLinks = [
 }
 .resource-card__links a {
   font-size: 13px;
-  color: #6366f1;
+  color: var(--color-primary-light);
 }
 </style>

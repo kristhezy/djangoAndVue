@@ -297,7 +297,7 @@ watch(() => menuStore.loaded, (loaded) => {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -318,12 +318,12 @@ watch(() => menuStore.loaded, (loaded) => {
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -354,7 +354,7 @@ watch(() => menuStore.loaded, (loaded) => {
 }
 
 .left-col::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
@@ -377,13 +377,13 @@ watch(() => menuStore.loaded, (loaded) => {
 }
 
 .right-col::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 /* ─── 通用卡片 ─── */
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
   overflow: hidden;
@@ -426,7 +426,7 @@ watch(() => menuStore.loaded, (loaded) => {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
@@ -437,7 +437,7 @@ watch(() => menuStore.loaded, (loaded) => {
   align-items: center;
   flex: 1;
   overflow-y: auto;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 .m-card-bd::-webkit-scrollbar {
@@ -449,7 +449,7 @@ watch(() => menuStore.loaded, (loaded) => {
 }
 
 .m-card-bd::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: var(--border-light);
   border-radius: 4px;
 }
 
@@ -487,7 +487,7 @@ watch(() => menuStore.loaded, (loaded) => {
 
 .chevron {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   transition: transform .25s ease;
 }
 
@@ -526,7 +526,7 @@ watch(() => menuStore.loaded, (loaded) => {
   border: 4px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
   object-fit: cover;
-  background: #fff;
+  background: var(--bg-card);
 }
 
 .uc-avatar__placeholder {
@@ -535,26 +535,26 @@ watch(() => menuStore.loaded, (loaded) => {
   border-radius: 9999px;
   border: 4px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
-  background: #e2e8f0;
+  background: var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
 }
 
 .uc-name {
   display: block;
   font-size: 20px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   text-align: center;
 }
 
 .uc-role {
   display: block;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-placeholder);
   margin-top: 2px;
   text-align: center;
   letter-spacing: .3px;
@@ -563,13 +563,13 @@ watch(() => menuStore.loaded, (loaded) => {
 .uc-motto {
   text-align: center;
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-muted);
   line-height: 1.7;
   margin-top: 14px;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
 }
 
 /* ─── 加密工具 ─── */
@@ -582,7 +582,7 @@ watch(() => menuStore.loaded, (loaded) => {
 
 .enc-hint {
   font-size: 11px;
-  color: #cbd5e1;
+  color: var(--text-placeholder);
   margin-top: 6px;
   text-align: center;
 }
@@ -592,10 +592,10 @@ watch(() => menuStore.loaded, (loaded) => {
   padding: 8px 12px;
   width: 100%;
   font-size: 13px;
-  color: #6366f1;
+  color: var(--color-primary-light);
   word-break: break-all;
   text-align: center;
-  background: #eef2ff;
+  background: var(--bg-active);
   border-radius: 8px;
   border: 1px solid #c7d2fe;
 }
@@ -619,7 +619,7 @@ watch(() => menuStore.loaded, (loaded) => {
   text-align: right;
   white-space: nowrap;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -631,7 +631,7 @@ watch(() => menuStore.loaded, (loaded) => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--color-primary-light);
   flex-shrink: 0;
 }
 
@@ -646,7 +646,7 @@ watch(() => menuStore.loaded, (loaded) => {
 .urp-op-bar {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   margin-bottom: 14px;
@@ -664,14 +664,14 @@ watch(() => menuStore.loaded, (loaded) => {
   background: transparent;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 .urp-op-bar label.active {
-  background: #fff;
+  background: var(--bg-card);
   color: #f59e0b;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
@@ -681,7 +681,7 @@ watch(() => menuStore.loaded, (loaded) => {
 .fm-type-bar {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   margin-bottom: 12px;
@@ -698,14 +698,14 @@ watch(() => menuStore.loaded, (loaded) => {
   background: transparent;
   font-size: 13px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 .fm-type-bar label.active {
-  background: #fff;
+  background: var(--bg-card);
   color: #8b5cf6;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
@@ -722,7 +722,7 @@ watch(() => menuStore.loaded, (loaded) => {
 
 .fm-label {
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -743,7 +743,7 @@ watch(() => menuStore.loaded, (loaded) => {
 :deep(.env-track) {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   flex-wrap: nowrap;
@@ -760,15 +760,15 @@ watch(() => menuStore.loaded, (loaded) => {
   background: transparent;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 :deep(.env-track label.active) {
-  background: #fff;
-  color: #6366f1;
+  background: var(--bg-card);
+  color: var(--color-primary-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
 }
@@ -814,11 +814,11 @@ watch(() => menuStore.loaded, (loaded) => {
   text-align: left;
   font-size: 13px;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
   padding: 10px 14px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   margin-top: 10px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }

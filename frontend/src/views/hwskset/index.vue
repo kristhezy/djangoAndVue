@@ -131,7 +131,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f5f6fa;
+  background: var(--bg-page);
 }
 
 .toolbar {
@@ -152,12 +152,12 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .3px;
 }
 
 .page-title i {
-  color: #6366f1;
+  color: var(--color-primary-light);
   margin-right: 4px;
 }
 
@@ -170,7 +170,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
 }
 
 .m-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   flex: 1.2;
   min-width: 0;
@@ -210,7 +210,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   letter-spacing: .2px;
 }
 
@@ -221,7 +221,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   align-items: center;
   flex: 1;
   overflow-y: auto;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-card);
 }
 
 .accent-blue {
@@ -248,7 +248,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
 }
 
 .fg-wide {
-  grid-template-columns: auto minmax(280px, 440px);
+  grid-template-columns: auto minmax(300px, 500px);
 }
 
 .fgr {
@@ -259,7 +259,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   text-align: left;
   white-space: nowrap;
   font-size: 13px;
-  color: #475569;
+  color: var(--text-secondary);
   padding-top: 6px;
 }
 
@@ -286,7 +286,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
 
 .hwsk-duo__label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
@@ -306,7 +306,7 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
 :deep(.env-track) {
   display: inline-flex;
   gap: 0;
-  background: #f1f5f9;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 2px;
   flex-wrap: nowrap;
@@ -323,15 +323,15 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   background: transparent;
   font-size: 12px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
   transition: all .2s;
   user-select: none;
   white-space: nowrap;
 }
 
 :deep(.env-track label.active) {
-  background: #fff;
-  color: #6366f1;
+  background: var(--bg-card);
+  color: var(--color-primary-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
   font-weight: 600;
 }
@@ -358,11 +358,11 @@ function reset() { form.loginName = ''; form.cname = ''; form.cid = ''; form.pay
   overflow-y: auto;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--bg-subtle);
   font-size: 13px;
   text-align: left;
   line-height: 1.7;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-all;
 }

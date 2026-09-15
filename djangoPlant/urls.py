@@ -46,6 +46,8 @@ urlpatterns = [
     path('pv/agent/float',pv.agent_float,name='agentFloat'),
     path('pv/agent/stream',pv.agent_stream,name='agentStream'),
     path('pv/agent/history',pv.agent_history,name='agentHistory'),
+    path('pv/radar/data',pv.radar_data,name='radarData'),
+    path('pv/radar/company',pv.radar_company,name='radarCompany'),
     #originview
     path('ov/soonConfig',ov.soonConfig),
     path('ov/mmeettopen',ov.mmeettopen),
