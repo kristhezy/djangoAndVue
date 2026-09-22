@@ -7,6 +7,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'element-plus/dist/index.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import './base.css'
+import './styles/design-system.css'
 import App from './App.vue'
 import router from './router'
 

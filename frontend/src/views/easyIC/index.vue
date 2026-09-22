@@ -41,6 +41,29 @@
             <label class="ic-label">请求参数 Params / Body</label>
             <el-input v-model="params" type="textarea" :rows="7" placeholder="input request params" />
           </div>
+          <div>
+            <label class="ic-label">上传文件（可选）</label>
+            <el-upload
+              ref="uploadRef"
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              :show-file-list="false"
+              multiple
+              drag
+            >
+              <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+              <div class="el-upload__text">
+                拖拽文件到此处或 <em>点击上传</em>
+              </div>
+            </el-upload>
+            <div v-if="uploadFiles.length" class="upload-file-list">
+              <div v-for="(item, idx) in uploadFiles" :key="idx" class="upload-file-item">
+                <el-input v-model="item.fieldName" size="small" placeholder="字段名" class="upload-field-name" />
+                <span class="upload-file-name" :title="item.file.name">{{ item.file.name }}</span>
+                <el-button type="danger" link size="small" @click="handleFileRemove(idx)">删除</el-button>
+              </div>
+            </div>
+          </div>
           <div class="ic-actions">
             <el-button style="flex:1" @click="resetParam">重&nbsp;&nbsp;置</el-button>
             <el-button type="primary" style="flex:1" :loading="loading" :disabled="loading"
@@ -55,6 +78,7 @@
               <div class="ic-card__head">
                 <span class="ic-card__method">{{ card.requestType }}</span>
                 <span class="ic-card__uri">{{ card.hostUri }}</span>
+                <el-button size="small" type="info" plain @click="copyCurl(card)" class="ic-card__curl">curl</el-button>
               </div>
               <div class="ic-card__fields">
                 <div class="ic-field"><span class="ic-field__label">请求头部:</span><span class="ic-field__value">{{
@@ -66,8 +90,8 @@
                 <div class="ic-field ic-field--top">
                   <span class="ic-field__label">响应内容:</span>
                   <div class="ic-field__body">
-                    <el-button size="small" type="primary" plain @click="copyBody(card.resBody)">复制</el-button>
                     <span class="ic-field__value ic-field__value--mono">{{ card.resBody }}</span>
+                    <el-button size="small" type="primary" plain @click="copyBody(card.resBody)" style="margin-top:8px">复制</el-button>
                   </div>
                 </div>
               </div>
@@ -76,6 +100,9 @@
           </div>
         </div>
       </div>
+
+      <!-- 遮罩层：点击关闭弹窗 -->
+      <div v-if="showHistory || showCurl" class="ic-overlay" @click="showHistory = false; showCurl = false"></div>
 
       <!-- 历史记录面板 -->
       <div v-if="showHistory" class="ic-dropdown">
@@ -89,19 +116,31 @@
           <div v-if="historyLoading" style="padding: 16px; text-align: center">加载中...</div>
           <div v-else-if="!history.length" style="padding: 16px; text-align: center; color: #999">暂无历史记录</div>
           <div v-for="h in history" :key="h.id" class="ic-his-row">
-            <span class="ic-his-text" @click="fillFromHistory(h)" :title="`【${h.method}】${h.host}${h.uri}`">
-              【{{ h.method }}】{{ h.host }}{{ h.uri }}
-            </span>
-            <el-button class="ic-his-replay" text type="primary" @click.stop="replayRequest(h)" title="一键重放">
-              <el-icon>
-                <RefreshRight />
-              </el-icon>
-            </el-button>
-            <el-button class="ic-his-delete" text type="danger" @click.stop="deleteHistory(h)" title="删除">
-              <el-icon>
-                <Delete />
-              </el-icon>
-            </el-button>
+            <div class="ic-his-main">
+              <div class="ic-his-name" v-if="editingNameId === h.id">
+                <el-input v-model="historyNames[h.id]" size="small" @blur="saveHistoryName(h.id)"
+                  @keyup.enter="saveHistoryName(h.id)" placeholder="输入自定义名称" />
+              </div>
+              <span class="ic-his-text" @click="fillFromHistory(h)" :title="`【${h.method}】${h.host}${h.uri}`">
+                <span v-if="historyNames[h.id]" class="ic-his-label">{{ historyNames[h.id] }}</span>
+                <span class="ic-his-url">【{{ h.method }}】{{ h.host }}{{ h.uri }}</span>
+              </span>
+            </div>
+            <div class="ic-his-actions">
+              <el-button class="ic-his-rename" text type="info" @click.stop="toggleEditName(h)" title="编辑名称">
+                <el-icon><Edit /></el-icon>
+              </el-button>
+              <el-button class="ic-his-replay" text type="primary" @click.stop="replayRequest(h)" title="一键重放">
+                <el-icon>
+                  <RefreshRight />
+                </el-icon>
+              </el-button>
+              <el-button class="ic-his-delete" text type="danger" @click.stop="deleteHistory(h)" title="删除">
+                <el-icon>
+                  <Delete />
+                </el-icon>
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -123,7 +162,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Clock, Monitor, Close, RefreshRight, Delete } from '@element-plus/icons-vue'
+import { Clock, Monitor, Close, RefreshRight, Delete, UploadFilled, Edit } from '@element-plus/icons-vue'
 import http from '../../api/http'
 
 const method = ref('post')
@@ -134,6 +173,10 @@ const params = ref('')
 const loading = ref(false)
 const error = ref('')
 const resultCards = ref([])
+const uploadRef = ref(null)
+const fileList = ref([])
+const selectedFiles = ref([])
+const uploadFiles = ref([])
 
 const showHistory = ref(false)
 const historyLoading = ref(false)
@@ -141,6 +184,8 @@ const history = ref([])
 
 const showCurl = ref(false)
 const curlInput = ref('')
+const historyNames = reactive({})
+const editingNameId = ref(null)
 
 // 预设环境 host 列表
 const KNOWN_HOSTS = [
@@ -163,6 +208,15 @@ function resetParam() {
   error.value = ''
   resultCards.value = []
   showHistory.value = false
+  uploadFiles.value = []
+}
+
+function handleFileChange(file, uploadFileList) {
+  uploadFiles.value.push({ file: file.raw, fieldName: 'image' })
+}
+
+function handleFileRemove(index) {
+  uploadFiles.value.splice(index, 1)
 }
 
 // 将 Python 风格字面量转为合法 JSON
@@ -270,14 +324,29 @@ async function sendRequest() {
   error.value = ''
   resultCards.value = []
   try {
-    const resp = await http.post('/pv/easyIC', {
-      setreqtype: method.value,
-      setenv: env.value,
-      uri: uri.value,
-      headers: parseTextToJSON(headers.value),
-      params: parseTextToJSON(params.value),
-      type: 'requestinterface',
-    })
+    let resp
+    if (uploadFiles.value.length > 0) {
+      // 有文件时，使用 FormData（multipart/form-data）
+      const fd = new FormData()
+      fd.append('setenv', env.value)
+      fd.append('uri', uri.value)
+      fd.append('headers', JSON.stringify(parseTextToJSON(headers.value)))
+      fd.append('params', JSON.stringify(parseTextToJSON(params.value)))
+      fd.append('type', 'requestinterface')
+      uploadFiles.value.forEach((item) => {
+        fd.append(item.fieldName, item.file)
+      })
+      resp = await http.post('/pv/easyIC', fd)
+    } else {
+      resp = await http.post('/pv/easyIC', {
+        setreqtype: method.value,
+        setenv: env.value,
+        uri: uri.value,
+        headers: parseTextToJSON(headers.value),
+        params: parseTextToJSON(params.value),
+        type: 'requestinterface',
+      })
+    }
     if (resp.data.error || !resp.data.data) {
       error.value = '请求异常: ' + (resp.data.error || '未获取到数据')
       return
@@ -316,6 +385,36 @@ function copyBody(body) {
   })
 }
 
+function copyCurl(card) {
+  let curl = `curl -X ${card.requestType.toUpperCase()} '${card.hostUri}'`
+  // headers
+  try {
+    const h = typeof card.reqHeader === 'string' ? JSON.parse(card.reqHeader) : card.reqHeader
+    if (typeof h === 'object' && h !== null) {
+      Object.entries(h).forEach(([k, v]) => {
+        curl += ` -H '${k}: ${v}'`
+      })
+    }
+  } catch (e) { }
+  // body
+  if (card.requestType !== 'get' && card.reqParam && card.reqParam !== '/') {
+    let bodyStr = ''
+    if (typeof card.reqParam === 'object') {
+      bodyStr = JSON.stringify(card.reqParam)
+    } else {
+      try {
+        bodyStr = JSON.stringify(JSON.parse(card.reqParam))
+      } catch (e) {
+        bodyStr = String(card.reqParam)
+      }
+    }
+    curl += ` -d '${bodyStr}'`
+  }
+  navigator.clipboard.writeText(curl).then(() => {
+    ElMessage.success('curl 已复制！')
+  })
+}
+
 function toggleHistory() {
   showCurl.value = false
   showHistory.value = !showHistory.value
@@ -338,6 +437,7 @@ async function loadHistory() {
     const resp = await http.post('/pv/easyIC', { type: 'gethistory' })
     const raw = resp.data?.data
     history.value = Array.isArray(raw) ? raw : Object.values(raw || {})
+    loadHistoryNames()
   } catch (e) {
     history.value = []
   } finally {
@@ -375,6 +475,36 @@ async function deleteHistory(h) {
   }
 }
 
+function toggleEditName(h) {
+  if (editingNameId.value === h.id) {
+    editingNameId.value = null
+    saveHistoryName(h.id)
+  } else {
+    editingNameId.value = h.id
+    if (!historyNames[h.id]) historyNames[h.id] = ''
+  }
+}
+
+function saveHistoryName(id) {
+  const name = (historyNames[id] || '').trim()
+  const allNames = JSON.parse(localStorage.getItem('easyIC_historyNames') || '{}')
+  if (name) {
+    allNames[id] = name
+  } else {
+    delete allNames[id]
+    delete historyNames[id]
+  }
+  localStorage.setItem('easyIC_historyNames', JSON.stringify(allNames))
+  editingNameId.value = null
+}
+
+function loadHistoryNames() {
+  const allNames = JSON.parse(localStorage.getItem('easyIC_historyNames') || '{}')
+  Object.keys(allNames).forEach(id => {
+    historyNames[id] = allNames[id]
+  })
+}
+
 function parseCurl() {
   const curlStr = curlInput.value.trim()
   if (!curlStr) {
@@ -404,14 +534,20 @@ function parseCurl() {
 
   // 提取 headers
   const hdrs = []
-  const headerRegex = /(?:-H|--header)\s+['"]([^'"]+)['"]/g
+  const headerRegex = /(?:-H|--header)\s+(?:'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)")/g
   let hMatch
-  while ((hMatch = headerRegex.exec(cmd)) !== null) hdrs.push(hMatch[1])
+  while ((hMatch = headerRegex.exec(cmd)) !== null) {
+    let val = hMatch[1] ?? hMatch[2]
+    val = val.replace(/\\"/g, '"').replace(/\\'/g, "'")
+    hdrs.push(val)
+  }
 
   // 提取 body
   let body = ''
-  const bodyMatch = cmd.match(/(?:-d|--data|--data-raw|--data-binary)\s+['"]([^'"]+)['"]/)
-  if (bodyMatch) body = bodyMatch[1]
+  const bodyMatch = cmd.match(/(?:-d|--data|--data-raw|--data-binary)\s+(?:'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)")/)
+  if (bodyMatch) {
+    body = ((bodyMatch[1] ?? bodyMatch[2]) || '').replace(/\\"/g, '"').replace(/\\'/g, "'")
+  }
 
   // 分割 URL 为 host + uri
   let host = ''
@@ -503,8 +639,8 @@ function parseCurl() {
 }
 
 .ic-left {
-  width: 520px;
-  flex-shrink: 0;
+  flex: 0 1 520px;
+  min-width: 320px;
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
@@ -579,6 +715,13 @@ function parseCurl() {
   color: var(--text-primary);
   word-break: break-all;
   padding-top: 2px;
+  flex: 1;
+}
+
+.ic-card__curl {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-family: monospace;
 }
 
 .ic-card__fields {
@@ -684,34 +827,100 @@ function parseCurl() {
 }
 
 /* 历史记录行 */
-.ic-his-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--border-card);
-}
-
 .ic-his-row:hover {
   background: var(--bg-subtle);
 }
 
-.ic-his-text {
-  flex: 1;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
-  color: var(--text-primary);
-  padding-right: 8px;
+.upload-file-list {
+  margin-top: 8px;
 }
 
-.ic-his-replay {
+.upload-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-subtle, #f5f7fa);
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.upload-field-name {
+  width: 100px;
   flex-shrink: 0;
 }
 
-.ic-his-delete {
+.upload-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.ic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+.ic-dropdown {
+  z-index: 100;
+}
+
+.ic-his-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+
+.ic-his-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ic-his-name {
+  width: 100%;
+}
+
+.ic-his-text {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.ic-his-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-primary-light, #409eff);
+}
+
+.ic-his-url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+
+.ic-his-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.ic-his-rename {
   flex-shrink: 0;
 }
 </style>

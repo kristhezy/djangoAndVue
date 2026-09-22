@@ -237,6 +237,10 @@ class publicDef(object):
         res = requests.post(uri, headers=header, json=req_json, timeout=30)
         # print(self.logcss(self.getctime,f'publicDef-【POST请求接口】:{uri}, heads:{res.headers}, 入参: {req_json}, 返回数据: {res.json()}'))
         return res
+    def uploadRequest(self,hostUri,shortUri,header,files,params=None):
+        uri = hostUri + shortUri
+        res = requests.post(uri, headers=header, files=files, data=params, timeout=60)
+        return res
     def getRequest(self,hostUri,shortUri,header,reqParam):
         if reqParam:
             uri = hostUri + shortUri + "?" + reqParam

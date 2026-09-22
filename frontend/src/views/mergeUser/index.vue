@@ -7,7 +7,6 @@
     </div>
 
     <div class="mo-body">
-      <div class="column">
         <div class="m-card" style="max-width:680px;margin:0 auto;">
           <div class="m-card-hd accent-blue">
             <div class="m-card-hd-left"><i class="fa-solid fa-people-arrows card-icon"></i><h3>手工合并用户</h3></div>
@@ -24,7 +23,6 @@
             <div v-if="result" :class="['result', alertType==='error'?'result--error':'']">{{ result }}</div>
           </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -75,11 +73,10 @@ function reset() { form.companyId = ''; form.opids = ''; form.env = 'prod'; resu
 .page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
 .page-title i { color:var(--color-primary-light); margin-right:4px; }
 
-.mo-body { flex:1; padding:0 14px 14px; overflow-y:auto; }
+.mo-body { flex:1; padding:0 14px 14px; overflow-y:auto; display:flex; justify-content:center; align-items:flex-start; }
 .mo-body::-webkit-scrollbar { width:4px; }
 .mo-body::-webkit-scrollbar-track { background:transparent; }
 .mo-body::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
-.column { columns:1; }
 
 .m-card {
   background:var(--bg-card); border-radius:12px;

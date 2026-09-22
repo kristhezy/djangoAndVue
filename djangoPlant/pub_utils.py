@@ -109,7 +109,8 @@ def login_with_beijing_time(request, username, password):
     django_login(request, user)
     
     # 3. 手动修正last_login为北京时间（核心：+8小时）
-    beijing_time = timezone.localtime()  # 带时区的当前北京时间
+    from datetime import datetime
+    beijing_time = datetime.now()  # 当前北京时间（naive）
     with connection.cursor() as cursor:
         # 仅更新last_login字段为北京时间，无需写复杂SQL
         cursor.execute("""

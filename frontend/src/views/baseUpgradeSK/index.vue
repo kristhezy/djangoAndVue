@@ -112,7 +112,7 @@ function reset() {
 
 /* ===================== 卡片 ===================== */
 .m-card {
-  background:var(--bg-card); border-radius:12px; width:720px; max-width:100%;
+  background:var(--bg-card); border-radius:12px; width:100%; max-width:720px;
   box-shadow:var(--shadow-card);
   overflow:hidden; transition:box-shadow .2s;
 }

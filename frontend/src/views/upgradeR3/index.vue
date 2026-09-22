@@ -138,6 +138,7 @@ function reset() { form.companyIds = ''; form.seats = ''; form.env = 'prod'; res
   flex: 1;
   padding: 0 14px 14px;
   overflow: hidden;
+  min-height: 0;
   display: flex;
   gap: 12px;
 }

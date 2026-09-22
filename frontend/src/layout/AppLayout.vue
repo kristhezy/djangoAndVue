@@ -7,12 +7,14 @@
         <router-view />
       </main>
     </div>
+    <AuditPollingFloat />
   </div>
 </template>
 
 <script setup>
 import HeaderBar from './HeaderBar.vue'
 import SidebarMenu from './SidebarMenu.vue'
+import AuditPollingFloat from '../components/AuditPollingFloat.vue'
 import { useMenuStore } from '../store/menu'
 
 const menuStore = useMenuStore()

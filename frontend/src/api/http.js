@@ -13,9 +13,14 @@ const http = axios.create({
 http.interceptors.request.use((config) => {
   const token = getCookie('djv_csrftoken')
   if (token) {
-    config.headers['X-CSRFToken'] = token
+    config.headers.set('X-CSRFToken', token)
   }
-  config.headers['Content-Type'] = 'application/json'
+  // FormData 不设置 Content-Type，让浏览器自动设置 multipart/form-data 及 boundary
+  if (config.data instanceof FormData) {
+    config.headers.delete('Content-Type')
+  } else if (!config.headers.has('Content-Type')) {
+    config.headers.set('Content-Type', 'application/json')
+  }
   return config
 })
 

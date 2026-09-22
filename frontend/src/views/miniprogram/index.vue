@@ -125,6 +125,7 @@
               <el-button type="primary" @click="searchRecords">查询</el-button>
             </div>
 
+            <div class="mp-table-wrap">
             <el-table :data="records" stripe class="mp-table" v-loading="loadingRecords" @row-click="onRowClick"
               row-class-name="mp-clickable-row" empty-text="暂无数据">
               <el-table-column prop="phone" label="账号" min-width="110" />
@@ -132,8 +133,13 @@
               <el-table-column prop="appId" label="appID" min-width="160" />
               <el-table-column prop="oContent" label="操作信息" min-width="220" show-overflow-tooltip />
               <el-table-column prop="uname" label="操作人" min-width="80" />
-              <el-table-column prop="createTime" label="操作时间" min-width="160" />
+              <el-table-column label="操作时间" min-width="160">
+                <template #default="{ row }">
+                  {{ row.createTime }}
+                </template>
+              </el-table-column>
             </el-table>
+            </div>
 
             <div class="mp-pagination">
               <span class="mp-stats">共 {{ totalRecords }} 条，第 {{ page }}/{{ totalPages }} 页</span>
@@ -164,6 +170,9 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http'
+import { useAuditPolling } from '../../store/auditPolling'
+
+const poll = useAuditPolling()
 
 const BtnOnly = {
   props: ['text', 'loading', 'disabled'],
@@ -237,7 +246,6 @@ function resetLeft() {
   fts.value = 'audit'; tsrlt.value = ''
   tyb.value = 'bindtester'; wcid.value = ''; tybrlt.value = ''
 }
-
 async function queryCompany() {
   if (!loginName.value.trim()) { ElMessage.warning('请输入查询参数'); return }
   loading.value = true; queryError.value = ''
@@ -282,6 +290,14 @@ async function submitAuditRelease() {
     tsrlt.value = resp.data?.data?.rlt || ''
     if (resp.data?.data?.errtips) showTips.value = true
     loadRecords()
+    // 提交审核成功 → 启动轮询
+    if (fts.value === 'audit' && resp.data?.code == 0) {
+      poll.start({ phone: phone.value, cid: cid.value, cn: cn.value, appid: appid.value, env: 'prod' })
+    }
+    // 查看审核结果为"审核中" → 启动轮询（如果还没有在轮询）
+    if (fts.value === 'ads' && tsrlt.value.includes('审核中')) {
+      poll.start({ phone: phone.value, cid: cid.value, cn: cn.value, appid: appid.value, env: 'prod' })
+    }
   } catch (e) { tsrlt.value = '操作失败' }
   finally { loading.value = false }
 }
@@ -386,13 +402,14 @@ onMounted(() => { loadRecords() })
   flex: 1;
   padding: 0 14px 14px;
   overflow: hidden;
+  min-height: 0;
   display: flex;
   gap: 12px;
 }
 
 .left-col {
-  width: 520px;
-  min-width: 400px;
+  width: clamp(360px, 30%, 520px);
+  flex-shrink: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -417,6 +434,25 @@ onMounted(() => { loadRecords() })
   min-width: 0;
   overflow: hidden;
   display: flex;
+}
+
+.right-col > .m-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-col > .m-card > .m-card-bd {
+  flex: 1;
+  min-height: 0;
+}
+
+.mp-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  width: 100%;
 }
 
 .m-card {

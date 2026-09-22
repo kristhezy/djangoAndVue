@@ -22,11 +22,11 @@
           </el-form-item>
           <el-form-item label="起始时间">
             <el-date-picker v-model="query.start_time" type="date" placeholder="选择起始日期" value-format="YYYY-MM-DD"
-              :clearable="false" style="width:160px" />
+              :clearable="false" />
           </el-form-item>
           <el-form-item label="结束时间">
             <el-date-picker v-model="query.end_time" type="date" placeholder="选择结束日期" value-format="YYYY-MM-DD"
-              :clearable="false" style="width:160px" />
+              :clearable="false" />
           </el-form-item>
           <el-form-item class="filter-actions">
             <el-button type="primary" :loading="loading" @click="search">查询</el-button>
@@ -39,19 +39,19 @@
 
     <!-- 表格区 -->
     <div class="mo-body">
-      <div class="m-card" style="height:100%;">
+      <div class="m-card">
         <div class="table-wrap">
           <el-table :data="pagedList" v-loading="loading" stripe height="100%">
-            <el-table-column prop="card_name" label="员工姓名" width="200" />
-            <el-table-column prop="card_position" label="职务" width="250" />
+            <el-table-column prop="card_name" label="员工姓名" min-width="150" />
+            <el-table-column prop="card_position" label="职务" min-width="180" />
             <el-table-column prop="department" label="部门" min-width="120" />
-            <el-table-column prop="radar_status" label="ai雷达" width="150" />
-            <el-table-column prop="boss_status" label="boss雷达" width="150" />
-            <el-table-column prop="action_type" label="内容类型" width="150" />
-            <el-table-column prop="share_count" label="分享次数" width="100" align="center" />
-            <el-table-column prop="uv_count" label="浏览人数" width="100" align="center" />
-            <el-table-column prop="pv_count" label="浏览次数" width="100" align="center" />
-            <el-table-column prop="customer_count" label="新增用户" width="100" align="center" />
+            <el-table-column prop="radar_status" label="ai雷达" min-width="120" />
+            <el-table-column prop="boss_status" label="boss雷达" min-width="120" />
+            <el-table-column prop="action_type" label="内容类型" min-width="120" />
+            <el-table-column prop="share_count" label="分享次数" min-width="90" align="center" />
+            <el-table-column prop="uv_count" label="浏览人数" min-width="90" align="center" />
+            <el-table-column prop="pv_count" label="浏览次数" min-width="90" align="center" />
+            <el-table-column prop="customer_count" label="新增用户" min-width="90" align="center" />
           </el-table>
         </div>
         <div class="pager">
@@ -255,6 +255,7 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
   border-radius: 12px;
   padding: 14px 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  box-sizing: border-box;
 }
 
 .filter-form {
@@ -266,9 +267,11 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
 
 .filter-form :deep(.el-form-item) {
   margin: 0;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  flex: 0 1 auto;
+  min-width: 130px;
 }
 
 .filter-form :deep(.el-form-item__label) {
@@ -280,19 +283,21 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
   flex-shrink: 0;
 }
 
-.filter-form :deep(.el-input) {
-  width: 200px;
-}
-
-.filter-form :deep(.el-select) {
-  width: 120px;
+.filter-form :deep(.el-input),
+.filter-form :deep(.el-select),
+.filter-form :deep(.el-date-editor) {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .filter-form :deep(.no-label) {
+  flex: none;
   gap: 4px;
 }
 
 .filter-actions {
+  flex: none;
   margin-left: auto;
 }
 
@@ -300,6 +305,7 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
   flex: 1;
   padding: 12px 14px 14px;
   overflow: hidden;
+  min-height: 0;
 }
 
 .m-card {
@@ -310,6 +316,8 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
   transition: box-shadow .2s;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
 }
 
 .m-card:hover {
@@ -319,6 +327,8 @@ onMounted(() => { /* 不自动加载，需用户输入企业ID后查询 */ })
 .table-wrap {
   flex: 1;
   overflow: hidden;
+  width: 100%;
+  min-height: 0;
 }
 
 .table-wrap :deep(.el-table) {

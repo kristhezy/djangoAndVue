@@ -606,8 +606,8 @@ onMounted(() => {
   gap: 4px;
 }
 .at-side {
-  width: 280px;
-  min-width: 280px;
+  flex: 0 1 280px;
+  min-width: 200px;
   background: var(--bg-card);
   border-radius: 12px;
   box-shadow: var(--shadow-card);

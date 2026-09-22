@@ -7,7 +7,7 @@
     </div>
 
     <div class="mo-body">
-      <div class="column">
+      <div class="mo-col">
         <!-- 卡片1: 生成企微应用链接 -->
         <div :class="['m-card', {collapsed:!cards.c1}]">
           <div class="m-card-hd accent-blue" @click="cards.c1=!cards.c1">
@@ -28,7 +28,9 @@
             <el-input v-model="result1" type="textarea" :rows="4" readonly placeholder="结果" class="result-box" />
           </div>
         </div>
+      </div>
 
+      <div class="mo-col">
         <!-- 卡片2: 获取密文企微ID -->
         <div :class="['m-card', {collapsed:!cards.c2}]">
           <div class="m-card-hd accent-green" @click="cards.c2=!cards.c2">
@@ -42,6 +44,18 @@
             <EnvRadio v-model="form2.env" name="env2" />
             <BtnGroup @reset="reset2" @submit="getCorpId" :loading="loading2" />
             <el-input v-model="result2" type="textarea" :rows="4" readonly placeholder="结果" class="result-box" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mo-col">
+        <!-- 占位卡片: 预留功能区域 -->
+        <div class="m-card">
+          <div class="m-card-hd accent-orange">
+            <div class="m-card-hd-left"><i class="fa-solid fa-puzzle-piece card-icon"></i><h3>预留功能区域</h3></div>
+          </div>
+          <div class="m-card-bd">
+            <div class="placeholder"><p>此区域预留用于未来功能扩展</p></div>
           </div>
         </div>
       </div>
@@ -109,44 +123,7 @@ function reset2() { form2.corpId = ''; form2.env = 'prod'; result2.value = '' }
 </script>
 
 <style scoped>
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:var(--bg-page); }
-.toolbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 8px; flex-shrink:0; }
-.toolbar-left { display:flex; align-items:center; gap:8px; }
-.page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
-.page-title i { color:var(--color-primary-light); margin-right:4px; }
-
-.mo-body { flex:1; padding:0 14px 14px; overflow-y:auto; }
-.mo-body::-webkit-scrollbar { width:4px; }
-.mo-body::-webkit-scrollbar-track { background:transparent; }
-.mo-body::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
-.column { columns:2; column-gap:12px; }
-
-.m-card {
-  background:var(--bg-card); border-radius:12px;
-  box-shadow:var(--shadow-card);
-  overflow:hidden; transition:box-shadow .2s;
-  break-inside:avoid; margin-bottom:12px;
-}
-.m-card:hover { box-shadow:var(--shadow-card-hover); }
-.m-card-hd {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:14px 18px; cursor:pointer; user-select:none;
-  border-left:4px solid transparent; transition:background .15s;
-}
-.m-card-hd:hover { background:var(--bg-hover); }
-.m-card-hd-left { display:flex; align-items:center; gap:10px; }
-.card-icon { font-size:15px; width:18px; text-align:center; }
-.m-card-hd h3 { margin:0; font-size:14px; font-weight:600; color:var(--text-primary); letter-spacing:.2px; }
-.chevron { font-size:11px; color:var(--text-placeholder); transition:transform .25s ease; }
-.chevron.open { transform:rotate(90deg); }
-.m-card.collapsed .m-card-bd { display:none; }
-.m-card-bd {
-  padding:16px 18px; display:flex; flex-direction:column; align-items:center;
-  border-top:1px solid var(--border-card);
-}
-
-.accent-blue  { border-left-color:#3b82f6; }  .accent-blue  .card-icon { color:#3b82f6; }
-.accent-green { border-left-color:#22c55e; }  .accent-green .card-icon { color:#22c55e; }
+/* mo-page / mo-body / mo-col / m-card 等样式由 design-system.css 统一提供 */
 
 .fg { display:grid; grid-template-columns:auto 300px; column-gap:12px; row-gap:12px; align-items:center; width:fit-content; margin:0 auto; }
 .fgr { display:contents; }
@@ -169,4 +146,6 @@ function reset2() { form2.corpId = ''; form2.env = 'prod'; result2.value = '' }
 :deep(.btn-group) { display:flex; justify-content:center; gap:12px; margin:8px 0 10px; }
 
 .result-box { width:100%; margin-top:4px; }
+.placeholder { display:flex; align-items:center; justify-content:center; width:100%; padding:24px 0; }
+.placeholder p { color:var(--text-placeholder); text-align:center; }
 </style>

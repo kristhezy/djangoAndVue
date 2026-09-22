@@ -350,8 +350,9 @@ class InputAndQuery(object):
     # ================================================================
 
     def _now(self):
-        """当前时间 — 本地时间（naive，Django 不做时区转换直接入库）"""
-        return timezone.localtime(timezone.now()).replace(tzinfo=None)
+        """当前北京时间（naive，直接入库）"""
+        from datetime import datetime
+        return datetime.now()
 
     def delete_user(self, ln):
         """软删除用户（原 update_userInfo，modkw 恒为 'deleted = 1'）"""
@@ -368,10 +369,16 @@ class InputAndQuery(object):
         )
         return 1
 
-    def update_reqhis(self, id, header, params):
-        """更新请求历史的 header/param"""
+    def update_reqhis(self, id, method, header, params):
+        """更新请求历史的 method/header/param"""
         return RequestHistory.objects.filter(id=self._esc_int(id), status='0').update(
-            header=header, param=params, update_time=self._now(),
+            method=method, header=header, param=params, update_time=self._now(),
+        )
+
+    def del_reqhis(self, id):
+        """软删除请求历史"""
+        return RequestHistory.objects.filter(id=self._esc_int(id), status='0').update(
+            status='1', update_time=self._now(),
         )
 
     def del_message(self, id):
@@ -446,14 +453,12 @@ class InputAndQuery(object):
 
     @staticmethod
     def _parse_dt(s):
-        """字符串时间 -> aware datetime，避免 naive datetime 警告"""
+        """字符串时间 -> naive datetime（北京时间直接入库）"""
         try:
             dt = datetime.fromisoformat(str(s).replace('Z', '+00:00'))
+            return dt.replace(tzinfo=None)
         except ValueError:
             return s  # 交给 Django 自行处理
-        if timezone.is_naive(dt):
-            dt = timezone.make_aware(dt)
-        return dt
 
     def inst_usertest(self, uuid, ln, name, pwd, vs):
         obj = User.objects.create(
@@ -480,6 +485,16 @@ class InputAndQuery(object):
         return obj.id
 
     def inst_mprecord(self, phone, cid, cn, appid, oc, uid, un):
+        # 如果最新一条记录 key 相同，只更新 update_time，不新增
+        latest = (MiniprogramRecord.objects
+                  .filter(phone=phone, company_id=cid, app_id=appid,
+                          oprate_content=oc, user_name=un, deleted='0')
+                  .order_by('-id')
+                  .first())
+        if latest:
+            latest.update_time = self._now()
+            latest.save(update_fields=['update_time'])
+            return latest.id
         obj = MiniprogramRecord.objects.create(
             phone=phone, company_id=cid, company_name=cn, app_id=appid,
             oprate_content=oc, user_id=self._esc_int(uid), user_name=un,

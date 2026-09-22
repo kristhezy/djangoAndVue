@@ -1539,7 +1539,7 @@ def miniprogramRelease(request,type):
                     newlist.append(item)
             sa = mp.wxasubaudit(newlist,cid,env)
             print("auditAndRelease-wxasubaudit:",sa)
-            if sa['errcode'] == 0: rlt = "小程序‘提审’成功!"
+            if sa['errcode'] == 0: rlt = "小程序‘已提审’!"
             else:
                 isinst = False
                 code = c['reserror']
@@ -1549,7 +1549,7 @@ def miniprogramRelease(request,type):
             gas = mp.getauditstatus(cid,env)
             print("ads-gas:",gas)
             if gas['errcode'] == 0:
-                if gas['status'] == 0: rlt = "小程序“审核”成功!"
+                if gas['status'] == 0: rlt = "小程序「审核成功」!"
                 elif gas['status'] == 1: 
                     getreason = gas['reason']
                     rlt = getreason.replace('"',"'")

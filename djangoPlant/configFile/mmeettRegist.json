@@ -21,5 +21,13 @@
     "country": 3630979328926013,
     "env": "test",
     "register_time": "2026-09-03 14:23:48"
+  },
+  {
+    "rcode": "7B5G8KXK",
+    "uname": "awei",
+    "pwd": "Aa445566",
+    "country": 3630979328926013,
+    "env": "prod",
+    "register_time": "2026-09-18 14:09:26"
   }
 ]

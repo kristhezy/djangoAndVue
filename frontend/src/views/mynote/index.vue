@@ -10,8 +10,8 @@
     <!-- 搜索栏 -->
     <div class="search-bar">
       <div class="search-bar__inner">
-        <el-input v-model="searchKey" placeholder="搜索标题/内容" clearable style="width:220px"
-          @keyup.enter="search" @clear="search" />
+        <el-input v-model="searchKey" placeholder="搜索标题/内容" clearable style="width:220px" @keyup.enter="search"
+          @clear="search" />
         <el-button type="primary" :loading="loading" @click="search">查询</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
@@ -29,8 +29,16 @@
                 <span class="note-meta">{{ metaText(note) }}</span>
                 <span class="note-actions">
                   <el-button type="primary" link @click="openEdit(note)">编辑</el-button>
-                  <span class="sep">|</span>
-                  <el-button type="danger" link @click="confirmDel(note)">删除</el-button>
+                  <el-dropdown trigger="hover" @command="(cmd) => onActionCommand(cmd, note)">
+                    <span class="more-trigger"><el-icon><MoreFilled /></el-icon></span>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="del" style="color: var(--el-color-danger)">
+                          <el-icon><Delete /></el-icon>删除
+                        </el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
                 </span>
               </div>
             </div>
@@ -59,6 +67,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { MoreFilled, Delete } from '@element-plus/icons-vue'
 import http from '../../api/http'
 
 const loading = ref(false)
@@ -113,55 +122,189 @@ async function submit() {
   finally { submitting.value = false }
 }
 
+function onActionCommand(cmd, note) {
+  if (cmd === 'del') confirmDel(note)
+}
+
 function confirmDel(note) {
   ElMessageBox.confirm('确定删除吗？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' })
     .then(async () => {
       try { const resp = await http.post('/pv/mynote/delnote', { id: note.id }); ElMessage.success(resp.data?.data || '删除成功！'); await load() }
       catch (e) { ElMessage.error('删除失败：' + (e?.response?.data?.msg || e.message)) }
-    }).catch(() => {})
+    }).catch(() => { })
 }
 
 onMounted(() => { load() })
 </script>
 
 <style scoped>
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:var(--bg-page); }
-.toolbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 8px; flex-shrink:0; }
-.toolbar-left { display:flex; align-items:center; gap:8px; }
-.page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
-.page-title i { color:var(--color-primary-light); margin-right:4px; }
-
-.search-bar { flex-shrink:0; padding:0 14px; }
-.search-bar__inner {
-  background:var(--bg-card); border-radius:12px; padding:10px 16px;
-  box-shadow:var(--shadow-card);
-  display:flex; align-items:center; gap:10px;
+.mo-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-page);
+  min-width: 0;
 }
 
-.mo-body { flex:1; padding:12px 14px 14px; overflow:hidden; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px 8px;
+  flex-shrink: 0;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: .3px;
+}
+
+.page-title i {
+  color: var(--color-primary-light);
+  margin-right: 4px;
+}
+
+.search-bar {
+  flex-shrink: 0;
+  padding: 0 14px;
+}
+
+.search-bar__inner {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mo-body {
+  flex: 1;
+  padding: 12px 14px 14px;
+  overflow: hidden;
+  min-height: 0;
+  min-width: 0;
+  box-sizing: border-box;
+}
 
 .m-card {
-  background:var(--bg-card); border-radius:12px;
-  box-shadow:var(--shadow-card);
-  overflow:hidden; transition:box-shadow .2s;
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  overflow: hidden;
+  transition: box-shadow .2s;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
-.m-card:hover { box-shadow:var(--shadow-card-hover); }
 
-.note-list { height:100%; overflow-y:auto; padding:8px 20px; }
-.note-list::-webkit-scrollbar { width:4px; }
-.note-list::-webkit-scrollbar-track { background:transparent; }
-.note-list::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
+.m-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
 
-.note-item { border-bottom:1px solid var(--border-light); padding:12px 0; }
+.note-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-card);
+}
+
+.note-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.note-list::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+.note-list::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.note-item {
+  padding: 10px 0;
+  overflow: hidden;
+  max-width: 100%;
+}
+
 .note-badge {
-  display:inline-block; padding:2px 10px; border-radius:0 4px 4px 0;
-  background:var(--bg-hover); font-size:14px; font-weight:500; color:var(--text-primary); margin-bottom:8px;
+  display: block;
+  padding: 6px 25px;
+  margin: -2px -12px 8px;
+  background: var(--bg-subtle);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
-.note-content { font-size:14px; color:var(--text-secondary); line-height:1.625; margin-bottom:8px; word-break:break-word; }
-.note-content :deep(a) { color:var(--color-primary-light); }
-.note-footer { display:flex; align-items:center; justify-content:space-between; }
-.note-meta { font-size:12px; color:var(--text-placeholder); }
-.note-actions { display:flex; align-items:center; }
-.note-actions .sep { color:var(--text-placeholder); margin:0 4px; }
-.note-bottom { text-align:center; font-weight:500; color:var(--text-placeholder); padding:12px 0; font-size:13px; }
+
+.note-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.625;
+  margin-bottom: 8px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  padding: 0 30px;
+}
+
+.note-content :deep(a) {
+  color: var(--color-primary-light);
+}
+
+.note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.note-meta {
+  font-size: 12px;
+  color: var(--text-placeholder);
+}
+
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.more-trigger {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  outline: none;
+}
+
+.more-trigger:hover {
+  color: var(--text-secondary);
+}
+
+.note-bottom {
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-placeholder);
+  padding: 12px 0;
+  font-size: 13px;
+}
 </style>

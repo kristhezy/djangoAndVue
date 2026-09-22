@@ -23,10 +23,7 @@
             <div class="fg">
               <div class="fgr">
                 <label>私有域名</label>
-                <el-select v-model="oa.privaddr" :disabled="oa.env === 'test'">
-                  <el-option label="请选择" value="" />
-                  <el-option label="中交四航院" value="https://47.92.151.128:443" />
-                </el-select>
+                <PrivAddrSelect v-model="oa.privaddr" :disabled="oa.env === 'test'" />
               </div>
               <div class="fgr"><label><span class="rq">*</span>企业名称</label><el-input v-model="oa.compName"
                   placeholder="输入企业全称" /></div>
@@ -84,10 +81,7 @@
             <div class="fg">
               <div class="fgr">
                 <label>私有域名</label>
-                <el-select v-model="uci.privaddr" :disabled="uci.env === 'test'">
-                  <el-option label="请选择" value="" />
-                  <el-option label="中交四航院" value="https://47.92.151.128:443" />
-                </el-select>
+                <PrivAddrSelect v-model="uci.privaddr" :disabled="uci.env === 'test'" />
               </div>
               <div class="fgr"><label><span class="rq">*</span>企业ID</label><el-input v-model="uci.compId"
                   placeholder="输入后回车可查有效日期" @keydown.enter="getExpireDate" /></div>
@@ -131,10 +125,7 @@
             <div class="fg">
               <div class="fgr">
                 <label>私有域名</label>
-                <el-select v-model="wx.privaddr" :disabled="wx.env === 'test'">
-                  <el-option label="请选择" value="" />
-                  <el-option label="中交四航院" value="https://47.92.151.128:443" />
-                </el-select>
+                <PrivAddrSelect v-model="wx.privaddr" :disabled="wx.env === 'test'" />
               </div>
               <div class="fgr"><label><span class="rq">*</span>企业ID</label><el-input v-model="wx.compId" /></div>
               <div class="fgr"><label><span class="rq">*</span>APP ID</label><el-input v-model="wx.appId" /></div>
@@ -151,7 +142,7 @@
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import http from '../../api/http.js'
 
@@ -164,6 +155,7 @@ const EnvRadio = {
 }
 const BtnGroup = { emits: ['reset', 'submit'], template: `<div class="btn-group"><el-button @click="$emit('reset')">重置</el-button><el-button type="primary" @click="$emit('submit')">提交</el-button></div>` }
 const ResultBox = { props: ['text', 'loading'], template: `<div class="result"><span v-if="loading" class="result-loading"><i class="fa-solid fa-spinner fa-spin"></i> 加载中...</span><span v-else v-html="text||''"></span></div>` }
+const PrivAddrSelect = { props: ['modelValue', 'disabled'], emits: ['update:modelValue'], template: `<el-select :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" :disabled="disabled" placeholder="请选择"><el-option label="请选择" value="" /><el-option label="中交四航院" value="https://47.92.151.128:443" /></el-select>` }
 
 function defaultDate() {
   const d = new Date()
@@ -211,6 +203,11 @@ function submitWx() {
   http.post('/ov/setting/savewxappinfo', { privaddr: wx.privaddr, cid: wx.compId, appid: wx.appId, secret: wx.appSecret, env: wx.env, type: 'savewxappinfo' })
     .then(r => { wx.result = r.data?.data || '' }).catch(() => { wx.result = '请求失败' }).finally(() => { wx.loading = false })
 }
+
+// 切换到测试环境时自动清空私有域名
+watch(() => oa.env, (v) => { if (v === 'test') oa.privaddr = '' })
+watch(() => uci.env, (v) => { if (v === 'test') uci.privaddr = '' })
+watch(() => wx.env, (v) => { if (v === 'test') wx.privaddr = '' })
 
 // ====== Card 4: 修改企管角色密码 ======
 const pwd = reactive({ userid: '', passwd: '', env: 'test', result: '', loading: false })
@@ -268,6 +265,7 @@ onMounted(() => { })
   padding: 0 12px 12px;
   flex: 1;
   overflow: hidden;
+  min-height: 0;;
 }
 
 .column {
@@ -415,12 +413,11 @@ onMounted(() => { })
 /* ===================== 表单 Grid ===================== */
 .fg {
   display: grid;
-  grid-template-columns: auto 300px;
+  grid-template-columns: auto minmax(120px, 300px);
   column-gap: 12px;
   row-gap: 12px;
   align-items: center;
-  width: fit-content;
-  margin: 0 auto;
+  width:fit-content; margin:0 auto;
 }
 
 .fgr {

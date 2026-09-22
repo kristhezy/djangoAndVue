@@ -157,7 +157,8 @@ onMounted(() => {})
 .page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
 .page-title i { color:var(--color-primary-light); margin-right:4px; }
 
-.mo-body { display:flex; gap:12px; padding:0 12px 12px; flex:1; overflow:hidden; }
+.mo-body { display:flex; gap:12px; padding:0 12px 12px; flex:1; overflow:hidden;
+  min-height: 0;; }
 .mo-body::-webkit-scrollbar { width:4px; }
 .mo-body::-webkit-scrollbar-track { background:transparent; }
 .mo-body::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
@@ -201,7 +202,7 @@ onMounted(() => {})
 .accent-orange{ border-left-color:#f59e0b; }  .accent-orange .card-icon { color:#f59e0b; }
 
 /* ===================== 表单 Grid ===================== */
-.fg { display:grid; grid-template-columns:auto 300px; column-gap:12px; row-gap:12px; align-items:center; width:fit-content; margin:0 auto; }
+.fg { display:grid; grid-template-columns: auto minmax(120px, 300px); column-gap:12px; row-gap:12px; align-items:center; width:fit-content; margin:0 auto; }
 .fgr { display:contents; }
 .fgr label { text-align:left; white-space:nowrap; font-size:13px; color:var(--text-secondary); }
 .fgr :deep(.el-input), .fgr :deep(.el-select) { width:100% !important; }

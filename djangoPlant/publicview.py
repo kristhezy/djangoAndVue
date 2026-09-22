@@ -421,12 +421,79 @@ def registTP(request):
 
 @login_required
 @never_cache
+@csrf_exempt
 def easyIC(request):
     if request.method == 'GET':
         return redirect('/')
     else:
+        # 检查是否是文件上传请求
+        if request.FILES:
+            uid = int(request.session.get('uid') or 0)
+            setenv = request.POST.get('setenv', '')
+            uri = request.POST.get('uri', '')
+            headers_str = request.POST.get('headers', '')
+            params_str = request.POST.get('params', '')
+
+            try:
+                headers = json.loads(headers_str) if headers_str else {}
+            except:
+                headers = {}
+
+            try:
+                params = json.loads(params_str) if params_str else {}
+            except:
+                params = {}
+
+            files = {}
+            for key in request.FILES:
+                files[key] = request.FILES[key]
+
+            try:
+                upload_res = pdef.uploadRequest(setenv, uri, headers, files, params)
+                try:
+                    rbody = upload_res.json()
+                except:
+                    rbody = upload_res.text
+                resheader = json.dumps(dict(upload_res.headers))
+                rlt = {
+                    "0": {
+                        "request_type": "upload",
+                        "host_uri": setenv + uri,
+                        "request_headers": headers_str,
+                        "request_params": params_str,
+                        "response_headers": resheader,
+                        "response_body": rbody
+                    }
+                }
+            except Exception as e:
+                rlt = {
+                    "0": {
+                        "request_type": "upload",
+                        "host_uri": setenv + uri,
+                        "request_headers": headers_str,
+                        "request_params": params_str,
+                        "response_headers": "",
+                        "response_body": f"上传失败: {str(e)}"
+                    }
+                }
+
+            # 保存历史记录
+            header = headers_str if headers_str else ""
+            params_for_his = params_str if params_str else ""
+            gethis = iaq.query_urlInReqhis(uid, setenv, uri)
+            if gethis:
+                his_id = gethis["id"]
+                iaq.update_reqhis(his_id, "post", header, params_for_his)
+            else:
+                iaq.inst_reqhis(int(uid), "post", setenv, uri, str(header), str(params_for_his))
+
+            code = c['success']
+            msg = m['success']
+            gr = pdef.get_result(code, msg, rlt)
+            return jr(gr)
+
         data = json.loads(request.body)
-        uid = request.session.get('uid')
+        uid = int(request.session.get('uid') or 0)
         dtype = data['type']
         if dtype == "gethistory":
             hislist = iaq.query_reqhis(uid)
@@ -439,6 +506,10 @@ def easyIC(request):
                 j += 1
             print("hisrlt:",hisrlt)
             rlt = hisrlt
+        elif dtype == "deletehistory":
+            his_id = data.get('id')
+            iaq.del_reqhis(his_id)
+            rlt = {"success": True}
         elif dtype == "requestinterface":
             data = json.loads(request.body)
             setreqtype = data["setreqtype"]
@@ -490,8 +561,14 @@ def easyIC(request):
                     resheader = json.dumps(dict(prrlt.headers))
                     rlt["0"] = {"request_type":setreqtype,"host_uri":setenv+uri,"request_headers":header,"request_params":params,"response_headers":resheader,"response_body":prrlt.json()}
                 elif setreqtype == "get":
-                    grrlt = pdef.getRequest(setenv,uri,headers,params)
-                    resheader = json.dumps(dict(grrlt.headers))
+                    try:
+                        grrlt = pdef.getRequest(setenv,uri,headers,params)
+                        rbody = grrlt.json()
+                        resheader = json.dumps(dict(grrlt.headers))
+                    except Exception as e:
+                        rbody = f"<span style='color:red;'><b>接口调用失败，请确认一下环境是否可用!</b></span>"
+                        resheader = ""
+                    rlt["0"] = {"request_type":setreqtype,"host_uri":setenv+uri,"request_headers":header,"request_params":params,"response_headers":resheader,"response_body":rbody}
                 print("非批量调用接口：",rlt)
             if not header: header = ""
             if not params: params = ""
@@ -500,7 +577,7 @@ def easyIC(request):
             #id,method,host,url,header,param
             if gethis:
                 id = gethis["id"]
-                iaq.update_reqhis(id, header, params)
+                iaq.update_reqhis(id, setreqtype, header, params)
             else:
                 iaq.inst_reqhis(int(uid),setreqtype,setenv,uri,str(header),str(params))
         code = c['success']

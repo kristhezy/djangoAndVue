@@ -55,9 +55,8 @@ class OVSetting(object):
             elif version == 7: mUri = self.mmeettTestUri
         elif env == "prod":
             if version == 3:
-                mUri = self.basicPordUri
-                if privaddr:
-                    mUri = privaddr
+                if privaddr: mUri = privaddr
+                else: mUri = self.basicPordUri
             elif version == 4: mUri = self.soonProdUri
             # elif version == 5: mUri = self.meetProdUri
             elif version == 6: mUri = self.twProdUri

@@ -7,7 +7,7 @@
     </div>
 
     <div class="mo-body">
-      <div class="column">
+      <div class="mo-col">
         <!-- 卡片1: 清除公众号/小程序绑定数据 -->
         <div :class="['m-card', {collapsed:!cards.c1}]">
           <div class="m-card-hd accent-blue" @click="cards.c1=!cards.c1">
@@ -33,7 +33,9 @@
             <div class="result">{{ formatResult(result1) }}</div>
           </div>
         </div>
+      </div>
 
+      <div class="mo-col">
         <!-- 卡片2: 清除过期企业信息数据 -->
         <div :class="['m-card', {collapsed:!cards.c2}]">
           <div class="m-card-hd accent-orange" @click="cards.c2=!cards.c2">
@@ -57,7 +59,9 @@
             <div class="result">{{ formatResult(result2) }}</div>
           </div>
         </div>
+      </div>
 
+      <div class="mo-col">
         <!-- 卡片3: 清除app登录token -->
         <div :class="['m-card', {collapsed:!cards.c3}]">
           <div class="m-card-hd accent-green" @click="cards.c3=!cards.c3">
@@ -149,17 +153,7 @@ function reset3() { form3.companyId = ''; form3.env = 'prod'; result3.value = ''
 
 <style scoped>
 /* ===================== 页面骨架 ===================== */
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:var(--bg-page); }
-.toolbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 8px; flex-shrink:0; }
-.toolbar-left { display:flex; align-items:center; gap:8px; }
-.page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
-.page-title i { color:var(--color-primary-light); margin-right:4px; }
-
-.mo-body { flex:1; padding:0 14px 14px; overflow-y:auto; }
-.mo-body::-webkit-scrollbar { width:4px; }
-.mo-body::-webkit-scrollbar-track { background:transparent; }
-.mo-body::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
-.column { columns:3; column-gap:12px; }
+/* mo-page / mo-body / mo-col / m-card 等样式由 design-system.css 统一提供 */
 
 /* ===================== 卡片 ===================== */
 .m-card {

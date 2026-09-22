@@ -322,7 +322,7 @@ onMounted(() => {
 .ag-page { width: 100%; height: 100%; display: flex; padding: 12px; background: var(--bg-page); gap: 12px; }
 
 .ag-side {
-  width: 220px; flex-shrink: 0; display: flex; flex-direction: column;
+  flex: 0 1 220px; min-width: 180px; display: flex; flex-direction: column;
   background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-card); overflow: hidden;
 }
 .side-hd { padding: 14px 14px 10px; border-bottom: 1px solid var(--border-card); }

@@ -153,3 +153,7 @@
 
 /* ===================== 提示文字 ===================== */
 .hint-text { color:#f59e0b; font-size:12px; text-align:center; margin:4px 0 8px; }
+
+/* ===================== NProgress 进度条 ===================== */
+#nprogress .bar { background: var(--color-primary-light); height: 3px; }
+#nprogress .peg { box-shadow: 0 0 10px var(--color-primary-light), 0 0 5px var(--color-primary-light); }

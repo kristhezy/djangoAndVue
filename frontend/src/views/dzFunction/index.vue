@@ -7,7 +7,7 @@
     </div>
 
     <div class="mo-body">
-      <div class="column">
+      <div class="mo-col">
         <!-- 卡片1: 红蚂蚁企业修改客户阶段 -->
         <div :class="['m-card', {collapsed:!cards.c1}]">
           <div class="m-card-hd accent-red" @click="cards.c1=!cards.c1">
@@ -24,7 +24,9 @@
             <div class="result">{{ result1 }}</div>
           </div>
         </div>
+      </div>
 
+      <div class="mo-col">
         <!-- 卡片2: 华为云license激活 -->
         <div :class="['m-card', {collapsed:!cards.c2}]">
           <div class="m-card-hd accent-blue" @click="cards.c2=!cards.c2">
@@ -42,7 +44,9 @@
             <div class="result">{{ result2 }}</div>
           </div>
         </div>
+      </div>
 
+      <div class="mo-col">
         <!-- 卡片3: 预留 -->
         <div :class="['m-card', {collapsed:!cards.c3}]">
           <div class="m-card-hd accent-green" @click="cards.c3=!cards.c3">
@@ -105,17 +109,7 @@ function reset2() { form2.compid = ''; form2.lisence = ''; form2.remark = ''; fo
 </script>
 
 <style scoped>
-.mo-page { display:flex; flex-direction:column; height:100%; overflow:hidden; background:var(--bg-page); }
-.toolbar { display:flex; justify-content:space-between; align-items:center; padding:12px 20px 8px; flex-shrink:0; }
-.toolbar-left { display:flex; align-items:center; gap:8px; }
-.page-title { margin:0; font-size:16px; font-weight:700; color:var(--text-primary); letter-spacing:.3px; }
-.page-title i { color:var(--color-primary-light); margin-right:4px; }
-
-.mo-body { flex:1; padding:0 14px 14px; overflow-y:auto; }
-.mo-body::-webkit-scrollbar { width:4px; }
-.mo-body::-webkit-scrollbar-track { background:transparent; }
-.mo-body::-webkit-scrollbar-thumb { background:var(--scrollbar-thumb); border-radius:4px; }
-.column { columns:3; column-gap:12px; }
+/* mo-page / mo-body / mo-col / m-card 等样式由 design-system.css 统一提供 */
 
 .m-card {
   background:var(--bg-card); border-radius:12px;

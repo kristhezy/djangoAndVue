@@ -53,8 +53,8 @@ def _now_context() -> str:
     精确到分钟而非秒：DeepSeek 的前缀缓存要求 system 消息前缀逐字节一致，
     精确到秒会让每次请求的前缀都不同、缓存永远 miss；降为分钟可在同一分钟内命中缓存。
     """
-    from django.utils import timezone
-    now = timezone.localtime()
+    from datetime import datetime
+    now = datetime.now()
     return f"现在是 {now.strftime('%Y年%m月%d日')} {_WEEKDAYS[now.weekday()]} {now.strftime('%H:%M')}。"
 
 

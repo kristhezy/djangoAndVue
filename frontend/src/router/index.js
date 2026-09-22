@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 import AppLayout from '../layout/AppLayout.vue'
+
+NProgress.configure({ showSpinner: false, speed: 400, minimum: 0.15 })
 
 // 不需要登录即可访问的路由
 const PUBLIC_PATHS = new Set(['/login', '/denied'])
@@ -55,8 +59,15 @@ const router = createRouter({
   routes,
 })
 
-// 路由守卫：未登录时跳转登录页
+// 路由守卫：进度条 + 防重复点击 + 登录检查
+let pendingPath = null
+
 router.beforeEach(async (to) => {
+  // 防重复点击：相同路径的重复导航直接拦截
+  if (pendingPath === to.fullPath) return false
+  pendingPath = to.fullPath
+  NProgress.start()
+
   if (PUBLIC_PATHS.has(to.path)) return true
 
   const { useMenuStore } = await import('../store/menu')
@@ -69,6 +80,11 @@ router.beforeEach(async (to) => {
       return { path: '/login', query: { next: to.fullPath } }
     }
   }
+})
+
+router.afterEach(() => {
+  pendingPath = null
+  NProgress.done()
 })
 
 export default router

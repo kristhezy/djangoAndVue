@@ -1049,7 +1049,7 @@ def _process_setting_impl(request, data):
         owairlt = _get_ovs().origin_saveOrUpdateWxAppInfo(data['cid'], data['appid'], data['secret'], env, 3, data['privaddr'])
         if owairlt['code'] == 0 and owairlt['data']:
             rescode, msg = c['success'], m['success']
-            rlt = f'企业（{data["cid"]}）绑定小程序（{data["appid"]}）成功! '
+            rlt = f'企业（{data["cid"]}）绑定小程序（appId:{data["appid"]}, secretKey:{data["secret"]}）成功! '
             pu.ov_opretor_records_instdb(data['cid'], "", env, request.session.get('uid'), request.session.get('uname'), rlt, ms, '102', "3")
         else:
             rescode, msg, rlt = c['reserror'], m['reserror'], f'企业绑定小程序异常, {owairlt["msg"]}'

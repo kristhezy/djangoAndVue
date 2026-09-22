@@ -48,24 +48,57 @@
 
     <!-- 表格区 -->
     <div class="mo-body">
-      <div class="m-card" style="height:100%;">
+      <div class="m-card">
         <div class="table-wrap">
           <el-table :data="list" v-loading="loading" stripe height="100%" :style="{ '--row-height': rowHeight + 'px' }">
-            <el-table-column prop="id" label="序号" width="70" />
-            <el-table-column label="环境" width="120">
+            <el-table-column prop="id" label="序号" min-width="70" />
+            <el-table-column label="环境" min-width="120">
               <template #default="{ row }">{{ envLabel(row) }}</template>
             </el-table-column>
-            <el-table-column prop="companyId" label="企业ID" width="200" show-overflow-tooltip />
-            <el-table-column prop="companyName" label="企业名称" width="230" show-overflow-tooltip />
-            <el-table-column prop="message" label="操作信息" class-name="wrap-cell">
+            <el-table-column prop="companyId" label="企业ID" min-width="160">
               <template #default="{ row }">
-                <el-tooltip :content="row.message" placement="top-start" :show-after="200">
-                  <div class="msg-wrap">{{ row.message }}</div>
+                <el-tooltip :content="row.companyId" placement="top" :show-after="200"
+                  :disabled="!truncatedMap.get(`${row.id}-companyId`)">
+                  <div class="cell-truncate" @mouseenter="checkTruncated($event, `${row.id}-companyId`)">{{
+                    row.companyId }}</div>
                 </el-tooltip>
               </template>
             </el-table-column>
-            <el-table-column prop="uname" label="操作人" width="100" show-overflow-tooltip />
-            <el-table-column prop="createTime" label="操作时间" width="170" show-overflow-tooltip />
+            <el-table-column prop="companyName" label="企业名称" min-width="180">
+              <template #default="{ row }">
+                <el-tooltip :content="row.companyName" placement="top" :show-after="200"
+                  :disabled="!truncatedMap.get(`${row.id}-companyName`)">
+                  <div class="cell-truncate" @mouseenter="checkTruncated($event, `${row.id}-companyName`)">{{
+                    row.companyName }}</div>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column prop="message" label="操作信息" min-width="400" class-name="wrap-cell">
+              <template #default="{ row }">
+                <el-tooltip :content="row.message" placement="top-start" :show-after="200"
+                  :disabled="!truncatedMap.get(row.id)">
+                  <div class="msg-wrap" @mouseenter="checkTruncated($event, row.id)">{{ row.message }}</div>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column prop="uname" label="操作人" min-width="80">
+              <template #default="{ row }">
+                <el-tooltip :content="row.uname" placement="top" :show-after="200"
+                  :disabled="!truncatedMap.get(`${row.id}-uname`)">
+                  <div class="cell-truncate" @mouseenter="checkTruncated($event, `${row.id}-uname`)">{{ row.uname }}
+                  </div>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="操作时间" min-width="160">
+              <template #default="{ row }">
+                <el-tooltip :content="row.createTime" placement="top" :show-after="200"
+                  :disabled="!truncatedMap.get(`${row.id}-createTime`)">
+                  <div class="cell-truncate" @mouseenter="checkTruncated($event, `${row.id}-createTime`)">{{
+                    row.createTime }}</div>
+                </el-tooltip>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" width="90" fixed="right">
               <template #default="{ row }">
                 <el-popconfirm title="确定删除这条记录吗？" @confirm="del(row.id)">
@@ -98,6 +131,12 @@ const operators = ref([])
 const total = ref(0)
 const page = ref(1)
 const rowHeight = ref(48)
+const truncatedMap = reactive(new Map())
+
+function checkTruncated(event, key) {
+  const el = event.target.closest('.msg-wrap') || event.target.closest('.cell-truncate') || event.target
+  truncatedMap.set(key, el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight)
+}
 
 const query = reactive({ env: '', vers: '', compid: '', compname: '', minfo: '', uname: '' })
 
@@ -119,7 +158,7 @@ function envLabel(row) {
   const env = row.env || '', ver = String(row.version ?? ''), ss = String(row.serverSide ?? '')
   if (env === '生产' || env === '测试') {
     if (ver === '1') return env + '/SAAS'
-    if (ver === '3') { if (env === '生产' && ss === '3') return '私有化/基线版'; return env + '/基线版' }
+    if (ver === '3') { if (env === '生产' && ss === '3') return '/基线版(私有化)'; return env + '/基线版' }
     if (ver === '4') return env + '/Soon'
     if (ver === '5') return env + '/Meet'
     if (ver === '6') return env + '/通威版'
@@ -218,6 +257,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 .search-bar {
   flex-shrink: 0;
   padding: 0 14px;
+  overflow: hidden;
 }
 
 .search-bar__inner {
@@ -225,6 +265,7 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   border-radius: 12px;
   padding: 14px 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  box-sizing: border-box;
 }
 
 .filter-form {
@@ -236,9 +277,11 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 
 .filter-form :deep(.el-form-item) {
   margin: 0;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1 1 0;
+  min-width: 130px;
 }
 
 .filter-form :deep(.el-form-item__label) {
@@ -250,23 +293,20 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   flex-shrink: 0;
 }
 
-.filter-form :deep(.el-input) {
-  width: 240px;
-}
-
-.filter-form :deep(.cid-input .el-input) {
-  width: 200px;
-}
-
+.filter-form :deep(.el-input),
 .filter-form :deep(.el-select) {
-  width: 120px;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
-.filter-form :deep(.opr-select .el-select) {
-  width: 140px;
+.filter-form :deep(.no-label) {
+  flex: none;
+  gap: 4px;
 }
 
 .filter-actions {
+  flex: none;
   margin-left: auto;
 }
 
@@ -274,6 +314,8 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   flex: 1;
   padding: 12px 14px 14px;
   overflow: hidden;
+  min-height: 0;
+  display: flex;
 }
 
 .m-card {
@@ -284,6 +326,8 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   transition: box-shadow .2s;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
 }
 
 .m-card:hover {
@@ -293,6 +337,8 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
 .table-wrap {
   flex: 1;
   overflow: hidden;
+  width: 100%;
+  min-height: 0;
 }
 
 .table-wrap :deep(.el-table) {
@@ -332,5 +378,11 @@ onBeforeUnmount(() => { if (resizeObserver) resizeObserver.disconnect() })
   word-break: break-word;
   white-space: normal;
   line-height: 1.4;
+}
+
+.cell-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
