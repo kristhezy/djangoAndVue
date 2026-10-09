@@ -120,3 +120,21 @@ def login_with_beijing_time(request, username, password):
         """, [beijing_time, user.id])  # 参数化查询，安全无注入
         connection.commit()
     return user  # 返回认证后的用户对象
+
+
+# ============ 同步视图跑独立线程池的统一包装 ============
+from functools import wraps
+from django.db import close_old_connections #type: ignore
+
+def run_in_pool(fn):
+    """包装将经 sync_to_async(thread_sensitive=False) 跑在线程池里的同步视图：
+    执行完毕（含异常）后清理当前线程的过期数据库连接，防止 CONN_MAX_AGE=0
+    下线程池线程复用导致 SQLite 连接/fd 滞留泄漏（Errno 24 的教训）。
+    对不访问数据库的视图 close_old_connections() 是空操作，可安全套用。"""
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            close_old_connections()
+    return wrapped

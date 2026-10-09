@@ -1,4 +1,6 @@
 from. import logger,JsonResponse as jr,json,redirect,pub_utils as pu,re,login_required,never_cache,cache_page,time,Colors,current_dir
+from asgiref.sync import sync_to_async  # 慢同步视图改跑独立线程池，避免串行阻塞 ASGI 主线程
+from.pub_utils import run_in_pool
 from.ov_setting import OVSetting,pdef
 from.mmeett import mmeettIF
 from.xcard import xcard
@@ -134,7 +136,12 @@ def mmeettopen(request):
     return redirect('/')
 
 @never_cache
-def pmmeett_action(request, action):
+async def pmmeett_action(request, action):
+    # mmeett 外部接口慢（超时 30s），丢独立线程池执行，避免阻塞主线程排队其他请求
+    return await sync_to_async(_pmmeett_action_sync, thread_sensitive=False)(request, action)
+
+@run_in_pool
+def _pmmeett_action_sync(request, action):
     """action 从 URL 路径获取"""
     data = json.loads(request.body)
     data["type"] = action

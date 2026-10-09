@@ -1,5 +1,7 @@
 from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time,requests
 from django.views.decorators.http import condition
+from asgiref.sync import sync_to_async  # 慢同步视图改跑独立线程池，避免串行阻塞 ASGI 主线程
+from.pub_utils import run_in_pool
 from.pub_InputAndQuery import InputAndQuery
 from.publicDef import publicDef,fivemillion
 from.compOpenAccount import compOpenAccount
@@ -245,7 +247,12 @@ def pmynote(request,opration):
 def gusercenter(request):
     return redirect('/')
 @never_cache
-def usercenter(request,uctype):
+async def usercenter(request,uctype):
+    # coa 开户等外部调用可能很慢，丢独立线程池执行，避免阻塞主线程排队其他请求
+    return await sync_to_async(_usercenter_sync, thread_sensitive=False)(request,uctype)
+
+@run_in_pool
+def _usercenter_sync(request,uctype):
     print(' ===== [%s] "用户中心" ====='%pdef.getctime())
     data = json.loads(request.body)
     # print(pdef.logcss(gct(),f"【pulicview-usercenter-data"),f"{data}")
@@ -419,10 +426,22 @@ def registTP(request):
     rlt = pdef.get_result(code,msg,gdata)
     return jr(rlt)
 
+def _parse_res_body(res):
+    """解析接口响应体：能解析 JSON 就返回 JSON，否则返回原文 text（如 nginx 405 HTML 页）"""
+    try:
+        return res.json()
+    except Exception:
+        return res.text
+
 @login_required
 @never_cache
 @csrf_exempt
-def easyIC(request):
+async def easyIC(request):
+    # 外部接口调用超时 30/60s，丢独立线程池执行，避免阻塞主线程排队其他请求
+    return await sync_to_async(_easyIC_sync, thread_sensitive=False)(request)
+
+@run_in_pool
+def _easyIC_sync(request):
     if request.method == 'GET':
         return redirect('/')
     else:
@@ -450,10 +469,7 @@ def easyIC(request):
 
             try:
                 upload_res = pdef.uploadRequest(setenv, uri, headers, files, params)
-                try:
-                    rbody = upload_res.json()
-                except:
-                    rbody = upload_res.text
+                rbody = _parse_res_body(upload_res)
                 resheader = json.dumps(dict(upload_res.headers))
                 rlt = {
                     "0": {
@@ -533,7 +549,7 @@ def easyIC(request):
                         # print("000000000000000getRequest-newparam",i)
                         try:
                             prrlt = pdef.postRequest(setenv,uri,headers,i)
-                            rbody = prrlt.json()
+                            rbody = _parse_res_body(prrlt)
                             resheader = json.dumps(dict(prrlt.headers))
                         except Exception as e:
                             rbody =  f"<span style='color:red;'><b>接口调用失败，请确认一下环境是否可用!</b></span>"
@@ -547,7 +563,7 @@ def easyIC(request):
                         # print("11111111111111getRequest-newp:",newp)
                         try:
                             grrlt = pdef.getRequest(setenv,uri,headers,newp)
-                            rbody = grrlt.json()
+                            rbody = _parse_res_body(grrlt)
                             resheader = json.dumps(dict(grrlt.headers))
                         except Exception as e:
                             rbody =  f"<span style='color:red;'><b>接口调用失败，请确认一下环境是否可用!</b></span>"
@@ -557,13 +573,18 @@ def easyIC(request):
                 print("批量调用接口：",rlt)
             else:
                 if setreqtype == "post":
-                    prrlt = pdef.postRequest(setenv,uri,headers,params)
-                    resheader = json.dumps(dict(prrlt.headers))
-                    rlt["0"] = {"request_type":setreqtype,"host_uri":setenv+uri,"request_headers":header,"request_params":params,"response_headers":resheader,"response_body":prrlt.json()}
+                    try:
+                        prrlt = pdef.postRequest(setenv,uri,headers,params)
+                        rbody = _parse_res_body(prrlt)
+                        resheader = json.dumps(dict(prrlt.headers))
+                    except Exception as e:
+                        rbody = f"<span style='color:red;'><b>接口调用失败，请确认一下环境是否可用!</b></span>"
+                        resheader = ""
+                    rlt["0"] = {"request_type":setreqtype,"host_uri":setenv+uri,"request_headers":header,"request_params":params,"response_headers":resheader,"response_body":rbody}
                 elif setreqtype == "get":
                     try:
                         grrlt = pdef.getRequest(setenv,uri,headers,params)
-                        rbody = grrlt.json()
+                        rbody = _parse_res_body(grrlt)
                         resheader = json.dumps(dict(grrlt.headers))
                     except Exception as e:
                         rbody = f"<span style='color:red;'><b>接口调用失败，请确认一下环境是否可用!</b></span>"
@@ -862,7 +883,11 @@ def paitools(request,ptype):
 RADAR_HOST = "https://agent.aijiatui.com"
 
 @never_cache
-def radar_data(request):
+async def radar_data(request):
+    return await sync_to_async(_radar_data_sync, thread_sensitive=False)(request)
+
+@run_in_pool
+def _radar_data_sync(request):
     """代理查询雷达数据"""
     company_id = request.GET.get('company_id', '')
     start_time = request.GET.get('start_time', '')
@@ -877,18 +902,22 @@ def radar_data(request):
         'limit': limit,
     }
     try:
-        resp = requests.get(f"{RADAR_HOST}/radar/prod/data", params=params, timeout=30)
+        resp = requests.get(f"{RADAR_HOST}/radar/prod/data", params=params, timeout=15)
         return jr(resp.json())
     except Exception as e:
         return jr({'code': 1, 'msg': f'请求失败: {e}', 'data': [], 'count': 0})
 
 
 @never_cache
-def radar_company(request):
+async def radar_company(request):
+    return await sync_to_async(_radar_company_sync, thread_sensitive=False)(request)
+
+@run_in_pool
+def _radar_company_sync(request):
     """根据企业名称搜索企业ID"""
     company_name = request.GET.get('company_name', '')
     try:
-        resp = requests.get(f"{RADAR_HOST}/radar/prod/company", params={'company_name': company_name}, timeout=30)
+        resp = requests.get(f"{RADAR_HOST}/radar/prod/company", params={'company_name': company_name}, timeout=15)
         return jr({'code': 0, 'msg': '成功', 'data': resp.json()})
     except Exception as e:
         return jr({'code': 1, 'msg': f'请求失败: {e}', 'data': []})

@@ -79,8 +79,12 @@ class MenuPermissionMiddleware:
 
 import json
 import logging
+import time
 
 logger = logging.getLogger('api')
+
+# 慢请求阈值（秒）：服务端处理超过该值额外记 WARNING，方便 grep "SLOW" 定位
+SLOW_THRESHOLD = 3.0
 
 
 class SuppressNoiseFilter(logging.Filter):
@@ -97,7 +101,9 @@ class ResponseLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        start = time.monotonic()
         response = self.get_response(request)
+        elapsed = time.monotonic() - start
 
         # 只记录业务接口，静态资源/后台不记录
         path = request.path
@@ -109,16 +115,21 @@ class ResponseLoggingMiddleware:
         if not is_api:
             return response
 
+        ms = f"{elapsed * 1000:.0f}ms"
         # 流式响应（SSE 等）：不读 content（会触发缓冲），只记元信息
         if getattr(response, 'streaming', False):
-            logger.info(f"API: {request.method} {path} → {response.status_code} (streaming)")
+            logger.info(f"API: {request.method} {path} → {response.status_code} (streaming, 建流 {ms})")
             return response
 
         try:
             body = response.content.decode('utf-8')
-            logger.info(f"API: {request.method} {path} → {response.status_code} ({len(body)} bytes)")
+            logger.info(f"API: {request.method} {path} → {response.status_code} ({len(body)} bytes, {ms})")
         except UnicodeDecodeError:
-            logger.info(f"API: {request.method} {path} → {response.status_code} ({len(response.content)} bytes)")
+            logger.info(f"API: {request.method} {path} → {response.status_code} ({len(response.content)} bytes, {ms})")
+
+        # 服务端确实处理慢（区别于浏览器排队/网络慢）时记 WARNING
+        if elapsed > SLOW_THRESHOLD:
+            logger.warning(f"SLOW API: {request.method} {path} 服务端耗时 {elapsed:.1f}s")
 
         return response
 

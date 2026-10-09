@@ -431,7 +431,7 @@ class fivemillion(object):
         return results
 
     def _lottery_clear_all(self, ltype=None):
-        """硬删除抽奖记录"""
+        """硬删除抽奖记录；删除后若库文件明显膨胀（>50MB）自动 VACUUM 收缩，无需手动清理"""
         from django.db import connection
         with connection.cursor() as cur:
             if ltype:
@@ -439,6 +439,18 @@ class fivemillion(object):
             else:
                 cur.execute("DELETE FROM lottery_records")
         cache.set('fmhis:ssq_count', self._lottery_count(ltype), timeout=None)
+        # 自助收缩：DELETE 只释放页不缩文件，超过阈值才 VACUUM + 截断 WAL（小库跳过，零开销）
+        import os
+        db_path = connection.settings_dict['NAME']
+        try:
+            if os.path.getsize(db_path) > 50 * 1024 * 1024:
+                with connection.cursor() as cur:
+                    cur.execute("VACUUM")
+                    cur.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                print(f"[清理] 库文件超 50MB，已自动 VACUUM 收缩至 {os.path.getsize(db_path) / 1024 / 1024:.1f}MB")
+        except Exception as e:
+            # VACUUM 失败（如被其他连接锁库）不影响已完成的清理结果
+            print(f"[清理] 自动 VACUUM 失败（数据已删除，文件未收缩）: {e}")
 
     def _lottery_migrate_from_json(self):
         """首次启动：将 fmhis.json 旧数据迁移到 SQLite（后台异步）"""

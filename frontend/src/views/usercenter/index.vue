@@ -127,11 +127,11 @@
                     </div>
                 </div>
 
-                <!-- FiveMillion -->
+                <!-- Dreams Come True -->
                 <div :class="['m-card', { collapsed: !fmOpen }]">
                     <div class="m-card-hd accent-purple" @click="fmOpen = !fmOpen" style="cursor:pointer;">
                         <div class="m-card-hd-left"><i class="fa-solid fa-dice card-icon"></i>
-                            <h3>FiveMillion</h3>
+                            <h3>Dreams Come True</h3>
                         </div>
                         <i :class="['fa-solid fa-chevron-right chevron', { open: fmOpen }]"></i>
                     </div>

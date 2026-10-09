@@ -26,4 +26,5 @@ if [ -f logs/console.log ] && [ "$(stat -f%z logs/console.log 2>/dev/null || ech
     : > logs/console.log
 fi
 
-/Users/imc/vllm/yes/envs/py310/bin/python3 -m uvicorn djangoPlant.asgi:application --host 0.0.0.0 --port 8001 --reload --reload-include '*.html' --reload-include '*.css' --reload-include '*.js' 2>&1 | tee -a logs/console.log
+# --reload-dir 限定只监视后端代码目录（已安装 watchfiles，事件驱动、不再全盘轮询扫描）
+/Users/imc/vllm/yes/envs/py310/bin/python3 -m uvicorn djangoPlant.asgi:application --host 0.0.0.0 --port 8001 --reload --reload-dir djangoPlant 2>&1 | tee -a logs/console.log
