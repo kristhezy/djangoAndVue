@@ -237,9 +237,38 @@ class publicDef(object):
         res = requests.post(uri, headers=header, json=req_json, timeout=30)
         # print(self.logcss(self.getctime,f'publicDef-【POST请求接口】:{uri}, heads:{res.headers}, 入参: {req_json}, 返回数据: {res.json()}'))
         return res
-    def uploadRequest(self,hostUri,shortUri,header,files,params=None):
+    def uploadRequest(self,hostUri,shortUri,header,files,params=None,method='POST'):
+        """文件上传请求（支持不同 HTTP 方法）
+
+        Args:
+            hostUri: 主机地址
+            shortUri: 接口路径
+            header: 请求头
+            files: 文件字典，格式为 {field_name: (filename, file_content, content_type)}
+            params: 其他表单参数
+            method: HTTP 方法，默认 POST
+        """
         uri = hostUri + shortUri
-        res = requests.post(uri, headers=header, files=files, data=params, timeout=60)
+        method = method.upper()
+
+        # 打印调试信息
+        print(f"[uploadRequest] 转发请求: method={method}, uri={uri}")
+        print(f"[uploadRequest] files参数: {[(k, v[0] if isinstance(v, tuple) else v) for k, v in files.items()]}")
+        print(f"[uploadRequest] params参数: {params}")
+
+        # 根据方法选择不同的请求方式
+        if method == 'GET':
+            res = requests.get(uri, headers=header, params=params, timeout=60)
+        elif method == 'PUT':
+            res = requests.put(uri, headers=header, files=files, data=params, timeout=60)
+        elif method == 'PATCH':
+            res = requests.patch(uri, headers=header, files=files, data=params, timeout=60)
+        elif method == 'DELETE':
+            res = requests.delete(uri, headers=header, data=params, timeout=60)
+        else:  # 默认 POST
+            res = requests.post(uri, headers=header, files=files, data=params, timeout=60)
+
+        print(f"[uploadRequest] 响应状态: {res.status_code}, 内容: {res.text[:200]}")
         return res
     def getRequest(self,hostUri,shortUri,header,reqParam):
         if reqParam:

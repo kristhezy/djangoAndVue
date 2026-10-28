@@ -32,8 +32,9 @@ class OVSetting(object):
         self.twProdUri = "https://ai-card.aijiatui.com"  #通威版prod
         self.soon_token = ""
         self.basic_token = ""
-        self.soonAdminToken = ""
-        self._soonAdminTokenEnv = ""
+        # 加密/解密接口的 admin token（按环境分开存储）
+        self.soonAdminToken_test = ""   # test 环境 token
+        self.soonAdminToken_prod = ""   # prod 环境 token
  
     def getphone(self,input_str):
         match = re.search(r'\+\d+-(\d+)', input_str)
@@ -380,43 +381,86 @@ class OVSetting(object):
         print(pdef.logcss(gct(),"【ov_setting-updateTWCompanyInfo】"),'【通威版企业绑定小程序】:%s, 入参: %s, 返回数据: json:%s'%(uri,req_json,res.json()))
         return res.json()
 
-    def _loginAdmin(self, env):
-        """Mmeett admin 登录（加密/解密接口需要）"""
-        if self._soonAdminTokenEnv and self._soonAdminTokenEnv != env:
-            self.soonAdminToken = ""
+    @handle_request_errors()
+    def _loginAdmin(self, env, force_refresh=False):
+        """Mmeett admin 登录（加密/解密接口需要）
+
+        Args:
+            env: 环境标识（test/prod）
+            force_refresh: 是否强制刷新token（用于43265重试场景）
+        """
+        # 根据环境选择对应的 token 字段
+        token_field = 'soonAdminToken_test' if env == 'test' else 'soonAdminToken_prod'
+        cached_token = getattr(self, token_field, '')
+
+        # 有缓存且不强制刷新，直接使用
+        if cached_token and not force_refresh:
+            print(pdef.logcss(gct(), "【ov_setting-_loginAdmin】"), f"环境: {env}; 使用缓存token")
+            return {"code": 0, "msg": "使用缓存token", "data": [{"token": cached_token}]}
+
+        # 重新登录获取token
         uri = self.soonTestUri if env == "test" else self.soonProdUri
         uri += '/admin/operate/login/account'
         data = {"password": "cf79ae6addba60ad018347359bd144d2", "email": "admin@aijiatui.com"}
         res = _get_session().post(uri, json=data)
         rlt = res.json()
-        self.soonAdminToken = rlt["data"][0]["token"]
-        self._soonAdminTokenEnv = env
+
+        # 验证返回结构
+        if not rlt.get("data") or not rlt["data"][0].get("token"):
+            raise ValueError(f"登录接口返回结构异常: {rlt}")
+
+        # 存储到对应的字段
+        new_token = rlt["data"][0]["token"]
+        setattr(self, token_field, new_token)
+        print(pdef.logcss(gct(), "【ov_setting-_loginAdmin】"), f"环境: {env}; 获取新token成功 (force_refresh={force_refresh})")
         return rlt
 
     @handle_request_errors()
     def cryptoEncrypt(self, value, env, version):
-        """加密"""
+        """加密（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env, version)
         uri = verurl + "/admin/field-crypto/encrypt"
-        if not self.soonAdminToken:
-            self._loginAdmin(env)
-        header = {"i-token": self.soonAdminToken}
+
+        # 首次请求（使用缓存token）
+        self._loginAdmin(env)
+        token_field = 'soonAdminToken_test' if env == 'test' else 'soonAdminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"value": value}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(), "【ov_setting-cryptoEncrypt】"), f"Token 失效(43265)，强制刷新重试...")
+            self._loginAdmin(env, force_refresh=True)  # 强制重新登录
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(), "【ov_setting-cryptoEncrypt】"), f"接口: {uri}; 入参:data={data}, header={header}; 返回: {rlt}")
         return rlt
 
     @handle_request_errors()
     def cryptoDecrypt(self, value, env, version):
-        """解密"""
+        """解密（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env, version)
         uri = verurl + "/admin/field-crypto/decrypt"
-        if not self.soonAdminToken:
-            self._loginAdmin(env)
-        header = {"i-token": self.soonAdminToken}
+
+        # 首次请求（使用缓存token）
+        self._loginAdmin(env)
+        token_field = 'soonAdminToken_test' if env == 'test' else 'soonAdminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"value": value}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(), "【ov_setting-cryptoDecrypt】"), f"Token 失效(43265)，强制刷新重试...")
+            self._loginAdmin(env, force_refresh=True)  # 强制重新登录
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(), "【ov_setting-cryptoDecrypt】"), f"接口: {uri}; 入参:data={data}; 返回: {rlt}")
         return rlt

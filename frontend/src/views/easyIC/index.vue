@@ -328,6 +328,7 @@ async function sendRequest() {
     if (uploadFiles.value.length > 0) {
       // 有文件时，使用 FormData（multipart/form-data）
       const fd = new FormData()
+      fd.append('setreqtype', method.value || 'POST')  // 添加请求方法
       fd.append('setenv', env.value)
       fd.append('uri', uri.value)
       fd.append('headers', JSON.stringify(parseTextToJSON(headers.value)))

@@ -29,5 +29,29 @@
     "country": 3630979328926013,
     "env": "prod",
     "register_time": "2026-09-18 14:09:26"
+  },
+  {
+    "rcode": "JP00104884",
+    "uname": "JP57233654",
+    "pwd": "Vst2025go",
+    "country": 3630979328926013,
+    "env": "prod",
+    "register_time": "2026-10-19 14:21:00"
+  },
+  {
+    "rcode": "JP00104886",
+    "uname": "dong001",
+    "pwd": "dd395710",
+    "country": 3630979328926009,
+    "env": "prod",
+    "register_time": "2026-10-19 15:46:43"
+  },
+  {
+    "rcode": "JP00104886",
+    "uname": "dong002",
+    "pwd": "dd396022",
+    "country": 3630979328926009,
+    "env": "prod",
+    "register_time": "2026-10-19 15:47:12"
   }
 ]

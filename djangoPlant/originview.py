@@ -188,7 +188,7 @@ def _process_pmmeett(request, data):
                         _log_mmeett_regist(rcode, uname, pwd, country, env)
                     uinfo = _get_mif().queryUserInfo(email, env, version)
                     uid = uinfo['data']['user']['jtUserId']
-                    urcode = uinfo['data']['user']['referralCode']
+                    urcode = uinfo['data']['user']['memberNo']
                     rlt += f"账号: {uname}, userId: {uid}, 推荐码: {urcode}. " if mset == "regist" else f"账号 {uname} 设置结果: "
                     if mset == "regist" and env == "test": #注册时安置用户
                         gtrlt = _get_mif().getTree(env, version)
@@ -939,6 +939,7 @@ def setting(request):
     data = json.loads(request.body)
     return _process_setting(request, data)
 
+@login_required
 @never_cache
 def setting_action(request, action):
     """action 从 URL 路径获取"""

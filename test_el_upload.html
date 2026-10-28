@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试 el-upload 组件</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/element-plus"></script>
+    <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>测试 el-upload 组件</h1>
+        <el-upload
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :show-file-list="false"
+            multiple
+            drag
+        >
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">
+                拖拽文件到此处或 <em>点击上传</em>
+            </div>
+        </el-upload>
+        <div v-if="uploadFiles.length">
+            <h3>已选择文件：</h3>
+            <ul>
+                <li v-for="(file, idx) in uploadFiles" :key="idx">
+                    {{ file.name }}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+        const { ElUpload, ElIcon } = ElementPlus;
+        const { UploadFilled } = ElementPlusIconsVue;
+
+        createApp({
+            components: {
+                ElUpload,
+                ElIcon,
+                UploadFilled
+            },
+            setup() {
+                const uploadFiles = ref([]);
+
+                function handleFileChange(file) {
+                    console.log('文件选择:', file.name);
+                    uploadFiles.value.push(file);
+                }
+
+                return {
+                    uploadFiles,
+                    handleFileChange
+                };
+            }
+        }).use(ElementPlus).mount('#app');
+    </script>
+</body>
+</html>

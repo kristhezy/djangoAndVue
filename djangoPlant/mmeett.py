@@ -25,8 +25,9 @@ class mmeettIF(object):
         self.mmeett_prod = "https://api.mmeett.com"
         self.token = ""
         self._token_env = ""       # 记录 token 对应的 env，env 变化时自动重新登录
-        self.adminToken = ""
-        self._adminToken_env = ""  # 同上
+        # adminToken 按环境分开存储
+        self.adminToken_test = ""   # test 环境 adminToken
+        self.adminToken_prod = ""   # prod 环境 adminToken
         self.email = ""
         self.vstId = ""
 
@@ -211,15 +212,26 @@ class mmeettIF(object):
     
     @handle_request_errors()
     def demotionVip(self,userId,level,env,version):
+        """降级VIP（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/demotionVip"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"remark":"test by testplant","userId":userId,"validSeconds":0,"level":level}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-demotionVip】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-demotionVip】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
@@ -272,31 +284,63 @@ class mmeettIF(object):
         return rlt
     
     @handle_request_errors()
-    def loginAdmin(self,env):
-        # env 变了 → adminToken 失效，重新登录
-        if self._adminToken_env and self._adminToken_env != env:
-            self.adminToken = ""
+    def loginAdmin(self, env, force_refresh=False):
+        """Admin 登录（支持 token 缓存和自动刷新）
+
+        Args:
+            env: 环境标识（test/prod）
+            force_refresh: 是否强制刷新token（用于43265重试场景）
+        """
+        # 根据环境选择对应的 token 字段
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        cached_token = getattr(self, token_field, '')
+
+        # 有缓存且不强制刷新，直接使用
+        if cached_token and not force_refresh:
+            print(pdef.logcss(gct(), "【mmeettIF-loginAdmin】"), f"环境: {env}; 使用缓存token")
+            return {"code": 0, "msg": "使用缓存token", "data": [{"token": cached_token}]}
+
+        # 重新登录获取token
         domain = self.versionUri(env)
         uri = domain + '/admin/login/account'
         if env == "test": psd = "6786d7956f9c7e55e6a5e1d12a89f3b0"
         if env == "prod": psd = "e29b3f14e80201979a4982a3149dcbc7"
-        data = {"password":psd,"email":"meet@jiatui.com"}
-        res = _get_session().post(uri,json = data)
+        data = {"password": psd, "email": "meet@jiatui.com"}
+        res = _get_session().post(uri, json=data)
         rlt = res.json()
-        print(pdef.logcss(gct(),"【mmeettIF-loginAdmin】"),f"返回结果: {rlt}")
-        self.adminToken = rlt["data"][0]["token"]
-        self._adminToken_env = env
+
+        # 验证返回结构
+        if not rlt.get("data") or not rlt["data"][0].get("token"):
+            raise ValueError(f"登录接口返回结构异常: {rlt}")
+
+        # 存储到对应的字段
+        new_token = rlt["data"][0]["token"]
+        setattr(self, token_field, new_token)
+        print(pdef.logcss(gct(), "【mmeettIF-loginAdmin】"), f"环境: {env}; 获取新token成功 (force_refresh={force_refresh})")
         return rlt
 
     @handle_request_errors()
     def openVip(self,userId,level,env):
+        """开通VIP（支持 token 自动刷新重试）"""
         domain = self.versionUri(env)
         uri = domain + '/admin/vip/openVip'
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"remark":"test","level":level,"userId":userId,"validSeconds":2592000,"sendComputing":True,"sendAward":False}
         res = _get_session().post(uri,headers=header,json = data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【xcard-openVip】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri,headers=header,json = data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【xcard-openVip】"),f"uri={uri}, header={header}, data={data}, response={rlt}")
         return rlt
     
@@ -352,68 +396,115 @@ class mmeettIF(object):
 
     @handle_request_errors()
     def getLocationInfo(self,userId,env,version):
+        """查询待安置位置信息（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/hierarchy/getNeedSetLocationInfoByUpdateUpperInfo"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"referralCode":"","email":"","pageNum":1,"pageSize":10,"id":userId}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-getLocationInfo】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-getLocationInfo】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
     @handle_request_errors()
     def updateHierarchy(self,upperUserId,userId,side,env,version):
+        """更新层级关系（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/hierarchy/update"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"upperUserId":upperUserId,"lowerUserId":userId,"side":side,"remark":"test"}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-updateHierarchy】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-updateHierarchy】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
     
     @handle_request_errors()
     def deleteUpperHierarchy(self,userId,env,version):
+        """切断上级树状关系（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/hierarchy/deleteUpperHierarchy"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"userId":userId,"remark":"切断上级树状关系"}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-deleteUpperHierarchy】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-deleteUpperHierarchy】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
     
     @handle_request_errors()
     def deleteLowerHierarchy(self,userId,env,version):
+        """切断下级树状关系（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/hierarchy/deleteLowerHierarchy"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"userId":userId,"remark":"切断下级树状关系"}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-deleteLowerHierarchy】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-deleteLowerHierarchy】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
     @handle_request_errors()
     def updateUserInfo(self,userId,env,version,**kw):
+        """更新用户信息（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/user/update"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {
-            "i-token": self.adminToken
-        }
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
+
         if "countryCode" in kw:
             data = {"id":userId,"countryCode":kw["countryCode"]}
             res = _get_session().post(uri, headers=header, json=data)
@@ -423,7 +514,22 @@ class mmeettIF(object):
         if "email" in kw:
             data = {"id":userId,"email":kw["email"]}
             res = _get_session().post(uri, headers=header, json=data)
+
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),"【mmeettIF-updateUserInfo】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            if "countryCode" in kw:
+                res = _get_session().post(uri, headers=header, json=data)
+            if "account" in kw:
+                res = _get_session().post(uri, headers=header, json=data)
+            if "email" in kw:
+                res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),"【mmeettIF-updateUserInfo】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
     
@@ -477,19 +583,33 @@ class mmeettIF(object):
     
     @handle_request_errors()
     def getComputingRechargeConfigList(self,env,version):
+        """获取算力充值配置列表（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/getComputingRechargeConfigList"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {}
         remark = "【getComputingRechargeConfigList】"
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
     
     @handle_request_errors()
     def sendComputing(self,id,userId,sa,crcl,env,version,ccnt=0):
+        """赠送算力（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/sendComputing"
         if int(id) > 0: rmk = next(i['name'] for i in crcl if int(i['id']) == int(id))
@@ -498,90 +618,177 @@ class mmeettIF(object):
         elif int(sa) == 1: sendAward = True
         data  = {"id":id,"sendAward":sendAward,"userId":userId,"remark": rmk}
         if int(id) == 0: data["computingCnt"] = ccnt
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         remark = f"sendComputing-{rmk}"
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
     @handle_request_errors()
     def computingConsumption(self,userId,amount,env,version):
+        """算力值扣减（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/operate/computing/consumption"
         remark = "算力值扣减"
         data  = {"userId":userId,"remark": remark,"amount":amount}
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
     @handle_request_errors()
     def sendAccountPoint(self,userId,level,amount,expire,env,version):
+        """赠送点位（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/account/sendAccountPoint"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         remark="赠送点位"
         data = {"remark":remark,"level":level,"userId":userId,"pointCount":amount,"vipExpireDays":expire}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
     
     @handle_request_errors()
     def assetChange(self,userId,camount,state,env,version):
+        """账户余额变更（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env,version)
         uri = verurl + "/admin/vip/asset/change"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         states = {"0":"扣减","1":"充值"}
         remark="账户余额"+states.get(state,"")
         data = {"id":userId,"amount":camount,"remark":remark,"state":state}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(),f"【mmeettIF-{remark}】"),f"接口: {uri}; 入参:header={header},data={data}; 返回结果: {rlt}")
         return rlt
 
     @handle_request_errors()
     def getNeedSetInfo(self, userId, env, version):
-        """查询待安置人数及列表"""
+        """查询待安置人数及列表（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env, version)
         uri = verurl + "/admin/vip/hierarchy/getNeedSetInfo"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"id": userId}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(), "【mmeettIF-getNeedSetInfo】"), f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(), "【mmeettIF-getNeedSetInfo】"), f"接口: {uri}; 入参:data={data}; ")
         return rlt
 
     @handle_request_errors()
     def getNeedSetLocationInfo(self, userId, env, version):
-        """查询可安置位置列表"""
+        """查询可安置位置列表（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env, version)
         uri = verurl + "/admin/vip/hierarchy/getNeedSetLocationInfo"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"id": userId, "pageNum": 1, "pageSize": 1000}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(), "【mmeettIF-getNeedSetLocationInfo】"), f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(), "【mmeettIF-getNeedSetLocationInfo】"), f"接口: {uri}; 入参:data={data};")
         return rlt
 
     @handle_request_errors()
     def setHierarchy(self, upperUserId, lowerUserId, side, userId, env, version):
-        """执行安置"""
+        """执行安置（支持 token 自动刷新重试）"""
         verurl = self.versionUri(env, version)
         uri = verurl + "/admin/vip/hierarchy/set"
-        if not self.adminToken: self.loginAdmin(env)
-        header = {"i-token": self.adminToken}
+
+        # 首次请求（使用缓存token）
+        self.loginAdmin(env)
+        token_field = 'adminToken_test' if env == 'test' else 'adminToken_prod'
+        header = {"i-token": getattr(self, token_field)}
         data = {"upperUserId": upperUserId, "lowerUserId": lowerUserId, "side": side, "rootUserId": userId}
         res = _get_session().post(uri, headers=header, json=data)
         rlt = res.json()
+
+        # 检测 token 失效（43265），自动强制刷新并重试
+        if rlt.get("code") == 43265:
+            print(pdef.logcss(gct(), "【mmeettIF-setHierarchy】"), f"Token 失效(43265)，强制刷新重试...")
+            self.loginAdmin(env, force_refresh=True)
+            header = {"i-token": getattr(self, token_field)}
+            res = _get_session().post(uri, headers=header, json=data)
+            rlt = res.json()
+
         print(pdef.logcss(gct(), "【mmeettIF-setHierarchy】"), f"接口: {uri}; 入参:data={data}; 返回结果: {rlt}")
         return rlt
 

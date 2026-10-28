@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试 easyIC 上传功能</title>
+</head>
+<body>
+    <h1>测试 easyIC 文件上传</h1>
+    <form id="testForm" enctype="multipart/form-data">
+        <input type="text" name="setreqtype" value="POST" /><br/>
+        <input type="text" name="setenv" value="https://soon-api-dev.aijiatui.com" /><br/>
+        <input type="text" name="uri" value="/admin/uploadFile" /><br/>
+        <input type="text" name="headers" value='{"i-token":"test"}' /><br/>
+        <input type="text" name="params" value="{}" /><br/>
+        <input type="text" name="type" value="requestinterface" /><br/>
+        <input type="file" name="image" /><br/>
+        <button type="submit">上传</button>
+    </form>
+    <pre id="result"></pre>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            try {
+                const resp = await fetch('/pv/easyIC', {
+                    method: 'POST',
+                    body: fd
+                });
+                const data = await resp.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('result').textContent = '错误: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

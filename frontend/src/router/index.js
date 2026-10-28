@@ -6,12 +6,13 @@ import AppLayout from '../layout/AppLayout.vue'
 NProgress.configure({ showSpinner: false, speed: 400, minimum: 0.15 })
 
 // 不需要登录即可访问的路由
-const PUBLIC_PATHS = new Set(['/login', '/denied'])
+const PUBLIC_PATHS = new Set(['/login', '/denied', '/public/radar'])
 
 const routes = [
   // ── 公开页面（不在 AppLayout 内） ──
   { path: '/login', component: () => import('../views/login/index.vue') },
   { path: '/denied', component: () => import('../views/denied/index.vue') },
+  { path: '/public/radar', component: () => import('../views/radar/public.vue') },
 
   // ── 需要登录的页面（AppLayout 壳） ──
   {

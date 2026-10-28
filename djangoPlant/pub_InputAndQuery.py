@@ -11,6 +11,7 @@ from mysqlite.models import (
     Role, UserRole, RoleMenu,
 )
 from .menu_registry import PUBLIC_MENUS
+from django.core.cache import cache  # type: ignore
 
 
 class InputAndQuery(object):
@@ -75,8 +76,13 @@ class InputAndQuery(object):
     # 查询（SELECT）— 已改为 Django ORM
     # ================================================================
 
-    def query_message1(self, num, page, kw):
-        """查询 q_getmessage（分页 + 动态条件，kw 为 qm_kw 返回的 tuple）"""
+    def _message_base_qs(self, kw, start=None, end=None):
+        """q_getmessage 公共基础 queryset。
+
+        列表查询与总数查询必须用同一份条件，否则会出现「总数和数据对不上」。
+        start/end 为可选的时间范围，作用在 Coalesce(update_time, create_time) 上
+        （与列表展示的「操作时间」列口径一致）。
+        """
         text_filters, exact_kw = kw
         qs = (QGetMessage.objects
               .filter(status=0)
@@ -97,9 +103,17 @@ class InputAndQuery(object):
                         if field:
                             qs = qs.filter(**{field: v})
 
-        qs = qs.annotate(
-            _sort=Coalesce('update_time', 'create_time')
-        ).order_by('-_sort', '-id')
+        qs = qs.annotate(_sort=Coalesce('update_time', 'create_time'))
+        if start is not None:
+            qs = qs.filter(_sort__gte=start)
+        if end is not None:
+            qs = qs.filter(_sort__lte=end)
+        return qs
+
+    def query_message1(self, num, page, kw, start=None, end=None):
+        """查询 q_getmessage（分页 + 动态条件，kw 为 qm_kw 返回的 tuple）"""
+        qs = (self._message_base_qs(kw, start, end)
+              .order_by('-_sort', '-id'))
         qs = qs[self._esc_int(page):self._esc_int(page) + self._esc_int(num)]
         return self._one(qs, single=False)
 
@@ -151,29 +165,9 @@ class InputAndQuery(object):
         exact_kw = envval + versval + cidval
         return text_filters, exact_kw
 
-    def query_message_total(self, kw):
-        """查询 q_getmessage 总数"""
-        qs = (QGetMessage.objects
-              .filter(status=0)
-              .exclude(data_source=444))
-
-        text_filters, exact_kw = kw
-        if text_filters:
-            qs = qs.filter(self._build_q(text_filters))
-        if exact_kw:
-            for part in exact_kw.split(' and '):
-                part = part.strip()
-                if '=' in part:
-                    k, v = part.split('=', 1)
-                    k = k.strip().strip('`')
-                    v = v.strip().strip().strip('"').strip("'")
-                    if v:
-                        field = {'q_env': 'q_env', 'version': 'version',
-                                 'company_id': 'company_id',
-                                 'data_source': 'data_source'}.get(k)
-                        if field:
-                            qs = qs.filter(**{field: v})
-        return {"c": qs.count()}
+    def query_message_total(self, kw, start=None, end=None):
+        """查询 q_getmessage 总数（条件与 query_message1 完全一致）"""
+        return {"c": self._message_base_qs(kw, start, end).count()}
 
     def query_cnbycid(self, companyId, env):
         """按企业 ID + 环境查企业名（调用方用 len(cn)==0 判空，确保返回 dict 或 {}）"""
@@ -277,12 +271,26 @@ class InputAndQuery(object):
         return d
 
     def query_opraterName(self):
-        """查所有操作人列表（GROUP BY uname）"""
+        """查所有操作人列表（GROUP BY uname）。
+
+        - 只统计未软删除的记录（status=0），否则已删除记录会把操作人留在下拉里
+        - 排除空的 uname：NULL 会让拼字符串那步直接抛异常，导致整个下拉为空
+        - 结果缓存 1 小时：操作人集合变化极少，而这是全表 GROUP BY
+        """
+        key = 'other:operators'
+        cached = cache.get(key)
+        if cached is not None:
+            return cached
         qs = (QGetMessage.objects
+              .filter(status=0)
+              .exclude(uname__isnull=True)
+              .exclude(uname='')
               .values('uname')
               .annotate(cnt=Count('id'))
               .order_by('uname'))
-        return list(qs)
+        rlt = list(qs)
+        cache.set(key, rlt, 3600)
+        return rlt
 
     def query_cidbyphone(self, phone, env="prod"):
         """按手机号模糊查企业"""

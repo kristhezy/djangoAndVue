@@ -1,4 +1,5 @@
-from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,ast,time,requests
+from. import logger,json,current_dir,JsonResponse as jr,re,csrf_exempt,NULL,urlencode,HttpResponse as hr,StreamingHttpResponse,make_password,Colors,redirect,login_required,never_cache,cache_page,cache,time,requests
+from datetime import datetime
 from django.views.decorators.http import condition
 from asgiref.sync import sync_to_async  # 慢同步视图改跑独立线程池，避免串行阻塞 ASGI 主线程
 from.pub_utils import run_in_pool
@@ -25,11 +26,36 @@ def _get_scc():
         _scc_instance = SparkChatClient()
     return _scc_instance
 
-cccache = current_dir / 'djangoPlant/configFile/CCCache.json' # 构建配置文件路径
 mynote = current_dir / "djangoPlant/configFile/mynote.json"
 
 def gct():
     return pdef.getctime()
+
+# q_env → 展示名。未知值原样返回，绝不沿用上一条记录的值
+ENV_LABELS = {'test': '测试', 'prod': '生产', 'nxlt': '宁夏联通'}
+
+# 单页最大偏移量：OFFSET 分页的代价随 offset 线性上升，超过则要求先用筛选条件缩小范围
+MAX_OFFSET = 10000
+
+
+def _parse_dt(s, is_end=False):
+    """把 'YYYY-MM-DD' / 'YYYY-MM-DD HH:MM:SS' 解析为 datetime。
+
+    解析失败返回 None（调用方跳过该条件，不让非法参数把整个查询打挂）。
+    is_end=True 时纯日期补到当天 23:59:59，保证「截止到今天」含当天全部记录。
+    """
+    if not s: return None
+    s = str(s).strip()
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+        try:
+            dt = datetime.strptime(s, fmt)
+            if is_end and fmt == '%Y-%m-%d':
+                dt = dt.replace(hour=23, minute=59, second=59)
+            return dt
+        except ValueError:
+            continue
+    logger.warning("【publicview】无法解析的时间参数：%s", s)
+    return None
 
 @login_required
 @never_cache
@@ -42,30 +68,29 @@ def home(request):
     return redirect('/')
 
 #查询操作记录页数
+@login_required
 @never_cache
 def pagecount(request):
     print(' ===== [%s] "查询操作记录页数" ====='%pdef.getctime())
-    # 优先 Redis 缓存
-    total = cache.get('cccache:orPages')
-    if total is None:
-        with open(cccache, 'r') as infile:
-            fdata = json.load(infile)
-        total = ast.literal_eval(fdata["orPages"])
-        cache.set('cccache:orPages', total, 3600)
     data = json.loads(request.body)
-    env = data['env']
-    vers = data['vers']
-    compid = data['compid']
-    compname = data['compname']
-    uname = data['uname']
-    minfo = data['minfo']
+    env = data.get('env') or ''
+    vers = data.get('vers') or ''
+    compid = data.get('compid') or ''
+    compname = data.get('compname') or ''
+    uname = data.get('uname') or ''
+    minfo = data.get('minfo') or ''
+    start = _parse_dt(data.get('start'))
+    end = _parse_dt(data.get('end'), is_end=True)
     try:
         kw = iaq.qm_kw(env,vers,compid,compname,uname,minfo)
         # print('1-kw-count:',kw,'【over】')
-        totalrlt = iaq.query_message_total(kw)
+        totalrlt = iaq.query_message_total(kw, start, end)
         # print(f"total: {totalrlt}")
         total = str(totalrlt["c"])
     except Exception as e:
+        # 原先这里会先读 Redis/CCCache.json 算一个 total，结果立刻被上面的查询覆盖；
+        # 那段代码是死代码，且文件读取没有异常保护，文件缺失会直接 500 挡住有效查询
+        logger.error("【publicview-pagecount】查询总数异常：%s", e)
         total = "0"
     # print(pdef.logcss(gct(),"【publicview-other】pagecount_total:"),total)
     tdata = {"total":total}
@@ -86,55 +111,82 @@ def other(request):
         #获取页面数，设置默认值
         data = json.loads(request.body)
         # print(pdef.logcss(gct(),"【publicview-other】前端调用时传的data:"), data)
-        num = data['num']
-        env = data['env']
-        vers = data['vers']
-        page = data['page']
-        compid = data['compid']
-        compname = data['compname']
-        un = data['uname']
-        minfo = data['minfo']
-        if page == 1: p=0
-        else: p = 10 * (int(page)-1)
+        num = data.get('num')
+        env = data.get('env') or ''
+        vers = data.get('vers') or ''
+        page = data.get('page')
+        compid = data.get('compid') or ''
+        compname = data.get('compname') or ''
+        un = data.get('uname') or ''
+        minfo = data.get('minfo') or ''
+        # 前端翻页不需要重新统计总数（COUNT 在带模糊条件时是扫表），
+        # 只在首次加载/改筛选条件/删除后才要求带上 total
+        need_total = data.get('needTotal')
+        start = _parse_dt(data.get('start'))
+        end = _parse_dt(data.get('end'), is_end=True)
+        # 每页条数与页码先整数化并做下界保护；offset 必须按 num 计算，
+        # 否则当 num != 10 时相邻页会重叠/漏数据（原实现把 10 写死了）
+        try:
+            num = int(num)
+            page = int(page)
+        except (TypeError, ValueError):
+            num, page = 10, 1
+        if num < 1: num = 10
+        if page < 1: page = 1
+        p = num * (page - 1)
         # print(pdef.logcss(gct(),"【publicview-other】页数p:"),p)
         kw = iaq.qm_kw(env,vers,compid,compname,un,minfo)
         print(pdef.logcss(gct(),"【publicview-other】查询条件kw:"),kw)
-        try:
-            query_msgData = iaq.query_message1(num,p,kw)
-            # print(f"query_msgData: {query_msgData}")
-            get_message1 = {}
-            x = 0
-            for i in query_msgData:
-                if i["q_env"] == 'test': env = '测试'
-                elif i["q_env"] == 'prod': env = '生产'
-                elif i["q_env"] == 'nxlt': env = '宁夏联通'
-                if str(i["update_time"]) == 'None':
-                    t = str(i["create_time"])
-                else:
-                    t = str(i["update_time"])
-                get_message1[x] = {"id":i["id"],"env":env,"companyName":i["company_name"],"companyId":str(i["company_id"]),"message":i["message"],"uname":i["uname"],"createTime":t,"serverSide":i["server_side"],"version":i["version"]}
-                x += 1
-            gm = list(get_message1.values())
-        except Exception as e:
-            gm = f"数据库连接异常！{e}"
+        total = None
+        errmsg = ''
+        ok = True
+        if p > MAX_OFFSET:
+            ok = False
+            errmsg = "结果翻得太深了，请先用时间范围或其他筛选条件缩小范围"
+            gm = []
+        else:
+            try:
+                if need_total:
+                    total = iaq.query_message_total(kw, start, end)["c"]
+                query_msgData = iaq.query_message1(num,p,kw,start,end)
+                # print(f"query_msgData: {query_msgData}")
+                gm = []
+                for i in query_msgData:
+                    # env 必须用独立变量：原实现复用了筛选变量 env，且 if/elif 没有 else，
+                    # 遇到未知环境值时「环境」列会沿用上一条记录的值
+                    env_label = ENV_LABELS.get(i["q_env"], i["q_env"] or '')
+                    if str(i["update_time"]) == 'None':
+                        t = str(i["create_time"])
+                    else:
+                        t = str(i["update_time"])
+                    gm.append({"id":i["id"],"env":env_label,"companyName":i["company_name"],"companyId":str(i["company_id"]),"message":i["message"],"uname":i["uname"],"createTime":t,"serverSide":i["server_side"],"version":i["version"]})
+            except Exception as e:
+                logger.error("【publicview-other】查询异常：%s", e)
+                gm = []
+                ok = False
+                errmsg = "查询失败：数据库异常！"
         # print(pdef.logcss(gct(),"【publicview-other】query_message1:"),gm)
-        crlt = {"oprationalInfo":gm}
+        crlt = {"oprationalInfo":gm,"ok":ok}
+        if errmsg: crlt["errmsg"] = errmsg
+        if total is not None: crlt["total"] = total
         code = c['success']
         msg = m['success']
         rlt = pdef.get_result(code,msg,crlt)
         return jr(rlt)
 
+@login_required
 @never_cache
 def other_part(request, part):
     grlt = ""
+    ok = False
     if part == "queryOpraterName":
         try:
             rlt = iaq.query_opraterName()
             for i in rlt:
                 grlt += i['uname']+","
-            # print(pdef.logcss(gct(),f"【originview-other_part】"),f"queryOpraterName:{grlt}, type: {type(grlt)}")
+            ok = True
         except Exception as e:
-            # print(pdef.logcss(gct(),"【originview-other_part】queryOpraterName-查询异常，","error"),e)
+            logger.error("【publicview-other_part】queryOpraterName-查询异常：%s", e)
             grlt = "数据库连接异常！"
     elif part == "delmsg":
         data = json.loads(request.body)
@@ -144,10 +196,13 @@ def other_part(request, part):
             rlt = iaq.del_message(id)
             if rlt == 1:
                 grlt = "删除成功！"
+                ok = True
+            else:
+                grlt = "记录不存在或已被删除！"
         except Exception as e:
-            # print(pdef.logcss(gct(),"【originview-other_part】delmsg-查询异常，","error"),e)
-            grlt = "数据库连接异常！"
-    rdata = {"otherPartRlt":grlt}
+            logger.error("【publicview-other_part】delmsg-删除异常：%s", e)
+            grlt = "删除失败：数据库异常！"
+    rdata = {"otherPartRlt":grlt,"ok":ok}
     code = c['success']
     msg = m['success']
     rlt = pdef.get_result(code,msg,rdata)
@@ -448,6 +503,7 @@ def _easyIC_sync(request):
         # 检查是否是文件上传请求
         if request.FILES:
             uid = int(request.session.get('uid') or 0)
+            setreqtype = request.POST.get('setreqtype', 'POST').upper()  # 获取请求方法，默认 POST
             setenv = request.POST.get('setenv', '')
             uri = request.POST.get('uri', '')
             headers_str = request.POST.get('headers', '')
@@ -458,6 +514,11 @@ def _easyIC_sync(request):
             except:
                 headers = {}
 
+            # 移除 Content-Type，让 requests 库自动生成 multipart/form-data 及 boundary
+            # 如果手动传递 Content-Type，会导致 boundary 不匹配，目标服务器无法解析文件
+            headers.pop('Content-Type', None)
+            headers.pop('content-type', None)
+
             try:
                 params = json.loads(params_str) if params_str else {}
             except:
@@ -465,15 +526,21 @@ def _easyIC_sync(request):
 
             files = {}
             for key in request.FILES:
-                files[key] = request.FILES[key]
+                uploaded_file = request.FILES[key]
+                # 转换为 requests 可识别的格式：(filename, file_content, content_type)
+                # Django 的 UploadedFile 对象需要读取内容后传递，否则转发时文件指针可能已耗尽
+                file_content = uploaded_file.read()
+                uploaded_file.seek(0)  # 重置指针，防止后续重复读取问题
+                files[key] = (uploaded_file.name, file_content, uploaded_file.content_type)
+                print(f"[easyIC-upload] 接收到文件: key={key}, filename={uploaded_file.name}, content_type={uploaded_file.content_type}, size={len(file_content)} bytes")
 
             try:
-                upload_res = pdef.uploadRequest(setenv, uri, headers, files, params)
+                upload_res = pdef.uploadRequest(setenv, uri, headers, files, params, method=setreqtype)
                 rbody = _parse_res_body(upload_res)
                 resheader = json.dumps(dict(upload_res.headers))
                 rlt = {
                     "0": {
-                        "request_type": "upload",
+                        "request_type": setreqtype.lower(),  # 使用实际的请求方法
                         "host_uri": setenv + uri,
                         "request_headers": headers_str,
                         "request_params": params_str,
@@ -484,7 +551,7 @@ def _easyIC_sync(request):
             except Exception as e:
                 rlt = {
                     "0": {
-                        "request_type": "upload",
+                        "request_type": setreqtype.lower(),
                         "host_uri": setenv + uri,
                         "request_headers": headers_str,
                         "request_params": params_str,
@@ -499,9 +566,9 @@ def _easyIC_sync(request):
             gethis = iaq.query_urlInReqhis(uid, setenv, uri)
             if gethis:
                 his_id = gethis["id"]
-                iaq.update_reqhis(his_id, "post", header, params_for_his)
+                iaq.update_reqhis(his_id, setreqtype.lower(), header, params_for_his)
             else:
-                iaq.inst_reqhis(int(uid), "post", setenv, uri, str(header), str(params_for_his))
+                iaq.inst_reqhis(int(uid), setreqtype.lower(), setenv, uri, str(header), str(params_for_his))
 
             code = c['success']
             msg = m['success']
